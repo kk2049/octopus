@@ -1,0 +1,98 @@
+# Import once at top level, then replace ONLY the Dashboard catch-all with:
+# import octopus_startup /var/lib/octopus-startup/current 127.0.0.1:9820
+# Runner, DSH, mesh and untrusted App origins keep their existing routes.
+(octopus_startup) {
+  handle /__octopus/deploy {
+    route {
+      @read method GET HEAD
+      handle @read {
+        root * {args[0]}/../status
+        header Cache-Control "no-store"
+        header X-Content-Type-Options "nosniff"
+        rewrite /status.json
+        file_server
+      }
+      respond 405
+    }
+  }
+  handle /__octopus/startup/* {
+    route {
+      @asset {
+        method GET HEAD
+        path /__octopus/startup/loading.css /__octopus/startup/loading.js
+      }
+      handle @asset {
+        root * {args[0]}
+        uri strip_prefix /__octopus/startup
+        header Cache-Control "no-store"
+        header X-Content-Type-Options "nosniff"
+        file_server
+      }
+      respond 404
+    }
+  }
+  handle /__octopus/ready {
+    route {
+      vars octopus_dashboard true
+      @read method GET HEAD
+      handle @read {
+        header Cache-Control "no-store"
+        reverse_proxy {args[1]} {
+          method GET
+          rewrite /login?
+          header_up -Cookie
+          header_up -Authorization
+          transport http {
+            dial_timeout 1s
+            response_header_timeout 2s
+          }
+          @ready status 200
+          handle_response @ready {
+            respond "" 204
+          }
+        }
+      }
+      respond 405
+    }
+  }
+  handle {
+    route {
+      vars octopus_dashboard true
+      reverse_proxy {args[1]} {
+        transport http {
+          dial_timeout 1s
+        }
+      }
+    }
+  }
+  handle_errors 502 503 504 {
+    @dashboard vars octopus_dashboard true
+    handle @dashboard {
+      header Cache-Control "no-store"
+      header Retry-After "3"
+      header X-Content-Type-Options "nosniff"
+      # Only ordinary page navigations receive an auto-returning document.
+      # OAuth callbacks, GET actions, APIs, streams and assets are excluded.
+      @document {
+        method GET HEAD
+        header Accept *text/html*
+        path / /login /sessions /sessions-plus /hq /secretary /tickets /apps /apps/*/open /launcher /admin /pending /permissions /knowledge /architecture /access-preview
+        not header Upgrade websocket
+      }
+      handle @document {
+        root * {args[0]}
+        header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+        header Referrer-Policy "no-referrer"
+        rewrite /index.html
+        file_server {
+          status 503
+        }
+      }
+      handle {
+        header Content-Type "application/json"
+        respond `{"error":"service_unavailable"}` 503
+      }
+    }
+    respond "Service unavailable" {err.status_code}
+  }
+}

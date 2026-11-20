@@ -1,0 +1,14 @@
+title: 工单板
+layout:
+  - [stats, f_open]
+  - [board]
+  - [thread, f_comment]
+  - [chat]
+widths: [2, 3, 4, 3]
+slots:
+  stats: { widget: kv, bind: view.stats, props: { title: 概况 } }
+  f_open: { widget: form, props: { action: open_ticket } }
+  board: { widget: list, bind: view.tickets, props: { title: 全部工单 } }
+  thread: { widget: markdown, bind: view.thread, props: { title: 最新一单 } }
+  f_comment: { widget: form, props: { action: comment } }
+  chat: { widget: agent-chat, agent: triage }

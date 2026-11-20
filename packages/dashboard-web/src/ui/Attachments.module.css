@@ -1,0 +1,69 @@
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The mail-attachment shape people already know: a blue name, its size, and
+ * the ✕ that takes it back off the draft. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 2px 4px 2px 8px;
+  border: 1px solid var(--line, #d0d7de);
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.chip > a {
+  overflow: hidden;
+  color: var(--accent, #3b82f6);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.size {
+  flex: none;
+  color: var(--muted, #6b7280);
+}
+
+.remove {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted, #6b7280);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.remove:hover {
+  background: var(--canvas, #f3f4f6);
+  color: var(--fg, #111);
+}
+
+.note {
+  color: var(--muted, #6b7280);
+  font-size: 12px;
+}
+
+.bad {
+  color: var(--err, #d33);
+  font-size: 12px;
+}

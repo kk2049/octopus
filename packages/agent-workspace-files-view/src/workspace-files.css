@@ -1,0 +1,338 @@
+/*
+ * Styles for the workspace-files modules.
+ *
+ * Plain global CSS with stable class names, for the same reason the sessions
+ * modules use it: an outside browser suite reads these names from OUTSIDE the
+ * frame to measure things only a browser can adjudicate. A hashed class name
+ * would make those elements unaddressable and turn that suite into a batch of
+ * silent timeouts.
+ */
+
+.wsfiles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--av-s2);
+  flex: 1;
+  min-height: 0;
+}
+
+.wsfiles-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--av-s2);
+  min-height: 32px;
+  padding-inline: var(--av-s1);
+  font-weight: 600;
+}
+
+/*
+ * The title takes the row; the knobs sit together on the right (ticket #350).
+ *
+ * `space-between` alone spread three children evenly the moment a second button
+ * appeared, which put the dot-entry toggle in the middle of the header.
+ */
+.wsfiles-head > span:first-child { margin-right: auto; }
+
+/*
+ * Pressed = hidden entries are being dropped. `aria-pressed` is the state, so
+ * the style reads it directly rather than duplicating it in a class: the two
+ * cannot drift, and a screen reader and a sighted reader are told the same
+ * thing by the same attribute.
+ */
+.wshidden-toggle[aria-pressed="true"] { color: var(--av-accent, currentColor); }
+
+.wsfiles-head button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--av-pill);
+  background: transparent;
+  color: var(--av-muted);
+}
+
+.wsfiles-head button:hover {
+  background: var(--av-tool-bg);
+  color: var(--av-fg);
+}
+
+.wstree {
+  list-style: none;
+  margin: 0;
+  padding: 2px 0 var(--av-s2);
+  overflow: auto;
+  min-height: 0;
+  scrollbar-gutter: stable;
+}
+
+.wsrow {
+  display: block;
+  min-width: 0;
+  animation: ws-row-in 150ms ease-out both;
+}
+
+.wsrow-main {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 32px;
+  border-radius: var(--av-rs);
+}
+
+.wsrow-main > button,
+.wsrow-main > .wsother {
+  /* Standalone form controls are too tall for a navigator. The 32px row is
+   * the same pointer target at every depth and leaves enough tree on screen. */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  min-height: 32px;
+  background: none;
+  border: 0;
+  padding: 0 7px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: start;
+  border-radius: var(--av-rs);
+}
+
+.wsrow-main > .wsdir,
+.wsrow-main > .wsfile,
+.wsrow-main > .wsother {
+  flex: 1;
+  min-width: 0;
+  /* Ant's button primitive centres its contents. Real rows arrive after the
+   * asynchronous directory read, so without an explicit override the tree
+   * visibly jumps from the left-aligned synthetic home row to centred files. */
+  justify-content: flex-start;
+}
+
+.wsglyph {
+  display: block;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  color: var(--av-muted);
+}
+
+.wsglyph-folder {
+  color: var(--av-accent);
+}
+
+.wschevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 10px;
+  color: var(--av-muted);
+  font-size: 18px;
+  line-height: 1;
+  transform: rotate(0deg);
+  transition: transform var(--av-duration) ease-out;
+}
+
+.wschevron[data-open="1"] {
+  transform: rotate(90deg);
+}
+
+.wschevron-placeholder {
+  height: 1px;
+}
+
+.wslabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wsrow-detail {
+  flex: none;
+  max-width: 38%;
+  margin-inline-start: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wsrow-main > .wsedit-open {
+  flex: none;
+  width: auto;
+  min-width: 28px;
+  padding: 0 6px;
+  color: var(--av-accent);
+  font-size: var(--av-xs);
+  opacity: 0;
+  transition: opacity var(--av-duration), background-color var(--av-duration);
+}
+
+.wsrow-main:hover > .wsedit-open,
+.wsrow-main:focus-within > .wsedit-open,
+.wsrow-main > .wsedit-open:disabled {
+  opacity: 1;
+}
+
+.wsedit-word {
+  display: none;
+}
+
+.wsrow-main > button:hover:not(:disabled) {
+  /*
+   * Every `--av-*` referenced here is defined in the SDK's `styles.css` for
+   * every theme (ticket #45), so no fallback literal is carried. A fallback
+   * would let a theme silently drift from the palette that owns it — the
+   * swatch shown when the sheet failed to load would be different from the
+   * one shown when it did, and that mismatch would be indistinguishable
+   * from a bug in the theme itself.
+   */
+  background: var(--av-tool-bg);
+}
+
+.wsrow button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.wsrow[aria-selected="true"] > .wsrow-main {
+  background: var(--av-user-bg);
+}
+
+.wsother {
+  opacity: 0.65;
+  cursor: default;
+}
+
+/* "加载更多": the trailing row of a paged listing, and the roots footer. An
+ * accent-coloured text action in the row's own column, not a filled button. */
+.wsrow-main > .wsmore,
+.wsroots-more > .wsmore {
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-start;
+  color: var(--av-accent);
+  font-size: var(--av-xs);
+}
+
+.wsroots-more {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 2px 0 6px;
+}
+
+.wsroots-more > .wsmore {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  background: none;
+  border: 0;
+  padding: 0 7px;
+  font: inherit;
+  font-size: var(--av-xs);
+  cursor: pointer;
+  border-radius: var(--av-rs);
+}
+
+.wsroots-more > .wsmore:hover:not(:disabled) {
+  background: var(--av-tool-bg);
+}
+
+.wsrow-feedback {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  padding: 0 8px 2px 38px;
+  overflow: hidden;
+  color: var(--av-muted);
+  font-size: var(--av-xs);
+  line-height: 1.35;
+}
+
+.wsrow-spinner {
+  width: 11px;
+  height: 11px;
+  flex: none;
+  border: 1.5px solid color-mix(in srgb, var(--av-muted) 35%, transparent);
+  border-top-color: var(--av-accent);
+  border-radius: var(--av-pill);
+  animation: ws-spin 700ms linear infinite;
+}
+
+@keyframes ws-row-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ws-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .wsrow-main > .wsedit-open {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wsrow,
+  .wsrow-spinner {
+    animation: none;
+  }
+
+  .wschevron,
+  .wsrow-main > .wsedit-open {
+    transition: none;
+  }
+}
+
+.wsmarkdown {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: clamp(18px, 4vw, 40px);
+  background: var(--av-surface);
+}
+
+.wsmarkdown > .av-prose {
+  max-width: 760px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.wsview-switch {
+  display: inline-flex;
+  flex: none;
+}
+
+.wsview-switch > .av-button:first-child {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.wsview-switch > .av-button:last-child {
+  margin-inline-start: -1px;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+@media (max-width: 720px) {
+  .wsview-switch > .av-button {
+    min-width: 42px;
+    padding-inline: 7px;
+  }
+
+  .wsmarkdown {
+    padding: 12px;
+  }
+}

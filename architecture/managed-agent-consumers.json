@@ -1,0 +1,116 @@
+{
+  "schema": "octopus-managed-agent-consumers/v1",
+  "consumers": [
+    {
+      "id": "ticket",
+      "source": "ticket",
+      "owner": "head+runner",
+      "entry": "packages/bot/src/devpipe/pipeline.ts"
+    },
+    {
+      "id": "sessions-native",
+      "source": "session",
+      "owner": "runner",
+      "entry": "packages/bot/src/session-resource/operation-executor.ts"
+    },
+    {
+      "id": "research-native",
+      "source": "research",
+      "owner": "runner",
+      "entry": "packages/bot/src/app-registry/research-sessions.ts"
+    },
+    {
+      "id": "mcp-session",
+      "source": "mcp-session",
+      "owner": "runner",
+      "entry": "packages/bot/src/mcp/service.ts"
+    },
+    {
+      "id": "mcp-app-parent",
+      "source": null,
+      "owner": "parent",
+      "entry": "packages/bot/src/mcp/service.ts"
+    },
+    {
+      "id": "mcp-execution-scope",
+      "source": null,
+      "owner": "parent",
+      "entry": "packages/bot/src/mcp/session-execution.ts"
+    },
+    {
+      "id": "discussion",
+      "source": "discussion",
+      "owner": "head",
+      "entry": "packages/bot/src/discussions/service.ts"
+    },
+    {
+      "id": "knowledge-chat",
+      "source": "knowledge-chat",
+      "owner": "head",
+      "entry": "packages/bot/src/dashboard/knowledge-chat.ts"
+    },
+    {
+      "id": "app:session-plus:keeper",
+      "source": "app-agent",
+      "owner": "head",
+      "entry": "packages/bot/src/session-plus/app/app.yaml",
+      "agent": "keeper"
+    },
+    {
+      "id": "app:research-program:mcp",
+      "source": "app-agent",
+      "owner": "head",
+      "entry": "packages/research-program-view/app/app.yaml",
+      "agent": "mcp"
+    },
+    {
+      "id": "app:research-program:secretary",
+      "source": "app-agent",
+      "owner": "head",
+      "entry": "packages/research-program-view/app/app.yaml",
+      "agent": "secretary"
+    },
+    {
+      "id": "app:ppt-studio:presenter",
+      "source": "app-agent",
+      "owner": "head",
+      "entry": "packages/ppt-studio-view/app/app.yaml",
+      "agent": "presenter"
+    },
+    {
+      "id": "app:chess:luna",
+      "source": "app-agent",
+      "owner": "head",
+      "entry": "packages/chess-view/app/app.yaml",
+      "agent": "luna"
+    },
+    {
+      "id": "research-canvas",
+      "source": "research-canvas",
+      "owner": "head",
+      "entry": "packages/bot/src/research-canvas/automation.ts"
+    },
+    {
+      "id": "research-canvas-native",
+      "source": "research",
+      "owner": "runner",
+      "entry": "packages/bot/src/research-canvas/native.ts"
+    },
+    {
+      "id": "app:research-v2:mcp",
+      "source": "app-agent",
+      "owner": "head",
+      "entry": "packages/research-canvas-view/app/app.yaml",
+      "agent": "mcp"
+    }
+  ],
+  "observationOnly": [
+    "external-cli",
+    "history",
+    "provider-parent-owned"
+  ],
+  "legacyExcluded": [
+    "packages/v3-host/apps",
+    "packages/engine"
+  ]
+}

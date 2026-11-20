@@ -1,0 +1,183 @@
+workflow:
+  # One name per lane so the bot's two monitors never read each other's
+  # pipelines: `gitlab-ci.ts` filters on octopus-v4-batch for the watermark,
+  # `gitlab-contrib.ts` starts and reads octopus-contrib-check by id.
+  name: '$OCTOPUS_PIPELINE_NAME'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "v4" && ($CI_PIPELINE_SOURCE == "push" || $OCTOPUS_RELEASE_BUILD == "1")'
+      variables:
+        OCTOPUS_PIPELINE_NAME: octopus-release
+    # Pushes only accumulate the day's candidate commits. The bot triggers one
+    # complete scan at Beijing 04:00, plus immediate verification scans after
+    # a repair lands; both paths pin an explicit v4 SHA through the API.
+    - if: '$CI_PIPELINE_SOURCE == "api" && $CI_COMMIT_BRANCH == "v4"'
+      variables:
+        OCTOPUS_PIPELINE_NAME: octopus-v4-batch
+    # Contributor review lane (2026-08-20): the bot pushes a verified candidate
+    # to contrib/<user>/ticket-<id> and starts exactly one complete run on it.
+    # Same suite, same runner, same resource group — a contributor's candidate
+    # is verified as hard as the watermark is, and serialises behind it.
+    - if: '$CI_PIPELINE_SOURCE == "api" && $CI_COMMIT_BRANCH =~ /^contrib\//'
+      variables:
+        OCTOPUS_PIPELINE_NAME: octopus-contrib-check
+    - when: never
+
+stages:
+  - test
+  - release
+
+variables:
+  PNPM_STORE_DIR: /cache/pnpm-store
+  PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+  XDG_CACHE_HOME: /cache/xdg
+  COREPACK_HOME: /cache/corepack
+  # The batched suite is the COMPLETE verdict, so it builds everything for
+  # real. `tools/build-cache` would otherwise persist across runs through the
+  # /cache volume this XDG_CACHE_HOME points at, and a restored artifact is
+  # evidence that this content built once — not that it builds now.
+  OCTO_BUILD_CACHE: "0"
+
+full_suite:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.62.1-noble
+  tags:
+    - octopus
+    - lht-val15
+  resource_group: octopus-v4-full-suite
+  interruptible: false
+  # 961 spec files in serial 40-file batches take about an hour on lht-val15
+  # (the suite was 666 files when this was 45 minutes). The Runner's own
+  # maximum_timeout is 2 hours.
+  timeout: 2 hours
+  rules:
+    - if: '$OCTOPUS_PIPELINE_NAME == "octopus-release"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "api" && $CI_COMMIT_BRANCH == "v4"'
+    - if: '$CI_PIPELINE_SOURCE == "api" && $CI_COMMIT_BRANCH =~ /^contrib\//'
+  before_script: &node_setup
+    # Production, CI and the persistent development containers share this
+    # exact Node 22 line. Production disables TurboFan's JS-to-Wasm call
+    # inlining at its launch boundary; tests exercise ordinary Node semantics.
+    #
+    # Also install the sqlite3 CLI: scripts/supervisord.sh (invoked by the
+    # supervisord e2e) talks to bot.db through it, and jq: the CLI-report test
+    # runs the same jq preflight scripts/ops/land.sh uses. The image has
+    # neither binary by default.
+    - apt-get update -qq
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential python3 python3-setuptools libsecret-1-dev sqlite3 jq curl ca-certificates
+    - mkdir -p /cache/bin "$PNPM_STORE_DIR" "$XDG_CACHE_HOME" "$COREPACK_HOME" reports
+    # Pin Node exactly, keeping the image's browser deps untouched. Only the
+    # official tarball is cached (checked against nodejs.org's SHASUMS256);
+    # it is unpacked into /usr/local on every run, where `n` used to put it.
+    # Pipeline 50121 failed when installing `n` from registry.npmjs.org timed
+    # out; 50129 showed the Runner's executable registry refuses an
+    # interpreter under the /cache volume (foreign owner / writable parent).
+    - |
+      tarball=/cache/node/node-v22.23.2-linux-x64.tar.gz
+      if ! echo "b294a556e639d64338823920e5866c21c02741742d2e1529ee1a225c1ec9252a  $tarball" | sha256sum -c --status 2>/dev/null; then
+        rm -rf /cache/node && mkdir -p /cache/node
+        curl -fsSL --retry 5 --retry-delay 10 -o "$tarball.partial" https://nodejs.org/dist/v22.23.2/node-v22.23.2-linux-x64.tar.gz
+        echo "b294a556e639d64338823920e5866c21c02741742d2e1529ee1a225c1ec9252a  $tarball.partial" | sha256sum -c
+        mv "$tarball.partial" "$tarball"
+      fi
+      tar -xzf "$tarball" --no-same-owner --strip-components=1 -C /usr/local
+    - hash -r
+    - test "$(node --version)" = 'v22.23.2' || { echo "expected Node 22.23.2, got $(node --version)"; exit 1; }
+    # Shims an earlier job's Node left in /cache/bin may now dangle, and
+    # `corepack enable` fails on a dangling link (pipeline 50128).
+    - find /cache/bin -xtype l -delete
+    - corepack enable --install-directory /cache/bin
+    - export PATH="/cache/bin:$PATH"
+    - corepack prepare pnpm@9.15.0 --activate
+    - pnpm config set store-dir "$PNPM_STORE_DIR"
+  script:
+    - pnpm install --frozen-lockfile --prefer-offline
+    - pnpm -r build
+    - pnpm exec tsc --noEmit -p packages/bot/tsconfig.json
+    # Pipeline 49367 repeated the same 29 failures across 10 files even after
+    # maxWorkers was lowered to one. The remaining shared resource was the
+    # long-lived Vitest process itself: it had accumulated browser, sandbox,
+    # child-process and module state for more than 15 minutes by the time the
+    # late Session Plus cases timed out. Discover the exact configured suite,
+    # then run bounded batches serially. This keeps one worker on the Runner,
+    # while letting the OS reclaim each batch before the next one starts.
+    # `list --filesOnly` does not execute test modules, and deriving the list
+    # from Vitest avoids a second hand-maintained inventory that could omit a
+    # newly added project. Its text output prefixes every path with the project
+    # name (`[node] packages/...`), which is display text rather than a valid
+    # file filter. Read the machine-readable `file` fields instead.
+    - |
+      test_manifest=reports/vitest-files.json
+      pnpm exec vitest list --filesOnly --json="$test_manifest"
+      mapfile -t test_files < <(node --input-type=module -e '
+        import { readFileSync } from "node:fs";
+        const specs = JSON.parse(readFileSync(process.argv[1], "utf8"));
+        for (const file of new Set(specs.map((spec) => spec.file))) console.log(file);
+      ' "$test_manifest")
+      if [ "${#test_files[@]}" -eq 0 ]; then
+        echo "Vitest discovered no test files"
+        exit 1
+      fi
+      batch_size=40
+      batch=0
+      failed_batches=""
+      # Keep going after a red batch. GitLab scripts run under `set -e`, so a
+      # bare failing batch used to abort the loop — one red run then reported
+      # only the FIRST failing batch, each repair exposed the next one, and a
+      # multi-failure landing burned one 20-45 minute round trip per failure
+      # (observed live: ticket #235 was handed three different single-file
+      # failures across three consecutive batches on 2026-08-17). Running every
+      # batch makes one red carry the COMPLETE failure roster, which is exactly
+      # what the repair ticket is gated on.
+      for ((offset = 0; offset < ${#test_files[@]}; offset += batch_size)); do
+        batch=$((batch + 1))
+        echo "Running Vitest batch ${batch}: files $((offset + 1))-$((offset + batch_size)) of ${#test_files[@]}"
+        pnpm exec vitest run \
+          --maxWorkers=1 \
+          --no-file-parallelism \
+          --reporter=default \
+          --reporter=junit \
+          --outputFile.junit="reports/vitest-junit-${batch}.xml" \
+          "${test_files[@]:offset:batch_size}" \
+          || failed_batches="${failed_batches} ${batch}"
+      done
+      if [ -n "${failed_batches}" ]; then
+        echo "Vitest batches failed:${failed_batches}"
+        exit 1
+      fi
+  artifacts:
+    when: always
+    expire_in: 14 days
+    reports:
+      junit: reports/vitest-junit-*.xml
+    paths:
+      - reports/
+
+# Independent of the application, its Runner connections and its merge lease.
+# Mainline can advance while this exact revision is being built.
+release:
+  stage: release
+  # A project-only protected shell runner inside its own bounded 4090 container.
+  # The pinned runtime already includes Node/native build prerequisites; this
+  # lane neither runs on the application host nor reinstalls an OS per commit.
+  tags: [octopus, lht-4090-release]
+  resource_group: octopus-release-build
+  interruptible: false
+  timeout: 45 minutes
+  rules:
+    - if: '$OCTOPUS_PIPELINE_NAME == "octopus-release"'
+  before_script:
+    - test "$OCTOPUS_RELEASE_EXECUTION_DEVICE" = gpu-host
+    - test "$(node --version)" = v22.23.2
+    - command -v gcc && command -v make && command -v python3
+    - mkdir -p /cache/bin "$PNPM_STORE_DIR" "$XDG_CACHE_HOME" "$COREPACK_HOME"
+    - corepack enable --install-directory /cache/bin
+    - export PATH="/cache/bin:$PATH"
+    - corepack prepare pnpm@9.15.0 --activate
+    - pnpm config set store-dir "$PNPM_STORE_DIR"
+  variables:
+    OCTOPUS_COMPUTE_ROLE: worker
+    OCTOPUS_JOB_ARTIFACT_DIR: '$CI_PROJECT_DIR/.octopus-release-artifacts'
+  script:
+    - node scripts/ops/release-build.mjs "$CI_COMMIT_SHA"
+    - node scripts/ops/release-publish.mjs

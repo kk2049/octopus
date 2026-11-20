@@ -1,0 +1,6 @@
+src/
+scripts/
+CLAUDE.md
+tcb-budget.json
+tsconfig.json
+*.tgz

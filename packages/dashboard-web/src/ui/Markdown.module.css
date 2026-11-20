@@ -1,0 +1,134 @@
+/* Prose styles adapted from the retired `md-lite` stylesheet. */
+
+.prose {
+  /* Keep every semantic heading visibly above prose while preserving a clear
+   * descending hierarchy. The retired md-lite scale flattened h4-h6 to 1em,
+   * so an h4 inside the 16px chat surface looked smaller than nearby prose. */
+  --markdown-h1-size: 1.5em;
+  --markdown-h2-size: 1.35em;
+  --markdown-h3-size: 1.2em;
+  --markdown-h4-size: 1.12em;
+  --markdown-h5-size: 1.06em;
+  --markdown-h6-size: 1em;
+
+  word-break: break-word;
+}
+
+.prose :global(p) {
+  margin: 0 0 0.55em;
+}
+
+.prose :global(p:last-child) {
+  margin-bottom: 0;
+}
+
+.prose :global(pre) {
+  background: var(--tool-bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: var(--space-2) 10px;
+  overflow-x: auto;
+  font: 12px/1.6 var(--mono);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 6px 0;
+}
+
+.prose :global(code) {
+  background: var(--tool-bg);
+  border-radius: 4px;
+  padding: 0 var(--space-1);
+  font: 12px/1.6 var(--mono);
+}
+
+.prose :global(pre code) {
+  background: none;
+  padding: 0;
+}
+
+.prose :global(h1),
+.prose :global(h2),
+.prose :global(h3),
+.prose :global(h4),
+.prose :global(h5),
+.prose :global(h6) {
+  margin: 10px 0 var(--space-1);
+  line-height: 1.35;
+}
+
+.prose :global(h1) {
+  font-size: var(--markdown-h1-size);
+}
+.prose :global(h2) {
+  font-size: var(--markdown-h2-size);
+}
+.prose :global(h3) {
+  font-size: var(--markdown-h3-size);
+}
+.prose :global(h4) {
+  font-size: var(--markdown-h4-size);
+}
+.prose :global(h5) {
+  font-size: var(--markdown-h5-size);
+}
+.prose :global(h6) {
+  font-size: var(--markdown-h6-size);
+}
+
+.prose :global(ul),
+.prose :global(ol) {
+  margin: 0.3em 0 0.55em;
+  padding-left: 1.5em;
+}
+
+.prose :global(li) {
+  margin: 0.12em 0;
+}
+
+.prose :global(blockquote) {
+  margin: 0.4em 0;
+  padding: 0.1em 0 0.1em 0.8em;
+  border-left: 3px solid var(--line);
+  color: var(--muted);
+}
+
+.prose :global(hr) {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 0.9em 0;
+}
+
+.prose :global(table) {
+  border-collapse: collapse;
+  margin: 6px 0;
+  font-size: 0.95em;
+}
+
+.prose :global(th),
+.prose :global(td) {
+  border: 1px solid var(--line);
+  padding: var(--space-1) var(--space-2);
+  text-align: left;
+}
+
+.prose :global(img) {
+  max-width: 100%;
+}
+
+/* File actions are inline prose: ordinary button/touch-target geometry would
+ * lift a single line, and nowrap would make long paths escape the paragraph. */
+.fileLink {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-align: inherit;
+  text-decoration: underline;
+  white-space: inherit;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}

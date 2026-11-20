@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "g1": {
+    "tentacleRepository": "/home/ubuntu/lht/octo-tentacle",
+    "tentacleCommit": "c600782e9f860e3dab0fb6da3584e35d411abc40",
+    "dshRepository": "/home/ubuntu/lht/dsh-spike/dsh",
+    "dshCommit": "47f943859bef60e4160492346772ded9b24f765a",
+    "consumerPatch": "patches/dsh-agent-loop-register-factory.patch",
+    "consumerPatchSha256": "f56fe873522f6aff5015ffa5191f873d6fcc37eab7542753709bca17a278e9a3",
+    "seamFile": "packages/dsh-plugin/src/dsh-seam.ts",
+    "typesFile": "packages/dsh-plugin/src/dsh-types.ts"
+  },
+  "g2": {
+    "required": ["rt_registration", "mcp_registration", "gate_round_trip", "revocation_zero_target_frames", "reconnect_no_duplicates", "upgrade_reregister", "post_upgrade_gate"]
+  },
+  "g3": {
+    "unknownIsTerminal": true,
+    "automaticRetry": false
+  },
+  "g4": {
+    "required": ["authenticatedOrigin", "mobile", "accessibility", "draftPreservation", "interactionCards", "stableDeepLinks", "imFallback"]
+  },
+  "g5": {
+    "registryContract": "app-registry-admin/v1",
+    "destructiveActions": false
+  }
+}

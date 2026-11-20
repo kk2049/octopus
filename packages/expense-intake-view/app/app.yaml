@@ -1,0 +1,38 @@
+id: expense-intake
+schema: 3
+state:
+  scope: shared
+roles:
+  manager: {max: 8}
+  submitter: {max: 64}
+actions:
+  submit_expense:
+    binding: runtime
+    handler: submit_expense
+    title: 提交报销单
+    description: 上传一份小型 PDF 和申报字段，立即进入演示提取流程。
+    roles: [submitter]
+    params:
+      merchant: {type: string, max: 120, required: true, description: 商户}
+      amount: {type: string, max: 20, required: true, description: 金额}
+      expense_date: {type: string, max: 10, required: true, description: 发生日期 YYYY-MM-DD}
+      description: {type: string, max: 1000, required: false, description: 补充说明}
+      receipt_pdf: {type: string, max: 262144, required: true, description: PDF 上传封套 JSON}
+  approve_expense:
+    binding: runtime
+    handler: approve_expense
+    title: 通过报销单
+    description: 管理者通过一条待复核记录。
+    roles: [manager]
+    params:
+      expense_id: {type: string, max: 80, required: true, description: 报销单编号}
+  reject_expense:
+    binding: runtime
+    handler: reject_expense
+    title: 退回报销单
+    description: 管理者退回一条待复核记录。
+    roles: [manager]
+    params:
+      expense_id: {type: string, max: 80, required: true, description: 报销单编号}
+view:
+  page: pages/main.yaml

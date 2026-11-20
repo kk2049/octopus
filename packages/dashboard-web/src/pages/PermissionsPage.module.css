@@ -1,0 +1,267 @@
+.wrap {
+  composes: page from "../ui-kit/layout.module.css";
+  max-width: 1320px;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  padding: 18px var(--space-4) 48px;
+}
+
+.wrap h2 {
+  margin: 0 0 var(--space-1);
+  font-size: 17px;
+}
+
+.sec {
+  margin-top: 30px !important;
+}
+
+.lead {
+  composes: lead from "../ui-kit/layout.module.css";
+  line-height: 1.6;
+}
+
+.card {
+  margin-bottom: var(--space-3);
+}
+
+.card h3 {
+  margin: 0 0 3px;
+  font-size: 14.5px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  margin: 0 0 10px;
+  line-height: 1.6;
+}
+
+.counts {
+  display: flex;
+  gap: 14px;
+  font-size: var(--text-xs);
+  color: var(--muted);
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.counts b {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.ops {
+  table-layout: fixed;
+  composes: dataTable from "../ui-kit/layout.module.css";
+}
+
+.ops th,
+.ops td {
+  padding: 7px var(--space-2);
+  font-size: 12.5px;
+}
+
+.ops th {
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.ops tr:last-child td {
+  border-bottom: none;
+}
+
+.op b {
+  font-weight: 600;
+}
+
+.d {
+  color: var(--muted);
+  font-size: 11.5px;
+  display: block;
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+.risk {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  white-space: normal;
+  margin-left: var(--space-1);
+}
+
+.hot {
+  border-color: var(--q-critical);
+  color: var(--q-critical);
+}
+
+.warm {
+  border-color: var(--q-warning);
+  color: var(--q-warning);
+}
+
+.yes {
+  font-size: var(--text-sm);
+  color: var(--accent);
+}
+
+.no {
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.why {
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.rowacts {
+  margin-top: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.diff {
+  font-size: var(--text-xs);
+  margin-left: var(--space-1);
+}
+
+.add {
+  color: var(--q-warning);
+}
+
+.rm {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.dev {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--space-2) 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg);
+  font-size: 12.5px;
+  margin-bottom: 7px;
+  flex-wrap: wrap;
+}
+
+.n {
+  font-weight: 600;
+}
+
+.online {
+  color: var(--accent);
+  font-size: 11.5px;
+}
+
+.offline {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.bounds {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+}
+
+.audit {
+  composes: dataTable from "../ui-kit/layout.module.css";
+  font-size: var(--text-xs);
+}
+
+.audit th,
+.audit td {
+  padding: 5px var(--space-2);
+}
+
+.audit th {
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.dec {
+  font-weight: 600;
+}
+
+.deny,
+.error {
+  color: var(--q-critical);
+}
+
+.pending {
+  color: var(--q-warning);
+}
+
+.t {
+  color: var(--muted);
+  white-space: normal;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.filters {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.note {
+  margin-top: 20px;
+  padding: var(--space-3) 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.note code {
+  background: var(--bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* Each tab remains mounted so drafts and directory selection survive switching. */
+.wrap > section[hidden] { display: none; }
+.tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; flex-wrap: wrap; margin: 18px 0; padding: 5px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+.tabs button { min-width: 0; padding: 10px 12px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); font: inherit; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--card)); font-weight: 600; }
+.tabs button:focus-visible { outline: 2px solid var(--accent); }
+.card { min-width: 0; }
+.bulkActions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; }
+.opGroup { border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin-block: 8px; }
+.opGroup summary { cursor: pointer; font-size: 13px; font-weight: 600; }
+.opGroup summary span { display: inline-block; margin-left: 12px; font-weight: 400; font-size: 11px; color: var(--muted); }
+.audit { table-layout: fixed; }
+.ops th, .ops td, .audit th, .audit td { overflow-wrap: anywhere; }
+@media (max-width: 720px) {
+  .ops, .ops tbody, .ops tr, .ops td { display: block; width: auto; }
+  .ops thead { display: none; }
+  .ops tr { padding-block: 8px; border-bottom: 1px solid var(--line); }
+  .ops td { display: grid; grid-template-columns: 66px minmax(0, 1fr); gap: 8px; border: 0; padding: 5px 0; }
+  .ops td::before { content: attr(data-label); color: var(--muted); font-size: 11px; }
+  .ops td:first-child { display: block; }
+  .ops td:first-child::before { display: none; }
+  .audit { font-size: 11px; }
+  .audit th, .audit td { padding: 5px 3px; }
+}
+
+@media (max-width: 600px) { .tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

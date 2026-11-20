@@ -1,0 +1,82 @@
+/* The host owns its chrome. The visible space is measured below that chrome. */
+.rv-app { min-height: 0; }
+.rv-app .rv-scope-header .rv-view-toolbar { pointer-events: auto; touch-action: pan-x; overscroll-behavior-x: contain; }
+.rv-app .rv-breadcrumbs { overflow-x: auto; height: auto; min-height: 25px; pointer-events: auto; touch-action: pan-x; }
+.rv-app .rv-breadcrumbs > * { flex-shrink: 0; }
+.rv-app .rv-workbench > header, .rv-app .rv-popover > header { position: sticky; top: -1px; z-index: 10; background: var(--card, #fffefb); }
+.rv-app .rv-window-dock { right: 16px; max-width: none; overflow-x: auto; flex-wrap: nowrap; }
+.rv-app .rv-window-dock > button { flex-shrink: 0; max-width: min(260px, 80vw); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-app :is(.rv-window-body, .rv-workbench, .rv-popover, .rv-dialog) { overscroll-behavior: contain; overflow-wrap: anywhere; }
+.rv-app :is(.rv-window-body, .rv-workbench) :is(pre, table) { max-width: 100%; overflow-x: auto; }
+.rv-app .rv-window-body > div { min-width: 0; }
+
+.rv-app.rv-compact { font-size: 14px; }
+.rv-app.rv-compact :is(.rv-project-header, .rv-scope-header) { top: calc(var(--rv-visible-top, 0px) + 8px); }
+.rv-app.rv-compact .rv-project-header { left: max(8px, env(safe-area-inset-left, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); padding: 0 8px; gap: 6px; height: 56px; }
+.rv-app.rv-compact .rv-project-mark { flex: 0 0 36px; height: 44px; }
+.rv-app.rv-compact .rv-project-header strong { font-size: 14px; }
+.rv-app.rv-compact .rv-header-actions { flex-wrap: nowrap; }
+.rv-app.rv-compact :is(.rv-header-actions, .rv-window-header, .rv-zoom) button { min-width: 44px; min-height: 44px; padding: 8px; }
+.rv-app.rv-compact .rv-scope-header { top: calc(var(--rv-visible-top, 0px) + 68px); left: 8px; right: 8px; gap: 4px; }
+.rv-app.rv-compact .rv-breadcrumbs { width: 100%; }
+.rv-app.rv-compact .rv-breadcrumbs button { min-height: 44px; font-size: 13px; padding-inline: 8px; }
+.rv-app.rv-compact .rv-view-toolbar { gap: 6px; }
+.rv-app.rv-compact .rv-view-toolbar :is(button, select) { min-height: 44px; font-size: 13px; }
+.rv-app.rv-compact .rv-view-toolbar [role=status]:empty { display: none; }
+.rv-app.rv-compact .rv-zoom { right: max(12px, env(safe-area-inset-right, 0px)); bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
+.rv-app.rv-compact .rv-window { min-width: 0; min-height: 0; max-width: 100%; max-height: none; border-radius: 0; animation: none; padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+.rv-app.rv-compact .rv-window-header { flex-shrink: 0; padding: 0 8px; gap: 8px; min-height: 56px; cursor: default; }
+.rv-app.rv-compact .rv-window-header h2 { min-width: 0; font-size: 15px; }
+.rv-app.rv-compact .rv-window-header button { flex-shrink: 0; }
+.rv-app.rv-compact .rv-window-body { padding: 12px; touch-action: pan-y; scroll-padding-block: 12px; }
+.rv-app.rv-compact :is(.rv-window-body, .rv-workbench, .rv-popover, .rv-dialog) :is(button, summary) { min-height: 44px; }
+.rv-app.rv-compact :is(.rv-window-body, .rv-workbench, .rv-popover, .rv-dialog) summary { align-content: center; }
+.rv-app.rv-compact :is(input, textarea, select), .rv-app.rv-compact .rv-nav-search input { font-size: 16px; }
+.rv-app.rv-compact :is(input:not([type=checkbox]):not([type=radio]), select) { min-height: 44px; }
+.rv-app.rv-compact .rv-sidebar { top: calc(var(--rv-visible-top, 0px) + 4px); bottom: max(4px, env(safe-area-inset-bottom, 0px)); width: min(360px, calc(100% - 24px)); left: 4px; }
+.rv-app.rv-compact .rv-sidebar button { min-height: 44px; font-size: 13px; }
+.rv-app.rv-compact .rv-nav-heading button, .rv-app.rv-compact .rv-nav-locate, .rv-app.rv-compact .rv-nav-branch { min-width: 44px; }
+.rv-app.rv-compact .rv-nav-search { min-height: 46px; flex-shrink: 0; }
+.rv-app.rv-compact .rv-nav-search kbd { display: none; }
+.rv-app.rv-compact .rv-nav-footer { max-height: 40%; overflow-y: auto; flex-shrink: 0; }
+.rv-app.rv-compact .rv-nav-heading { min-height: 56px; padding: 4px 8px; flex-shrink: 0; }
+.rv-app.rv-compact .rv-workbench { top: var(--rv-visible-top, 0px); bottom: 0; left: 0; right: 0; width: 100%; border-radius: 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.rv-app.rv-compact .rv-workbench > header { min-height: 56px; padding: 4px 12px; }
+.rv-app.rv-compact .rv-workbench > header button { min-width: 44px; }
+.rv-app.rv-compact .rv-popover { left: 4px; right: 4px; top: calc(var(--rv-visible-top, 0px) + 4px); bottom: max(4px, env(safe-area-inset-bottom, 0px)); max-height: none; width: auto; padding: 12px; }
+.rv-app.rv-compact .rv-popover > header { padding-block: 4px; }
+.rv-app.rv-compact .rv-popover > header button { min-width: 44px; }
+.rv-app.rv-compact .rv-dialog-shade { top: var(--rv-visible-top, 0px); padding: 4px env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+.rv-app.rv-compact .rv-dialog { max-width: calc(100% - 8px); max-height: 100%; padding: 16px; }
+.rv-app.rv-compact .rv-related { left: 8px; right: 8px; width: auto; max-height: max(100px, calc(var(--rv-visible-height, 100dvh) - 200px)); }
+.rv-app.rv-compact .rv-window-dock { left: 8px; right: 8px; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+.rv-app.rv-compact .rv-window-dock button { min-height: 44px; }
+.rv-app.rv-compact .rv-notice { max-width: calc(100% - 16px); max-height: 40%; overflow: auto; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+.rv-app.rv-compact .rv-notice button { min-width: 44px; min-height: 44px; }
+.rv-app.rv-compact .rv-card-preview-face > footer .rv-icon-button { min-width: 44px; min-height: 44px; }
+.rv-app.rv-compact .rv-card-preview-face > footer .rv-card-secondary { display: none; }
+.rv-app.rv-compact .rv-mode-pan :is(.rv-handle, .rv-event-port, .rv-resize-card) { display: none; }
+.rv-app.rv-compact .rv-mode-select .rv-handle { opacity: 1; width: 32px; height: 32px; }
+.rv-app.rv-compact .rv-handle.top { top: -16px; left: calc(50% - 16px); }
+.rv-app.rv-compact .rv-handle.bottom { bottom: -16px; left: calc(50% - 16px); }
+.rv-app.rv-compact .rv-handle.left { left: -16px; top: calc(50% - 16px); }
+.rv-app.rv-compact .rv-handle.right { right: -16px; top: calc(50% - 16px); }
+.rv-app.rv-compact .rv-resize-card { width: 44px; height: 44px; }
+.rv-app.rv-compact .rv-card-menu { max-width: calc(100% - 8px); max-height: 80%; overflow: auto; font-size: 16px; }
+.rv-app.rv-compact .rv-card-menu :is(button, a) { min-height: 44px; }
+.rv-app.rv-compact .rv-conversation-settings > summary { width: 44px; height: 44px; }
+.rv-app.rv-compact .rv-conversation-settings-body { width: min(380px, calc(100vw - 40px)); max-height: calc(var(--rv-visible-height, 100dvh) - 136px); }
+.rv-app.rv-compact .rv-report-selections { grid-template-columns: minmax(0, 1fr); }
+.rv-app.rv-compact .rv-evidence-links > div { grid-template-columns: minmax(0, 1fr); }
+
+/* A short phone viewport keeps breadcrumbs and canvas tools on one scrollable row. */
+.rv-app.rv-compact.rv-short .rv-scope-header { flex-wrap: nowrap; align-items: center; }
+.rv-app.rv-compact.rv-short .rv-breadcrumbs { width: 30%; flex: 0 0 30%; }
+.rv-app.rv-compact.rv-short .rv-scope-header .rv-view-toolbar { width: auto; flex: 1; }
+
+/* Selected relationship actions must remain reachable above the phone controls. */
+.rv-app.rv-compact .rv-edge-selection { left: 8px; right: 8px; top: auto; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); width: auto; max-height: calc(var(--rv-visible-height, 100dvh) - 88px); overflow-y: auto; overscroll-behavior: contain; }
+.rv-app.rv-compact .rv-edge-selection header { position: sticky; top: -12px; z-index: 1; background: #f5f9ff; }
+.rv-app.rv-compact .rv-edge-selection strong { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rv-app.rv-compact .rv-edge-selection button { min-width: 44px; min-height: 44px; flex-shrink: 0; }
+.rv-app.rv-compact .rv-edge-hit { stroke-width: 24; }

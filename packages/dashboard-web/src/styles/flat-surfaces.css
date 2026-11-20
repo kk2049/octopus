@@ -1,0 +1,23 @@
+/* Both schemes use borders rather than elevation (#605, #609). The base-layer
+ * important reset includes Ant, App portals and interactive/pseudo states. */
+html:root {
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-overlay: none;
+  --line: color-mix(in srgb, var(--fg) 22%, var(--card));
+  --line-strong: color-mix(in srgb, var(--fg) 32%, var(--card));
+}
+
+html:root *,
+html:root *::before,
+html:root *::after {
+  box-shadow: none !important;
+}
+
+/* Several inputs used a box-shadow as their only focus indicator. */
+html:root :focus-visible,
+html:root :is(.ant-select, .ant-picker, .ant-checkbox, .ant-radio):has(:focus-visible) {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px;
+}

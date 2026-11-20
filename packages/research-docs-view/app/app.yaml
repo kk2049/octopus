@@ -1,0 +1,461 @@
+{
+  "id": "research-docs",
+  "schema": 4,
+  "state": {
+    "scope": "shared"
+  },
+  "roles": {
+    "owner": {
+      "max": 1
+    },
+    "editor": {
+      "max": 64
+    },
+    "viewer": {
+      "max": 64,
+      "observer": true
+    }
+  },
+  "actions": {
+    "library": {
+      "binding": "resource",
+      "title": "读取共享空间的文档目录；带 limit 时按创建顺序分页，任意篇数，按 next 继续",
+      "description": "读取共享空间的文档目录；带 limit 时按创建顺序分页，任意篇数，按 next 继续",
+      "roles": [
+        "owner",
+        "editor",
+        "viewer"
+      ],
+      "params": {
+        "limit": {
+          "type": "string",
+          "max": 4,
+          "required": false,
+          "description": "每页条数（最多 200）；省略时整份回答，仅为旧版页面保留"
+        },
+        "after": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "分页游标：上一页返回的 next"
+        }
+      }
+    },
+    "create": {
+      "binding": "resource",
+      "title": "新建文档；相同请求幂等",
+      "description": "新建文档；相同请求幂等",
+      "roles": [
+        "owner",
+        "editor"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "稳定请求 ID；未知结果重试沿用同一 ID"
+        },
+        "title": {
+          "type": "string",
+          "max": 240,
+          "required": true,
+          "description": "文档标题"
+        },
+        "parent": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "父文档 ID"
+        },
+        "seed": {
+          "type": "string",
+          "max": 180000,
+          "required": false,
+          "description": "初始块 JSON"
+        }
+      }
+    },
+    "metadata": {
+      "binding": "resource",
+      "title": "重命名、移动、归档或恢复文档，校验版本",
+      "description": "重命名、移动、归档或恢复文档，校验版本",
+      "roles": [
+        "owner",
+        "editor"
+      ],
+      "params": {
+        "doc": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "文档 ID"
+        },
+        "expected": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "当前元数据版本"
+        },
+        "title": {
+          "type": "string",
+          "max": 240,
+          "required": false,
+          "description": "标题"
+        },
+        "parent": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "父文档 ID；root 表示顶层"
+        },
+        "archived": {
+          "type": "string",
+          "max": 8,
+          "required": false,
+          "description": "归档状态"
+        }
+      }
+    },
+    "read": {
+      "binding": "resource",
+      "title": "读取文档 CRDT 或相对本地副本的增量；带 offset 时按 192 KiB 窗口分段，任意大小，按 snapshot 与 next 继续",
+      "description": "读取文档 CRDT 或相对本地副本的增量；带 offset 时按 192 KiB 窗口分段，任意大小，按 snapshot 与 next 继续",
+      "roles": [
+        "owner",
+        "editor",
+        "viewer"
+      ],
+      "params": {
+        "doc": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "文档 ID"
+        },
+        "vector": {
+          "type": "string",
+          "max": 4096,
+          "required": false,
+          "description": "Yjs 状态向量 base64"
+        },
+        "offset": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "分段读取的字节偏移；首段 0，之后用返回的 next"
+        },
+        "snapshot": {
+          "type": "string",
+          "max": 64,
+          "required": false,
+          "description": "首段返回的分段快照 ID"
+        }
+      }
+    },
+    "update": {
+      "binding": "resource",
+      "title": "持久合并 Yjs 更新并返回差异；不会整页覆盖。较大的更新按 offset/total 分段推送，最后一段一次合并",
+      "description": "持久合并 Yjs 更新并返回差异；不会整页覆盖。较大的更新按 offset/total 分段推送，最后一段一次合并",
+      "roles": [
+        "owner",
+        "editor"
+      ],
+      "params": {
+        "doc": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "文档 ID"
+        },
+        "update": {
+          "type": "string",
+          "max": 262144,
+          "required": true,
+          "description": "Yjs update base64；分段时为本段"
+        },
+        "vector": {
+          "type": "string",
+          "max": 4096,
+          "required": true,
+          "description": "本地状态向量 base64"
+        },
+        "offset": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "分段推送时本段的字节偏移"
+        },
+        "total": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "分段推送时整个更新的字节数"
+        }
+      }
+    },
+    "comments": {
+      "binding": "resource",
+      "title": "读取文档讨论；带 limit 时按发布顺序分页，任意条数，按 next 继续",
+      "description": "读取文档讨论；带 limit 时按发布顺序分页，任意条数，按 next 继续",
+      "roles": [
+        "owner",
+        "editor",
+        "viewer"
+      ],
+      "params": {
+        "doc": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "文档 ID"
+        },
+        "limit": {
+          "type": "string",
+          "max": 4,
+          "required": false,
+          "description": "每页条数（最多 200）；省略时整份回答，仅为旧版页面保留"
+        },
+        "after": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "分页游标：上一页返回的 next"
+        }
+      }
+    },
+    "comment": {
+      "binding": "resource",
+      "title": "追加可追溯的文档讨论，不发送外部消息",
+      "description": "追加可追溯的文档讨论，不发送外部消息",
+      "roles": [
+        "owner",
+        "editor"
+      ],
+      "params": {
+        "doc": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "文档 ID"
+        },
+        "request": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "稳定请求 ID；未知结果重试沿用同一 ID"
+        },
+        "text": {
+          "type": "string",
+          "max": 8000,
+          "required": true,
+          "description": "讨论正文"
+        },
+        "block": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "关联块 ID"
+        },
+        "thread": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "回复的讨论 ID"
+        }
+      }
+    },
+    "resolve": {
+      "binding": "resource",
+      "title": "解决或重新打开讨论",
+      "description": "解决或重新打开讨论",
+      "roles": [
+        "owner",
+        "editor"
+      ],
+      "params": {
+        "doc": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "文档 ID"
+        },
+        "comment": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "讨论 ID"
+        },
+        "resolved": {
+          "type": "string",
+          "max": 8,
+          "required": true,
+          "description": "true / false"
+        }
+      }
+    },
+    "sources": {
+      "binding": "resource",
+      "title": "读取本人有权访问的科研项目目录",
+      "description": "读取本人有权访问的科研项目目录",
+      "roles": [
+        "owner",
+        "editor",
+        "viewer"
+      ],
+      "params": {}
+    },
+    "source": {
+      "binding": "resource",
+      "title": "读取科研项目资源目录；原项目权限仍逐次检查",
+      "description": "读取科研项目资源目录；原项目权限仍逐次检查",
+      "roles": [
+        "owner",
+        "editor",
+        "viewer"
+      ],
+      "params": {
+        "project": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "源项目 ID"
+        },
+        "after": {
+          "type": "string",
+          "max": 512,
+          "required": false,
+          "description": "分页游标"
+        }
+      }
+    },
+    "source_call": {
+      "binding": "resource",
+      "title": "操作文档中的源资源，复用原项目的权限和执行语义",
+      "description": "操作文档中的源资源，复用原项目的权限和执行语义",
+      "roles": [
+        "owner",
+        "editor",
+        "viewer"
+      ],
+      "params": {
+        "project": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "源项目 ID"
+        },
+        "action": {
+          "type": "string",
+          "max": 80,
+          "required": true,
+          "description": "闭合的资源动作"
+        },
+        "params": {
+          "type": "string",
+          "max": 262144,
+          "required": true,
+          "description": "原资源动作 JSON"
+        }
+      }
+    },
+    "upload": {
+      "binding": "resource",
+      "title": "上传本人选择的附件块；稳定 ID 和顺序保证续传",
+      "description": "上传本人选择的附件块；稳定 ID 和顺序保证续传",
+      "roles": [
+        "owner",
+        "editor"
+      ],
+      "params": {
+        "doc": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "文档 ID"
+        },
+        "request": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "稳定请求 ID；未知结果重试沿用同一 ID"
+        },
+        "name": {
+          "type": "string",
+          "max": 240,
+          "required": true,
+          "description": "文件名"
+        },
+        "media": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "MIME"
+        },
+        "size": {
+          "type": "string",
+          "max": 16,
+          "required": true,
+          "description": "完整文件字节数"
+        },
+        "offset": {
+          "type": "string",
+          "max": 16,
+          "required": true,
+          "description": "块字节偏移"
+        },
+        "data": {
+          "type": "string",
+          "max": 48000,
+          "required": true,
+          "description": "base64 文件块"
+        }
+      }
+    },
+    "attachment": {
+      "binding": "resource",
+      "title": "按需读取本文档的附件块",
+      "description": "按需读取本文档的附件块",
+      "roles": [
+        "owner",
+        "editor",
+        "viewer"
+      ],
+      "params": {
+        "doc": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "文档 ID"
+        },
+        "file": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "附件 ID"
+        },
+        "offset": {
+          "type": "string",
+          "max": 16,
+          "required": true,
+          "description": "块字节偏移"
+        }
+      }
+    },
+    "members": {
+      "binding": "resource",
+      "title": "读取共享空间成员和角色",
+      "description": "读取共享空间成员和角色",
+      "roles": [
+        "owner",
+        "editor",
+        "viewer"
+      ],
+      "params": {}
+    }
+  },
+  "agents": {},
+  "view": {
+    "page": "pages/main.yaml"
+  }
+}

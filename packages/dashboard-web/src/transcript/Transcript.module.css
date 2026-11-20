@@ -1,0 +1,29 @@
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--av-chat-inset, 14px 18px var(--space-2));
+  min-height: 0;
+}
+
+.virtualBox {
+  position: relative;
+  width: 100%;
+}
+
+.virtualRow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+/* The virtualizer already decides which rows exist and must measure their
+ * actual height. The trusted non-virtual chat uses content-visibility for the
+ * same purpose; disable that second estimator inside measured rows so the two
+ * windowing strategies never feed placeholder heights back into each other. */
+.virtualRow :global(.av-chat-turn),
+.virtualRow :global(.av-chat-work),
+.virtualRow :global(.av-chat-thinking) {
+  content-visibility: visible;
+  contain-intrinsic-block-size: none;
+}

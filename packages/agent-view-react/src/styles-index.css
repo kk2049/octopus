@@ -1,0 +1,33 @@
+/* Keep the View-owned reset/tokens below Ant; module CSS remains unlayered. */
+@layer agent-view-base, antd;
+
+@import "./styles.css" layer(agent-view-base);
+
+/* @claude-bot/agent-view-build:theme-tokens */
+
+/* Adapters must win over Ant's layer just like Dashboard's CSS Modules.
+ * Keep local semantic font inheritance (caption, body, toolbar) intact. */
+.av-button.ant-btn,
+.av-input.ant-input,
+.av-textarea.ant-input,
+.av-checkbox.ant-checkbox-wrapper {
+  font: inherit;
+}
+
+.av-button.ant-btn,
+input.av-input.ant-input {
+  box-sizing: border-box;
+  height: var(--av-control-h);
+}
+
+/* A fixed single-line height must leave the inherited line box intact. */
+input.av-input.ant-input {
+  padding-block: 0;
+}
+
+@media (max-width: 720px), (hover: none) and (pointer: coarse) {
+  .av-button.ant-btn,
+  input.av-input.ant-input {
+    min-height: var(--av-touch-target);
+  }
+}

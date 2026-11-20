@@ -1,0 +1,63 @@
+.rv-agent-window .rv-transcript {
+  margin: 0;
+}
+.rv-conversation-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: var(--card, #fffefb);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 30px;
+  margin-bottom: 6px;
+}
+.rv-conversation-status {
+  color: var(--muted, #71816a);
+  font-size: 11px;
+}
+.rv-conversation-settings {
+  position: relative;
+  flex: 0 0 auto;
+}
+.rv-conversation-settings > summary {
+  display: grid;
+  place-items: center;
+  list-style: none;
+  width: 32px;
+  height: 28px;
+  border: 1px solid var(--line, #e0e5da);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+.rv-conversation-settings > summary::-webkit-details-marker { display: none; }
+.rv-conversation-settings > summary:hover,
+.rv-conversation-settings[open] > summary { background: var(--tool-bg, #eef1e5); }
+.rv-conversation-settings-body {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 5px);
+  z-index: 5;
+  width: min(380px, 72vw);
+  max-height: 50vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+  border: 1px solid var(--line, #e0e5da);
+  border-radius: 8px;
+  background: var(--card, #fffefb);
+  box-shadow: 0 8px 24px #20302024;
+  font-size: 11px;
+}
+.rv-conversation-settings-body > strong { display: block; margin-bottom: 10px; }
+.rv-conversation-settings-body .rv-identity { overflow-wrap: anywhere; color: var(--muted, #71816a); }
+.rv-conversation-settings-body .rv-identity b { color: var(--fg, #304137); }
+.rv-conversation-settings-body .rv-inline { flex-wrap: wrap; }
+.rv-conversation-settings-body .rv-settings { margin-top: 10px; padding-top: 9px; }
+.rv-conversation-settings-body .rv-upload { margin-top: 10px; }
+.rv-agent-window .rv-composer { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--line, #e0e5da); }
+.rv-agent-window .rv-composer textarea { border: 1px solid var(--line, #e0e5da); }
+.rv-agent-window .rv-composer > .rv-inline { justify-content: flex-end; }

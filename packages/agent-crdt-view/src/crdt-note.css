@@ -1,0 +1,321 @@
+/*
+ * Plain global CSS, and the class names are a contract.
+ *
+ * The browser boundary suites read these from OUTSIDE the frame to measure the
+ * things only a browser can decide, so CSS Modules — whose names are generated —
+ * would turn a rename into a batch of silent 30-second timeouts rather than a
+ * failed assertion. The same rule the other reusable module packages follow.
+ *
+ * Every colour comes from the SDK's `--av-*` tokens so the surface follows the
+ * shell's theme (light, dark, brands) without this module knowing a palette.
+ * Tokens are used bare where a missing one should be LOUD (an unstyled block),
+ * and with fallbacks only where the token is not themed yet (`--av-mono`).
+ */
+
+/* ── the document surface ─────────────────────────────────────────────── */
+
+.crdtdoc {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.crdtdoc-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid var(--av-line);
+}
+
+.crdtdoc-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crdtdoc-status {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.crdtdoc-actions {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.crdtdoc-actions button {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 12px;
+  border: 1px solid var(--av-line);
+  border-radius: 999px;
+  background: var(--av-surface);
+  color: inherit;
+  cursor: pointer;
+}
+
+.crdtdoc-actions button:hover:not(:disabled) {
+  border-color: var(--av-accent);
+  color: var(--av-accent);
+}
+
+.crdtdoc-actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.crdtdoc-actions .crdtdoc-mode {
+  font-weight: 600;
+}
+
+/* ── reading: the page ─────────────────────────────────────────────────── */
+
+.crdtdoc-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--av-canvas);
+}
+
+/* A centred column with generous measure and line height: the document reads
+ * like a page, not like a form field. */
+.crdtdoc-prose {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 40px 72px;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.crdtdoc-prose h1 {
+  font-size: 26px;
+  line-height: 1.35;
+  margin: 8px 0 16px;
+}
+
+.crdtdoc-prose h2 {
+  font-size: 20px;
+  margin: 24px 0 10px;
+}
+
+.crdtdoc-prose h3 {
+  font-size: 16px;
+  margin: 18px 0 8px;
+}
+
+.crdtdoc-prose p {
+  margin: 10px 0;
+}
+
+.crdtdoc-prose ul,
+.crdtdoc-prose ol {
+  padding-inline-start: 24px;
+}
+
+.crdtdoc-prose li {
+  margin: 4px 0;
+}
+
+.crdtdoc-prose blockquote {
+  margin: 12px 0;
+  padding: 2px 14px;
+  border-inline-start: 3px solid var(--av-accent);
+  background: var(--av-raised);
+  border-radius: 4px;
+  color: var(--av-muted);
+}
+
+.crdtdoc-prose hr {
+  border: none;
+  border-top: 1px solid var(--av-line);
+  margin: 20px 0;
+}
+
+/* ── writing: toolbar + source ─────────────────────────────────────────── */
+
+.crdtdoc-editwrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.crdtdoc-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  flex-wrap: wrap;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--av-line);
+  background: var(--av-raised);
+}
+
+.crdtdoc-tool {
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  min-width: 28px;
+  padding: 6px 7px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.crdtdoc-tool:hover {
+  background: var(--av-surface);
+  border-color: var(--av-line);
+}
+
+.crdtdoc-toolgap {
+  width: 1px;
+  align-self: stretch;
+  margin: 3px 6px;
+  background: var(--av-line);
+}
+
+.crdtdoc-source {
+  flex: 1 1 auto;
+  min-height: 160px;
+  resize: none;
+  font: inherit;
+  font-family: var(--av-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 13.5px;
+  line-height: 1.7;
+  padding: 20px 24px 64px;
+  border: none;
+  outline: none;
+  background: var(--av-canvas);
+  color: inherit;
+}
+
+/* ── shared chrome ─────────────────────────────────────────────────────── */
+
+.crdtdoc-hint {
+  margin: 0;
+  padding: 24px 16px;
+  font-size: 13px;
+  color: var(--av-muted);
+}
+
+.crdtdoc-foot {
+  margin: 0;
+  flex: none;
+  padding: 6px 16px 8px;
+  font-size: 12px;
+  color: var(--av-muted);
+  border-top: 1px solid var(--av-line);
+}
+
+/* ── the document rail ─────────────────────────────────────────────────── */
+
+/*
+ * The rail takes the height its documents need and no more (ticket #61).
+ *
+ * `navigation` is a flow slot: every panel in it is `flex: 1` by default, so a
+ * standing rail with three documents in it was taking the same share of the
+ * column as the directory index — the surface that column exists for. The same
+ * declaration the operations strip uses says it once, from the stylesheet that
+ * travels with the module that emits the class name.
+ */
+.av-panel[data-av-module^="crdt.doc-list/"] {
+  flex: none;
+}
+
+.crdtdocs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  padding: 8px 10px;
+}
+
+.crdtdocs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: none;
+}
+
+.crdtdocs-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.crdtdocs-tools button {
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 10px;
+  border: 1px solid var(--av-line);
+  border-radius: 999px;
+  background: var(--av-surface);
+  color: inherit;
+  cursor: pointer;
+}
+
+.crdtdocs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* The rail is `flex: none`, so this is what bounds it: a long grant scrolls
+     inside the rail instead of pushing the directory index off the column. */
+  max-height: 28vh;
+  overflow-y: auto;
+}
+
+.crdtdocs-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+  text-align: start;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.crdtdocs-item:hover {
+  background: var(--av-raised);
+}
+
+.crdtdocs-item.is-active {
+  background: var(--av-raised);
+  color: var(--av-accent);
+  font-weight: 600;
+}
+
+.crdtdocs-icon {
+  flex: none;
+}
+
+.crdtdocs-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crdtdocs-note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--av-muted);
+}

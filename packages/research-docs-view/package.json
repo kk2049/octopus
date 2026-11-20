@@ -1,0 +1,42 @@
+{
+  "name": "@claude-bot/research-docs-view",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/paths.ts",
+    "./pack": "./src/pack.ts"
+  },
+  "scripts": {
+    "build": "node ../../tools/build-cache/bin/octo-build.mjs -- 'vite build'",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "manifest": "tsx src/manifest.ts"
+  },
+  "dependencies": {
+    "@claude-bot/research-docs-contract": "workspace:*",
+    "@claude-bot/research-canvas-contract": "workspace:*",
+    "@claude-bot/research-canvas-view": "workspace:*",
+    "@claude-bot/agent-view-react": "workspace:*",
+    "@claude-bot/agent-file-preview": "workspace:*",
+    "@blocknote/core": "0.51.2",
+    "@blocknote/react": "0.51.2",
+    "@blocknote/mantine": "0.51.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "yjs": "^13.6.27"
+  },
+  "devDependencies": {
+    "@claude-bot/agent-view-build": "workspace:*",
+    "@claude-bot/agent-view-preview": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/user-event": "^14.6.1",
+    "jsdom": "^27.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^7.1.9"
+  }
+}

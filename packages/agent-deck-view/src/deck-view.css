@@ -1,0 +1,499 @@
+/**
+ * Plain global CSS, not CSS Modules, and the class names are a contract.
+ *
+ * The Agent View boundary suites read class names from OUTSIDE the frame to
+ * measure things only a real browser can decide. A hashed local name would make
+ * that impossible, and deleting a name here turns those assertions into silent
+ * timeouts rather than failures. Same rule, same reason, as every other reusable
+ * module package here.
+ *
+ * Two colour vocabularies, deliberately kept apart:
+ *
+ *  · Panel chrome — toolbars, notices, row controls — uses the `--av-*` tokens
+ *    from `@claude-bot/agent-view-react/ui`, so both dashboard schemes work
+ *    without this file knowing there are two.
+ *  · The slide surface uses `--dkv-page` / `--dkv-ink` / `--dkv-faint`, which
+ *    `SlideSurface` sets inline from the CONTRACT's `DECK_THEME_COLOURS` — the
+ *    same six values the Typst preamble prints. The canvas previews the
+ *    document, and the document's theme is the deck's, not the dashboard's.
+ *
+ * There is still no colour literal below.
+ *
+ * All type inside the surface is sized in `cqw` against the surface's own
+ * width, so the SAME rules render the rail thumbnail and the full canvas —
+ * which is what makes the thumbnail the canvas at a distance.
+ */
+
+.dkv-outline,
+.dkv-editor,
+.dkv-typst {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  height: 100%;
+  padding: 10px 12px;
+  overflow: auto;
+  font-size: 13px;
+}
+
+.dkv-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.dkv-head b {
+  font-size: 14px;
+}
+
+.dkv-sub,
+.dkv-hint,
+.dkv-count {
+  color: var(--av-muted);
+  font-size: 12px;
+}
+
+.dkv-close {
+  margin-left: auto;
+}
+
+.dkv-note {
+  color: var(--av-muted);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.dkv-notice {
+  margin: 0;
+  color: var(--av-fg);
+}
+
+.dkv-issues {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  line-height: 1.7;
+}
+
+.dkv-readonly {
+  color: var(--av-muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+/* ── the slide surface (thumbnail and canvas alike) ──────────────────────── */
+
+.dkv-surface {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--dkv-page);
+  color: var(--dkv-ink);
+  line-height: 1.45;
+}
+
+.dkv-sur-cover {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.5cqw;
+  padding: 6cqw 8cqw;
+}
+
+.dkv-sur-title {
+  font-size: 6.5cqw;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.dkv-sur-subtitle {
+  font-size: 3cqw;
+  font-style: italic;
+}
+
+.dkv-sur-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 2cqw;
+  padding: 4.5cqw 6cqw;
+}
+
+.dkv-sur-heading {
+  flex: 0 0 auto;
+  font-size: 4.4cqw;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.dkv-sur-list {
+  list-style: disc;
+  margin: 0;
+  padding-left: 3.5cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 1cqw;
+  min-height: 0;
+}
+
+.dkv-sur-item {
+  font-size: 2.6cqw;
+  line-height: 1.55;
+}
+
+.dkv-sur-itemtext {
+  font-size: 2.6cqw;
+}
+
+.dkv-sur-columns {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 5cqw;
+  align-items: start;
+}
+
+.dkv-sur-image {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1cqw;
+  border: max(1px, 0.18cqw) solid var(--dkv-faint);
+  border-radius: 0.6cqw;
+}
+
+.dkv-sur-imgword {
+  font-size: 2.2cqw;
+  color: var(--dkv-faint);
+}
+
+.dkv-sur-imgalt {
+  font-size: 2cqw;
+}
+
+.dkv-sur-imgref {
+  font-size: 1.7cqw;
+  color: var(--dkv-faint);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  max-width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dkv-sur-caption {
+  flex: 0 0 auto;
+  font-size: 2cqw;
+  font-style: italic;
+  text-align: center;
+}
+
+/* ── in-place editing on the surface ─────────────────────────────────────── */
+
+/* Display mode: a button that reads as slide text. */
+.dkv-inline {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0.5cqw;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  line-height: inherit;
+  cursor: text;
+}
+
+.dkv-inline:hover,
+.dkv-inline:focus-visible {
+  outline: max(1px, 0.18cqw) dashed color-mix(in srgb, var(--av-accent) 60%, transparent);
+  outline-offset: 0.4cqw;
+}
+
+.dkv-inline[data-dkv-empty="1"] {
+  color: var(--dkv-faint);
+}
+
+/* Edit mode: an input that keeps the region's type exactly. */
+.dkv-inline-input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0.5cqw;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  line-height: inherit;
+  outline: max(1px, 0.18cqw) solid var(--av-accent);
+  outline-offset: 0.4cqw;
+}
+
+.dkv-sur-item {
+  position: relative;
+}
+
+.dkv-sur-itemops {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: none;
+  gap: 2px;
+}
+
+.dkv-sur-item:hover .dkv-sur-itemops,
+.dkv-sur-item:focus-within .dkv-sur-itemops {
+  display: inline-flex;
+}
+
+.dkv-sur-itemops button {
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 0 4px;
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rs, 6px);
+  background: var(--av-raised);
+  color: var(--av-fg);
+  cursor: pointer;
+}
+
+.dkv-sur-add {
+  list-style: none;
+  margin-left: -3.5cqw;
+}
+
+.dkv-sur-add > button {
+  background: none;
+  border: max(1px, 0.15cqw) dashed var(--dkv-faint);
+  border-radius: 0.5cqw;
+  color: var(--dkv-faint);
+  font: inherit;
+  font-size: 2.2cqw;
+  padding: 0.4cqw 1.2cqw;
+  cursor: pointer;
+}
+
+/* ── outline: the film strip ─────────────────────────────────────────────── */
+
+.dkv-slides {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.dkv-slide {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  border-radius: 8px;
+}
+
+.dkv-pick {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  padding: 4px;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dkv-pick:hover {
+  background: var(--av-raised);
+}
+
+/* The page-number badge beside the thumbnail. */
+.dkv-no {
+  flex: 0 0 auto;
+  min-width: 1.5em;
+  padding-top: 2px;
+  color: var(--av-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.dkv-slide[data-dkv-selected="1"] .dkv-no {
+  color: var(--av-accent);
+  font-weight: 700;
+}
+
+.dkv-thumb {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: block;
+  border: 1px solid var(--av-line);
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--av-fg) 8%, transparent);
+}
+
+.dkv-slide[data-dkv-selected="1"] .dkv-thumb {
+  border-color: var(--av-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--av-accent) 35%, transparent);
+}
+
+/* Thumbnails are inert pictures: nothing in one needs a pointer. */
+.dkv-thumb .dkv-surface {
+  pointer-events: none;
+  border-radius: 0;
+}
+
+.dkv-rowops,
+.dkv-itemops {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.dkv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.dkv-export {
+  margin-left: auto;
+}
+
+.dkv-danger {
+  color: var(--av-error);
+}
+
+/* ── the canvas panel ────────────────────────────────────────────────────── */
+
+.dkv-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--av-line);
+}
+
+.dkv-tb-name {
+  font-size: 14px;
+  margin-right: 4px;
+}
+
+.dkv-tb-group {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.dkv-tb-page {
+  margin-left: auto;
+  color: var(--av-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dkv-tb-sync {
+  color: var(--av-muted);
+  font-size: 12px;
+}
+
+.dkv-tb-theme[aria-pressed="true"] {
+  background: var(--av-user-bg);
+}
+
+.dkv-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+  padding: 14px;
+  background: var(--av-canvas);
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rm, 10px);
+}
+
+/* As large as fits both ways, still 16:9 — the aspect comes from the surface. */
+.dkv-canvas {
+  width: min(100cqw, 100cqh * 16 / 9);
+}
+
+.dkv-canvas .dkv-surface {
+  box-shadow: var(--av-shadow-sm);
+}
+
+/* ── the property strip (fields with no place on the canvas) ─────────────── */
+
+.dkv-props {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.dkv-prop {
+  flex: 1 1 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dkv-prop-name {
+  color: var(--av-muted);
+  font-size: 12px;
+}
+
+.dkv-prop[data-dkv-invalid="1"] input {
+  border-color: var(--av-error);
+}
+
+.dkv-problem {
+  color: var(--av-error);
+  font-size: 12px;
+}
+
+/* ── typst ───────────────────────────────────────────────────────────────── */
+
+.dkv-source {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 10px;
+  overflow: auto;
+  white-space: pre;
+  background: var(--av-tool-bg);
+  border: 1px solid var(--av-line);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  user-select: text;
+}

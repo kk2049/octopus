@@ -1,0 +1,194 @@
+/*
+ * The board module's stylesheet. Everything colour-shaped comes from the SDK's
+ * `--av-*` tokens, so dark mode arrives without a second theme. Ordinary global
+ * CSS on purpose: class names are a contract a real-browser suite can read.
+ * Selection, highlight and focus use three different channels (background,
+ * outline, box-shadow) so any combination stays visible.
+ */
+
+.bv-board {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--av-s2);
+  padding: var(--av-s2) var(--av-s3);
+  min-height: 0;
+  overflow: auto;
+}
+
+.bv-note {
+  margin: 0;
+  color: var(--av-muted);
+  font-size: var(--av-xs);
+  line-height: 1.7;
+}
+
+.bv-note code {
+  font-size: var(--av-xs);
+  background: var(--av-tool-bg);
+  border-radius: var(--av-rs);
+  padding: 0 4px;
+}
+
+.bv-refusal {
+  color: var(--av-error);
+}
+
+.bv-dismiss {
+  margin-left: var(--av-s2);
+  padding: 1px 7px;
+  font: inherit;
+  color: var(--av-error);
+  background: var(--av-surface);
+  border: 1px solid var(--av-error);
+  border-radius: var(--av-rs);
+  cursor: pointer;
+}
+
+.bv-dismiss:focus-visible {
+  outline: none;
+  box-shadow: var(--av-focus);
+}
+
+.bv-grid-wrap {
+  --bv-cell: clamp(22px, 4.5vmin, 44px);
+  position: relative;
+}
+
+.bv-grid {
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  max-width: 100%;
+  grid-auto-rows: var(--bv-cell);
+}
+
+.bv-grid[aria-disabled="true"]:not([aria-busy="true"]) {
+  opacity: 0.55;
+}
+
+/* Rows keep their ARIA structure; the cells lay out on the grid container. */
+.bv-row {
+  display: contents;
+}
+
+.bv-cell {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-size: calc(var(--bv-cell) * 0.55);
+  line-height: 1;
+  color: var(--av-fg);
+  background: var(--av-surface);
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rs);
+  padding: 0;
+  cursor: pointer;
+}
+
+/* A subtle checker tint: generic grid legibility, not a statement about use. */
+.bv-cell[data-bv-alt] {
+  background: var(--av-tool-bg);
+}
+
+.bv-cell:hover:enabled {
+  border-color: var(--av-accent);
+}
+
+.bv-cell:disabled {
+  cursor: default;
+}
+
+.bv-cell:focus-visible {
+  outline: none;
+  box-shadow: var(--av-focus);
+  position: relative;
+  z-index: 1;
+}
+
+.bv-cell[aria-selected="true"] {
+  background: var(--av-user-bg);
+  border-color: var(--av-accent);
+}
+
+.bv-cell[data-bv-hi] {
+  outline: 2px solid var(--av-info);
+  outline-offset: -2px;
+}
+
+.bv-glyph {
+  transition: opacity var(--bv-motion-ms, 180ms) ease;
+}
+
+.bv-cell.bv-origin .bv-glyph {
+  opacity: 0.32;
+}
+
+.bv-cell.bv-pending {
+  border-color: var(--av-warn);
+  box-shadow: inset 0 0 0 1px var(--av-warn);
+}
+
+.bv-pending-glyph {
+  opacity: 0.68;
+  animation: bv-pending-pulse 900ms ease-in-out infinite alternate;
+}
+
+.bv-cell.bv-reverting .bv-pending-glyph {
+  opacity: 0.4;
+  animation: none;
+}
+
+.bv-floating {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font: inherit;
+  font-size: calc(var(--bv-cell) * 0.55);
+  line-height: 1;
+  color: var(--av-fg);
+  opacity: 0.9;
+}
+
+.bv-floating[data-bv-animate] {
+  transition: transform var(--bv-motion-ms, 180ms) ease, opacity var(--bv-motion-ms, 180ms) ease;
+}
+
+.bv-floating[data-bv-direction="out"][data-bv-animate] {
+  opacity: 0;
+}
+
+.bv-floating[data-bv-direction="back"] {
+  opacity: 0.9;
+}
+
+.bv-floating[data-bv-tone="ok"] { color: var(--av-ok); }
+.bv-floating[data-bv-tone="warn"] { color: var(--av-warn); }
+.bv-floating[data-bv-tone="error"] { color: var(--av-error); }
+.bv-floating[data-bv-tone="info"] { color: var(--av-info); }
+
+@keyframes bv-pending-pulse {
+  from { opacity: 0.48; }
+  to { opacity: 0.82; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bv-glyph,
+  .bv-floating {
+    transition: none;
+  }
+
+  .bv-pending-glyph {
+    animation: none;
+  }
+}
+
+.bv-cell[data-bv-tone="ok"] { color: var(--av-ok); }
+.bv-cell[data-bv-tone="warn"] { color: var(--av-warn); }
+.bv-cell[data-bv-tone="error"] { color: var(--av-error); }
+.bv-cell[data-bv-tone="info"] { color: var(--av-info); }

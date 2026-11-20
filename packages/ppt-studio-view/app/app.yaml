@@ -1,0 +1,67 @@
+id: ppt-studio
+schema: 2
+state:
+  scope: account
+actions:
+  ask_presenter:
+    binding: agent
+    agent: presenter
+    human_only: true
+    title: 交给演示文稿 Agent
+    description: 把本次新建或修改目标放进该账户的 presenter inbox。
+    params:
+      prompt:
+        type: string
+        max: 4000
+        required: true
+        description: 受众、目标、材料与约束
+  load_skill:
+    binding: runtime
+    handler: load_skill
+    agent_only: true
+    title: 加载原子技能
+    description: 只把当前任务需要的演示文稿技能临时注入本轮。
+    params:
+      name:
+        type: string
+        max: 32
+        required: true
+        enum: [strategy, visual, authoring, template, review, export]
+        description: 要加载的原子技能
+  replace_deck:
+    binding: runtime
+    handler: replace_deck
+    agent_only: true
+    title: 写入完整初稿
+    description: 用一份严格、有限的 deck-model/v1 JSON 替换当前 deck。
+    params:
+      deck_json:
+        type: string
+        max: 4096
+        required: true
+        description: 结构化 deck JSON，最多 40 页
+  deck_command:
+    binding: runtime
+    handler: deck_command
+    title: 编辑幻灯片
+    description: 对唯一事实源应用一条 deck-model/v1 语义命令。
+    params:
+      op: { type: string, max: 32, required: true, description: 命令名 }
+      slide: { type: string, max: 64, description: 幻灯片 id }
+      field: { type: string, max: 40, description: 字段名 }
+      index: { type: string, max: 4, description: 十进制位置 }
+      value: { type: string, max: 512, description: 新文本 }
+      layout: { type: string, max: 32, description: title / bullets / two-column / image-ref }
+agents:
+  presenter:
+    adapter: openai-loop
+    prompt: |
+      你负责把用户的目标变成简洁、可编辑、可审阅的演示文稿。
+      默认已经注入路由与安全基线：先判定任务类型；deck-model/v1 是唯一事实源；
+      不声称访问文件、生成 PDF/PPTX 或解析图片；所有改变都走声明动作。
+
+      每轮先调用 read_app_state。根据任务只调用必要的 load_skill，并把返回的 instructions
+      当成本轮附加工作规范；不要一次加载全部技能。新建或大改优先调用 replace_deck，
+      小改用 deck_command。完成前加载 review 自检。若材料不足，使用 ask_user，不能编造事实。
+view:
+  page: pages/main.yaml

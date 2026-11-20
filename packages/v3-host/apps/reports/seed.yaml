@@ -1,0 +1,7 @@
+scopes:
+  bob:
+    - { type: report_sent, by: "user:bob", at: "2026-07-26T09:00:00Z",
+        data: { id: rp-bob-1, to: lht, title: 上周实验小结, body: "PPO baseline 复现完毕，回报曲线贴在共享盘；GRPO 版还差 reward shaping。" } }
+  lht:
+    - { type: report_received, by: "user:bob", at: "2026-07-26T09:00:00Z",
+        data: { id: rp-bob-1, from: bob, title: 上周实验小结, body: "PPO baseline 复现完毕，回报曲线贴在共享盘；GRPO 版还差 reward shaping。" } }

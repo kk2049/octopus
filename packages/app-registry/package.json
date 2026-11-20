@@ -1,0 +1,15 @@
+{
+  "name": "@claude-bot/app-registry",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "node ../../tools/build-cache/bin/octo-build.mjs -- 'tsup src/index.ts --format esm --dts --clean'"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0"
+  }
+}

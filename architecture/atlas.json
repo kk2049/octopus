@@ -1,0 +1,1506 @@
+{
+  "$schema": "./schema.json",
+  "system": {
+    "id": "octopus",
+    "title": "Octopus Architecture Observatory",
+    "description": "面向持续 code review 的多视角架构地图：结构、依赖、控制流、权限流与审阅证据来自同一份可重复生成的模型。",
+    "sourceUrlTemplate": "https://gitlab.example.com/lvht/octopus/-/blob/{commit}/{path}#L{line}"
+  },
+  "analysis": {
+    "sourceRoots": ["packages", "plugins", "scripts", "ctl"],
+    "exclude": ["fixtures"],
+    "gitHistoryCommits": 200
+  },
+  "zones": [
+    {
+      "id": "external",
+      "label": "外部参与者与平台",
+      "description": "浏览器、飞书、CLI、用户与设备；它们提供输入，但不能自证身份或授权。",
+      "color": "#8b95a7",
+      "trust": "external"
+    },
+    {
+      "id": "trusted-browser",
+      "label": "可信面板浏览器",
+      "description": "同源 Dashboard，持有 cookie/CSRF 与导航上下文，但不替服务端作授权判断。",
+      "color": "#3b82f6",
+      "trust": "trusted"
+    },
+    {
+      "id": "untrusted-browser",
+      "label": "不可信 Agent View",
+      "description": "独立 origin 与 bundle；只能通过 MessagePort 提议，不能得知身份或直接联网。",
+      "color": "#f59e0b",
+      "trust": "untrusted"
+    },
+    {
+      "id": "neutral-browser",
+      "label": "中立浏览器展示",
+      "description": "无身份、无网络、无 authority 的纯展示代码；可进入可信与不可信 bundle，但不属于任一发布车道。",
+      "color": "#10b981",
+      "trust": "untrusted"
+    },
+    {
+      "id": "boundary-contract",
+      "label": "边界契约",
+      "description": "跨进程/跨 origin 的封闭协议词表；共享协议，不共享权限实现。",
+      "color": "#a78bfa",
+      "trust": "trusted"
+    },
+    {
+      "id": "control-plane",
+      "label": "可信控制面",
+      "description": "身份绑定、路由、组合根、资源适配与业务编排所在进程。",
+      "color": "#14b8a6",
+      "trust": "trusted"
+    },
+    {
+      "id": "security-kernel",
+      "label": "权限 TCB",
+      "description": "Capability 图、唯一 Gate、强制 policy 与批准恢复；错误可导致跨账户访问。",
+      "color": "#ef4444",
+      "trust": "critical"
+    },
+    {
+      "id": "sandbox-runtime",
+      "label": "受限应用运行时",
+      "description": "生成代码、Compartment 与子进程；只有显式 endowment 与 capability facade。",
+      "color": "#d946ef",
+      "trust": "untrusted"
+    },
+    {
+      "id": "persistence",
+      "label": "持久状态",
+      "description": "SQLite、迁移、状态机与单写者租约；负责唯一表示和重启恢复。",
+      "color": "#22c55e",
+      "trust": "critical"
+    },
+    {
+      "id": "device",
+      "label": "Runner 设备面",
+      "description": "用户设备上的 Runner 与工作区，真实副作用在这里发生。",
+      "color": "#06b6d4",
+      "trust": "external"
+    },
+    {
+      "id": "developer-tool",
+      "label": "开发与运维工具",
+      "description": "构建、部署、MCP 插件、CLI 与本架构观测台；不进入产品请求的权限结论。",
+      "color": "#64748b",
+      "trust": "trusted"
+    },
+    {
+      "id": "unmapped",
+      "label": "未归属",
+      "description": "分析范围内但尚未在架构清单中声明职责的文件。",
+      "color": "#fb7185",
+      "trust": "untrusted"
+    }
+  ],
+  "modules": [
+    {
+      "id": "capability-kernel",
+      "label": "Capability Kernel",
+      "description": "Context 树、capability 衰减/撤销、唯一 Gate、批准状态机与持久表示。",
+      "zone": "security-kernel",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/capability-kernel/"],
+      "tags": ["tcb", "authority", "single-gate"],
+      "docs": ["packages/capability-kernel/CLAUDE.md", "doc/tcb-reading-guide.md"]
+    },
+    {
+      "id": "dashboard-authz",
+      "label": "Dashboard Route Policy",
+      "description": "路由表、Cedar 策略、surface allowlist 与唯一 pre-dispatch 授权决定。",
+      "zone": "security-kernel",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/bot/src/dashboard/authz.ts", "packages/bot/src/dashboard/features.ts"],
+      "tags": ["authorization", "cedar", "fail-closed"],
+      "docs": ["doc/adr/0004-dashboard-fastify-transport.md"]
+    },
+    {
+      "id": "dashboard-server",
+      "label": "Dashboard Server",
+      "description": "Fastify transport、身份/CSRF/Cedar 门、route handlers 与已注入业务端口的 HTTP 投影。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/dashboard/"],
+      "tags": ["http", "transport", "trusted-surface"],
+      "docs": ["doc/adr/0004-dashboard-fastify-transport.md", "doc/tcb-reading-guide.md"]
+    },
+    {
+      "id": "dashboard-web",
+      "label": "Trusted Dashboard Web",
+      "description": "可信 React 面板；渲染服务端裁决，能力型请求不自动重放。",
+      "zone": "trusted-browser",
+      "criticality": "high",
+      "pathPrefixes": ["packages/dashboard-web/"],
+      "tags": ["browser", "react", "trusted-origin"],
+      "docs": ["packages/dashboard-web/CLAUDE.md", "doc/adr/0003-dashboard-react-frontend.md"]
+    },
+    {
+      "id": "chat-ui-commons",
+      "label": "Neutral Chat UI Commons",
+      "description": "跨发布车道共享的 transcript 归一、分组、滚动与结构样式；Markdown、安全策略和副作用由 Host 注入。",
+      "zone": "neutral-browser",
+      "criticality": "high",
+      "pathPrefixes": ["packages/chat-ui-commons/"],
+      "tags": ["browser", "react", "presentation-only", "release-neutral"],
+      "docs": ["packages/chat-ui-commons/CLAUDE.md"]
+    },
+    {
+      "id": "agent-view-react",
+      "label": "Agent View Runtime",
+      "description": "不可信 View 的传输、hooks、隔离自检和无权限 UI 原语。",
+      "zone": "untrusted-browser",
+      "criticality": "high",
+      "pathPrefixes": ["packages/agent-view-react/"],
+      "tags": ["browser", "untrusted", "proposal-only"],
+      "docs": ["packages/agent-view-react/CLAUDE.md"]
+    },
+    {
+      "id": "agent-view-build",
+      "label": "Agent View Build Toolchain",
+      "description": "Agent View 的确定性构建配方与产物加载器：两个固定产物、nonce 可内联、源码 digest 拒绝陈旧构建。2026-08-11 自 agent-view-react 拆出。",
+      "zone": "developer-tool",
+      "criticality": "high",
+      "pathPrefixes": ["packages/agent-view-build/"],
+      "tags": ["node", "toolchain", "release-identity"],
+      "docs": ["packages/agent-view-build/CLAUDE.md"]
+    },
+    {
+      "id": "agent-view-preview",
+      "label": "Agent View Preview Harness",
+      "description": "草稿组合的本机预览：fixture client 与 loopback dev server；不模拟授权、不写任何东西。2026-08-11 自 agent-view-react 拆出。",
+      "zone": "developer-tool",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/agent-view-preview/"],
+      "tags": ["node", "preview", "fixture"],
+      "docs": ["packages/agent-view-preview/CLAUDE.md"]
+    },
+    {
+      "id": "research-docs-view",
+      "label": "研究文档 View",
+      "description": "独立共享文档 App：BlockNote 编辑、Yjs 增量同步和受审科研元件。",
+      "zone": "trusted-browser",
+      "criticality": "high",
+      "pathPrefixes": [
+        "packages/research-docs-view/"
+      ],
+      "tags": [
+        "browser",
+        "app-view",
+        "collaboration"
+      ],
+      "docs": [
+        "packages/research-docs-view/README.md"
+      ]
+    },
+    {
+      "id": "research-docs-contract",
+      "label": "研究文档契约",
+      "description": "文档、讨论、附件及科研来源动作的版本化契约。",
+      "zone": "boundary-contract",
+      "criticality": "high",
+      "pathPrefixes": [
+        "packages/research-docs-contract/"
+      ],
+      "tags": [
+        "contract"
+      ],
+      "docs": [
+        "packages/research-docs-contract/README.md"
+      ]
+    },
+    {
+      "id": "research-docs",
+      "label": "研究文档 Host",
+      "description": "成员与能力门、持久正文、附件和原科研资源授权桥接。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": [
+        "packages/bot/src/research-docs/"
+      ],
+      "tags": [
+        "host",
+        "collaboration"
+      ],
+      "docs": [
+        "packages/bot/src/research-docs/README.md"
+      ]
+    },
+    {
+      "id": "research-canvas-view", "label": "自动科研 v2 Canvas",
+      "description": "独立 ESM App：共享研究图、个人节点工作窗、直接连线和插件化内容展示。",
+      "zone": "trusted-browser", "criticality": "high",
+      "pathPrefixes": ["packages/research-canvas-view/"],
+      "tags": ["browser", "app-view", "collaboration"], "docs": ["packages/research-canvas-view/README.md"]
+    },
+    {
+      "id": "research-canvas-contract", "label": "Research Canvas Contract",
+      "description": "节点、关系、事件、来源与统一工具目录的版本化数据契约。",
+      "zone": "boundary-contract", "criticality": "high",
+      "pathPrefixes": ["packages/research-canvas-contract/"], "tags": ["contract"], "docs": ["packages/research-canvas-contract/README.md"]
+    },
+    {
+      "id": "research-canvas", "label": "Research Canvas Host",
+      "description": "项目权限和资源绑定、语义图、CRDT、持久事件与原生 Agent 执行适配。",
+      "zone": "control-plane", "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/research-canvas/"],
+      "tags": ["host", "collaboration", "managed-agent"], "docs": ["packages/bot/src/research-canvas/README.md"]
+    },
+    {
+      "id": "session-plus-view",
+      "label": "Session Plus View",
+      "description": "第一个 Agentic App 的发布者 View，只经 Agent View Runtime 与 Host 交互。",
+      "zone": "untrusted-browser",
+      "criticality": "high",
+      "pathPrefixes": ["packages/session-plus-view/"],
+      "tags": ["browser", "untrusted", "app-view"],
+      "docs": ["doc/adr/0001-session-plus-trust-boundaries.md"]
+    },
+    {
+      "id": "web-trust-contract",
+      "label": "Frame Protocol Contract",
+      "description": "可信 Host 与不可信 View 唯一共享的 MessagePort 协议词表。",
+      "zone": "boundary-contract",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/web-trust/src/frame-protocol.ts"],
+      "tags": ["protocol", "trust-boundary"]
+    },
+    {
+      "id": "web-trust",
+      "label": "Browser Trust Rules",
+      "description": "Origin、cookie、session、mutation gate 与 frame 响应契约的一份实现。",
+      "zone": "security-kernel",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/web-trust/"],
+      "tags": ["browser-security", "csrf", "session"]
+    },
+    {
+      "id": "session-plus-host",
+      "label": "Session Plus Host",
+      "description": "App identity、可信服务、View 发布与 runtime supervisor。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/session-plus/"],
+      "tags": ["agentic-app", "host", "trust"]
+    },
+    {
+      "id": "runner-authority",
+      "label": "Runner Authority Plane",
+      "description": "账户根、设备凭据、capability 授予、loopback 与固定资源 adapter。",
+      "zone": "control-plane",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/bot/src/runner/"],
+      "tags": ["authority", "device", "adapter"]
+    },
+    {
+      "id": "execution-workspace-authority",
+      "label": "Execution Workspace Authority",
+      "description": "工作区命令与按需执行 scope 的独立 capability Object、审批策略和撤销边界。",
+      "zone": "control-plane",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/bot/src/execution-workspace/"],
+      "tags": ["authority", "execution", "workspace"]
+    },
+    {
+      "id": "knowledge-artifact-authority",
+      "label": "Knowledge Artifact Builder Authority",
+      "description": "固定 owner/device 的知识索引任务 capability Object、Runner adapter 与撤销生命周期。",
+      "zone": "control-plane",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/bot/src/knowledge-artifact/"],
+      "tags": ["knowledge", "artifact", "authority"]
+    },
+    {
+      "id": "resource-recovery",
+      "label": "Resource Recovery Coordination",
+      "description": "资源不可达标记、耐久 waiter、scope notifier 与恢复通知协调。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/resources/"],
+      "tags": ["resource", "recovery", "notification"]
+    },
+    {
+      "id": "tentacle-contract",
+      "label": "Tentacle Vocabulary Contract",
+      "description": "Tentacle subject 与 operation 的无依赖稳定词表，供共享面和权限投影共同消费。",
+      "zone": "boundary-contract",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/tentacle/contract.ts"],
+      "tags": ["contract", "tentacle", "vocabulary"]
+    },
+    {
+      "id": "tentacle",
+      "label": "Cross-user Tentacle Plane",
+      "description": "跨用户 dsh 工具与 viewer-safe 会话投影的 capability、broker、协议和共享生命周期。",
+      "zone": "control-plane",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/bot/src/tentacle/"],
+      "tags": ["tentacle", "sharing", "capability"]
+    },
+    {
+      "id": "runner-device",
+      "label": "Runner Device",
+      "description": "设备端 WebSocket client、机器探针、workspace 与副作用执行。",
+      "zone": "device",
+      "criticality": "high",
+      "pathPrefixes": ["packages/runner/"],
+      "tags": ["device", "side-effect"]
+    },
+    {
+      "id": "engine-public-api",
+      "label": "Agentic App Engine Public API",
+      "description": "Engine 包入口的公共导出门面；只汇出 core、host、runtime 与 agent surface，不承载它们的实现职责。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/engine/src/index.ts"],
+      "tags": ["package-facade", "api"]
+    },
+    {
+      "id": "engine-host",
+      "label": "Agentic App Host",
+      "description": "应用 HTTP surface、capability plane、frame delivery 与 release version。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/engine/src/host/"],
+      "tags": ["app-host", "capability-broker"]
+    },
+    {
+      "id": "engine-runtime",
+      "label": "Sandbox Runtime",
+      "description": "SES Compartment、子进程隔离、部署 profile 与资源上限。",
+      "zone": "sandbox-runtime",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/engine/src/runtime/"],
+      "tags": ["sandbox", "ses", "generated-code"]
+    },
+    {
+      "id": "engine-agent",
+      "label": "Agent Plane",
+      "description": "Agent session、CLI adapters、MCP shim 与 session view。",
+      "zone": "sandbox-runtime",
+      "criticality": "high",
+      "pathPrefixes": ["packages/engine/src/agent/"],
+      "tags": ["agent", "mcp"]
+    },
+    {
+      "id": "engine-core",
+      "label": "Agentic App Engine Core",
+      "description": "Manifest、dispatch、projection、store、delivery 与热更新核心。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/engine/"],
+      "tags": ["agentic-app", "dispatch"]
+    },
+    {
+      "id": "v3-bootstrap",
+      "label": "Bot Composition Root",
+      "description": "生产唯一的组合根 bootstrap-v3：控制面服务的构造顺序、生命周期与启动清单。",
+      "zone": "control-plane",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/bot/src/bootstrap-v3.ts"],
+      "tags": ["composition-root", "lifecycle", "fail-closed"]
+    },
+    {
+      "id": "v3-host",
+      "label": "v3 Host Distribution",
+      "description": "声明式应用组合与 reports demo 的发行入口。",
+      "zone": "control-plane",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/v3-host/"],
+      "tags": ["distribution", "apps"]
+    },
+    {
+      "id": "app-registry",
+      "label": "Immutable App Registry",
+      "description": "不可变 release descriptor、content store 与 catalog ports。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/app-registry/"],
+      "tags": ["release", "registry", "immutable"]
+    },
+    {
+      "id": "app-core",
+      "label": "Shared Agentic App Core",
+      "description": "Session Plus 与通用 App 承载共同向下依赖的 release-neutral 契约和 policy-free mechanics。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/app-core/"],
+      "tags": ["agentic-app", "shared-core", "runtime"],
+      "docs": ["packages/bot/src/app-core/CLAUDE.md"]
+    },
+    {
+      "id": "app-release-hosting",
+      "label": "App Release Hosting",
+      "description": "Bot 侧 release catalog adapter、active pointers、声明式 App instance 与 runtime host 组合。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/app-registry/"],
+      "tags": ["release", "hosting", "adapter"]
+    },
+    {
+      "id": "external-app-host",
+      "label": "External App Host",
+      "description": "本机可信外壳使用的 capability-bound App transport、宿主配置与每请求重验服务。",
+      "zone": "control-plane",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/bot/src/app-external/"],
+      "tags": ["agentic-app", "external-host", "capability"]
+    },
+    {
+      "id": "app-runtime",
+      "label": "App Runtime Process",
+      "description": "应用 runtime 子进程服务、release 校验与 child RPC client。",
+      "zone": "sandbox-runtime",
+      "criticality": "high",
+      "pathPrefixes": ["packages/app-runtime/"],
+      "tags": ["process", "runtime"]
+    },
+    {
+      "id": "app-state",
+      "label": "App State Process",
+      "description": "应用状态子进程、canonical representation 与 SQLite service。",
+      "zone": "persistence",
+      "criticality": "high",
+      "pathPrefixes": ["packages/app-state/"],
+      "tags": ["state", "sqlite", "process"]
+    },
+    {
+      "id": "child-rpc",
+      "label": "Child RPC Contract",
+      "description": "Host 与受限子进程之间的有界 RPC 协议和 client/server。",
+      "zone": "boundary-contract",
+      "criticality": "high",
+      "pathPrefixes": ["packages/child-rpc/"],
+      "tags": ["rpc", "process-boundary"]
+    },
+    {
+      "id": "session-hub",
+      "label": "Session Hub",
+      "description": "会话发现、lease、operation lifecycle 与多后端协调。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/sessionhub/"],
+      "tags": ["sessions", "lease", "operations"]
+    },
+    {
+      "id": "session-resource-contract",
+      "label": "Session Resource Permission Contract",
+      "description": "Session Plus 稳定身份、permission contract catalog 与 digest 解析的纯契约。",
+      "zone": "boundary-contract",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/session-resource/contract.ts"],
+      "tags": ["session", "permission-contract"]
+    },
+    {
+      "id": "session-resource",
+      "label": "Session Resource Plane",
+      "description": "资源 catalog、binding、intent resolver、projection 与 operation executor。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/session-resource/"],
+      "tags": ["resource", "binding"]
+    },
+    {
+      "id": "authorization",
+      "label": "Canonical Authorization Domain",
+      "description": "Canonical domain/resource/exact-permit store、可信规则程序与 intent-only decision。",
+      "zone": "control-plane",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/bot/src/authorization/"],
+      "tags": ["authorization", "policy", "permit"]
+    },
+    {
+      "id": "permissions",
+      "label": "Product Permission Service",
+      "description": "App trust、grant intent、effective permission 与用户可见 catalog。",
+      "zone": "control-plane",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/bot/src/permissions/"],
+      "tags": ["permission", "consent"]
+    },
+    {
+      "id": "persistence-store",
+      "label": "Bot Store & Migrations",
+      "description": "Bot SQLite store、版本迁移和业务状态的持久唯一表示。",
+      "zone": "persistence",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/bot/src/store/"],
+      "tags": ["sqlite", "migration", "state"]
+    },
+    {
+      "id": "agent-session",
+      "label": "Session Utilities",
+      "description": "LLM HTTP 收口（fetchLlm）与路径围栏（PathJail）等共享叶子模块。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/session/"],
+      "tags": ["agent", "session"]
+    },
+    {
+      "id": "channels",
+      "label": "External Channels",
+      "description": "飞书账号 OAuth、租户目录与飞书网关适配。",
+      "zone": "external",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/channel/", "packages/bot/src/feishu/"],
+      "tags": ["io", "identity-source"]
+    },
+    {
+      "id": "dev-pipeline",
+      "label": "Development Pipeline",
+      "description": "Agent worktree、执行器、落地/部署状态机与 quota。",
+      "zone": "developer-tool",
+      "criticality": "critical",
+      "pathPrefixes": ["packages/bot/src/devpipe/"],
+      "tags": ["git", "deploy", "side-effect"]
+    },
+    {
+      "id": "mcp-policy-contract",
+      "label": "MCP Token Policy Contract",
+      "description": "mcp-token-policy/v1 schema、工具组词表与无依赖 canonical codec。",
+      "zone": "boundary-contract",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/mcp/policy-contract.ts"],
+      "tags": ["contract", "mcp", "policy"]
+    },
+    {
+      "id": "mcp-surface",
+      "label": "Bot MCP Surface",
+      "description": "Owner-scoped MCP token、tool catalog 与各能力平面的可信适配。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/mcp/"],
+      "tags": ["mcp", "tooling", "adapter"]
+    },
+    {
+      "id": "user-memory",
+      "label": "User Memory Plane",
+      "description": "账号级 Agent memory 的目录、能力对象与持久服务。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/user-memory/"],
+      "tags": ["memory", "capability"]
+    },
+    {
+      "id": "user-skills",
+      "label": "User Skill Registry",
+      "description": "账号级 Skill registry、能力对象与受限安装入口。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/user-skills/"],
+      "tags": ["skills", "capability"]
+    },
+    {
+      "id": "agent-interactions",
+      "label": "Agent Interaction Plane",
+      "description": "Agent question/approval interaction 的能力对象、状态与 provider adapter。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/agent-interactions/"],
+      "tags": ["agent", "interaction", "capability"]
+    },
+    {
+      "id": "user-domain",
+      "label": "User Identity Domain",
+      "description": "用户身份映射、账号目录与 user manager。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/user/"],
+      "tags": ["identity", "account"]
+    },
+    {
+      "id": "bot-shared-infrastructure",
+      "label": "Bot Shared Infrastructure Leaves",
+      "description": "Bot 模块共享的配置、logger 与 checkout root 解析叶子；不属于 composition root 或任一业务领域。",
+      "zone": "control-plane",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/bot/src/config.ts", "packages/bot/src/logger.ts", "packages/bot/src/project-root.ts"],
+      "tags": ["configuration", "logging", "filesystem", "infrastructure"]
+    },
+    {
+      "id": "bot-core",
+      "label": "Bot Core & Composition",
+      "description": "主入口、配置、生命周期与尚未单列的用户/workspace/maintenance 领域。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/"],
+      "tags": ["composition", "core"]
+    },
+    {
+      "id": "plugin-surface",
+      "label": "MCP Plugin Surface",
+      "description": "machines、sessions 等独立 MCP server 与会话扫描库。",
+      "zone": "developer-tool",
+      "criticality": "high",
+      "pathPrefixes": ["plugins/"],
+      "tags": ["mcp", "plugin"]
+    },
+    {
+      "id": "cli",
+      "label": "Control CLIs",
+      "description": "ctl/ 下的控制面命令入口(发布、开发租约、实例管理)。",
+      "zone": "external",
+      "criticality": "normal",
+      "pathPrefixes": ["ctl/"],
+      "tags": ["cli"]
+    },
+    {
+      "id": "operations",
+      "label": "Operations Scripts",
+      "description": "重启、部署、演示与运维脚本。",
+      "zone": "developer-tool",
+      "criticality": "high",
+      "pathPrefixes": ["scripts/"],
+      "tags": ["operations", "deploy"]
+    },
+    {
+      "id": "typed-port-kit",
+      "label": "Typed Port Kit",
+      "description": "typed port 契约的声明机床：单一 declareContract 派生 wire 编码、MCP 面、拒绝码闭集与到达校验。",
+      "zone": "boundary-contract",
+      "criticality": "high",
+      "pathPrefixes": ["packages/typed-port-kit/"],
+      "tags": ["contract", "typed-port", "kit"],
+      "docs": ["packages/typed-port-kit/CLAUDE.md"]
+    },
+    {
+      "id": "convergence-gates",
+      "label": "Convergence Gate Contracts",
+      "description": "G0–G5 的 provider-neutral typed contracts、无正文使用量证据、崩溃终态与 fail-closed 验证器；只产证据，不选择默认 provider。",
+      "zone": "boundary-contract",
+      "criticality": "high",
+      "pathPrefixes": ["packages/convergence-gates/"],
+      "tags": ["contract", "migration-gate", "observability", "fail-closed"],
+      "docs": ["doc/adr/2026-08-15-octopus-convergence-line.md", "doc/development/2026-08-15-convergence-execution-plans.md"]
+    },
+    {
+      "id": "agent-module-contract",
+      "label": "Agent Module Contract",
+      "description": "模块系统的纯数据 ABI：module manifest、lock、composition、resource bindings 与 app-permissions 文档。",
+      "zone": "boundary-contract",
+      "criticality": "high",
+      "pathPrefixes": ["packages/agent-module-contract/"],
+      "tags": ["contract", "module-system"],
+      "docs": ["packages/agent-module-contract/CLAUDE.md"]
+    },
+    {
+      "id": "agent-sessions-contract",
+      "label": "Agent Sessions Contract",
+      "description": "会话模块的投影形状、action/operation 词表与 typed port 契约；port 上说不出身份与路径。",
+      "zone": "boundary-contract",
+      "criticality": "high",
+      "pathPrefixes": ["packages/agent-sessions-contract/"],
+      "tags": ["contract", "sessions"],
+      "docs": ["packages/agent-sessions-contract/CLAUDE.md"]
+    },
+    {
+      "id": "workspace-files-contract",
+      "label": "Workspace Files Contract",
+      "description": "只读 + CAS 写的工作区文件 typed port ABI：opaque ref、无路径、拒绝一律 resolve。",
+      "zone": "boundary-contract",
+      "criticality": "high",
+      "pathPrefixes": ["packages/workspace-files-contract/"],
+      "tags": ["contract", "workspace-files"],
+      "docs": ["packages/workspace-files-contract/CLAUDE.md"]
+    },
+    {
+      "id": "resource-stream-contract",
+      "label": "Resource Stream Contract",
+      "description": "一次有界、pull-based、可取消读取的零依赖流 ABI，供各 typed port 共享。",
+      "zone": "boundary-contract",
+      "criticality": "high",
+      "pathPrefixes": ["packages/resource-stream-contract/"],
+      "tags": ["contract", "stream"],
+      "docs": ["packages/resource-stream-contract/CLAUDE.md"]
+    },
+    {
+      "id": "notify-contract",
+      "label": "Notify Contract",
+      "description": "notify/v1：向被给到的 opaque 收件人 ref 投递有界消息的契约，typed-port-kit 的第一个消费者。",
+      "zone": "boundary-contract",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/notify-contract/"],
+      "tags": ["contract", "notify"],
+      "docs": ["packages/notify-contract/CLAUDE.md"]
+    },
+    {
+      "id": "crdt-doc-contract",
+      "label": "CRDT Doc Contract",
+      "description": "crdt-doc/v1 与 v2：CRDT 协作文档的 pull-based 同步 ABI（open/apply/read_updates 与拒绝码闭集）；v2 以资源流分块读、按偏移分段写，文档大小不设上限。",
+      "zone": "boundary-contract",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/crdt-doc-contract/"],
+      "tags": ["contract", "crdt"]
+    },
+    {
+      "id": "deck-model-contract",
+      "label": "Deck Model Contract",
+      "description": "deck-model/v1：deck 纯数据 schema、语义编辑命令（含 inverse）与 Typst 导出的单向契约。",
+      "zone": "boundary-contract",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/deck-model-contract/"],
+      "tags": ["contract", "deck", "typst"]
+    },
+    {
+      "id": "agent-sessions-view",
+      "label": "Agent Sessions View Modules",
+      "description": "可复用会话模块（search/roster/chat/new/operations）与共享 controller，只依赖 typed port。",
+      "zone": "untrusted-browser",
+      "criticality": "high",
+      "pathPrefixes": ["packages/agent-sessions-view/"],
+      "tags": ["browser", "untrusted", "module"],
+      "docs": ["packages/agent-sessions-view/CLAUDE.md"]
+    },
+    {
+      "id": "agent-workspace-files-view",
+      "label": "Workspace Files View Modules",
+      "description": "可复用只读文件树与文件查看器模块：不猜路径、拒绝是可读状态、不自动重试。",
+      "zone": "untrusted-browser",
+      "criticality": "high",
+      "pathPrefixes": ["packages/agent-workspace-files-view/"],
+      "tags": ["browser", "untrusted", "module"],
+      "docs": ["packages/agent-workspace-files-view/CLAUDE.md"]
+    },
+    {
+      "id": "agent-editor-view",
+      "label": "Editor View Module",
+      "description": "可复用文本编辑器模块（CodeMirror 6 + expected-digest CAS 保存，五种保存结局为纯函数）。",
+      "zone": "untrusted-browser",
+      "criticality": "high",
+      "pathPrefixes": ["packages/agent-editor-view/"],
+      "tags": ["browser", "untrusted", "module"],
+      "docs": ["packages/agent-editor-view/CLAUDE.md"]
+    },
+    {
+      "id": "agent-data-view",
+      "label": "Generic Data View Modules",
+      "description": "通用数据 UI 模块（data.list/detail/form）与 app-data/v1 typed port，实例配置的第一个消费者。",
+      "zone": "untrusted-browser",
+      "criticality": "high",
+      "pathPrefixes": ["packages/agent-data-view/"],
+      "tags": ["browser", "untrusted", "module"],
+      "docs": ["packages/agent-data-view/CLAUDE.md"]
+    },
+    {
+      "id": "agent-crdt-view",
+      "label": "CRDT Note View Module",
+      "description": "可复用协作笔记模块：本地 Y.Doc 副本 + 显式同步按钮，不装 provider、不轮询。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/agent-crdt-view/"],
+      "tags": ["browser", "untrusted", "module", "crdt"],
+      "docs": ["packages/agent-crdt-view/CLAUDE.md"]
+    },
+    {
+      "id": "agent-deck-view",
+      "label": "Deck View Modules",
+      "description": "可复用 deck 模块（大纲/单页编辑/Typst 源码），一次保存编译为命令序列。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/agent-deck-view/"],
+      "tags": ["browser", "untrusted", "module", "deck"]
+    },
+    {
+      "id": "agent-board-view",
+      "label": "Board Grid View Module",
+      "description": "通用棋盘格模块：只读取几何与展示投影，按组合配置提交坐标提议，不包含游戏规则或身份判断。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/agent-board-view/"],
+      "tags": ["browser", "untrusted", "module", "board"],
+      "docs": ["packages/agent-board-view/CLAUDE.md"]
+    },
+    {
+      "id": "agent-feishu-view",
+      "label": "Feishu Document View Module",
+      "description": "飞书文档资源链接的安全展示模块；不持有飞书凭据、不加载第三方页面，只处理组合提供的规范链接。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/agent-feishu-view/"],
+      "tags": ["browser", "untrusted", "module", "feishu"]
+    },
+    {
+      "id": "feishu-docs-addon",
+      "label": "Native Feishu Docs Agent Card",
+      "description": "飞书原生文档小组件；通过独立短期 bearer 访问 Octopus，会话关联 Record 不携带权限。",
+      "zone": "external",
+      "criticality": "high",
+      "pathPrefixes": ["packages/feishu-docs-addon/"],
+      "tags": ["browser", "feishu", "external-host"],
+      "docs": ["packages/feishu-docs-addon/README.md"]
+    },
+    {
+      "id": "feishu-docs-addon-protocol",
+      "label": "Feishu Docs Card Wire Values",
+      "description": "卡片 HTTP 展示值与无权限的 Record 引用；不定义新的执行能力。",
+      "zone": "boundary-contract",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/feishu-docs-addon/src/protocol.ts"],
+      "tags": ["contract", "feishu"]
+    },
+    {
+      "id": "agent-intake-view",
+      "label": "Intake Workflow View Module",
+      "description": "通用收件工作流模块：只读 app-data 投影并提交组合声明的 action，不拥有身份、授权或流程规则。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/agent-intake-view/"],
+      "tags": ["browser", "untrusted", "module", "workflow"],
+      "docs": ["packages/agent-intake-view/CLAUDE.md"]
+    },
+    {
+      "id": "agent-schedule-view",
+      "label": "Schedule View Module",
+      "description": "通用资源日历模块：展示预约投影并提交组合声明的 action，冲突与业务规则留在 App 后端。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/agent-schedule-view/"],
+      "tags": ["browser", "untrusted", "module", "schedule"],
+      "docs": ["packages/agent-schedule-view/CLAUDE.md"]
+    },
+    {
+      "id": "agent-text-view",
+      "label": "Text Surface View Module",
+      "description": "文件查看器与编辑器共用的 CodeMirror 展示表面和文档 chrome；不持有资源契约、授权、保存语义或持久状态。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/agent-text-view/"],
+      "tags": ["browser", "untrusted", "module", "presentation-only"],
+      "docs": ["packages/agent-text-view/CLAUDE.md"]
+    },
+    {
+      "id": "showcase-view",
+      "label": "Showcase App View",
+      "description": "第一个只用现成模块包组装的被声明 App View：一个 StandardApp，零业务代码。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/showcase-view/"],
+      "tags": ["browser", "untrusted", "app-view"],
+      "docs": ["packages/showcase-view/CLAUDE.md"]
+    },
+    {
+      "id": "chess-view",
+      "label": "Chess App View",
+      "description": "国际象棋声明式 App 组合根：装配通用数据与棋盘模块，浏览器侧不包含身份、回合归属或规则裁决。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/chess-view/"],
+      "tags": ["browser", "untrusted", "app-view", "composition-root"],
+      "docs": ["packages/chess-view/CLAUDE.md"]
+    },
+    {
+      "id": "daily-brief-view",
+      "label": "Daily Brief App View",
+      "description": "每日简报声明式 App 组合根：以通用数据模块组织概览、历史、正文记录与动作入口。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/daily-brief-view/"],
+      "tags": ["browser", "untrusted", "app-view", "composition-root"]
+    },
+    {
+      "id": "expense-intake-view",
+      "label": "Expense Intake App View",
+      "description": "报销收件声明式 App 组合根：装配通用 intake 模块，身份隔离、审批规则与文件校验留在可信侧和 App 后端。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/expense-intake-view/"],
+      "tags": ["browser", "untrusted", "app-view", "composition-root"],
+      "docs": ["packages/expense-intake-view/CLAUDE.md"]
+    },
+    {
+      "id": "meeting-room-view",
+      "label": "Meeting Room App View",
+      "description": "会议室声明式 App 组合根：装配通用日历与数据模块，预约冲突和角色策略由后端裁决。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/meeting-room-view/"],
+      "tags": ["browser", "untrusted", "app-view", "composition-root"],
+      "docs": ["packages/meeting-room-view/CLAUDE.md"]
+    },
+    {
+      "id": "ppt-studio-view",
+      "label": "PPT Studio App View",
+      "description": "演示文稿声明式 App 组合根：装配 deck 与数据模块，浏览器只提交提议并展示 deck-model 派生结果。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/ppt-studio-view/"],
+      "tags": ["browser", "untrusted", "app-view", "composition-root"],
+      "docs": ["packages/ppt-studio-view/CLAUDE.md"]
+    },
+    {
+      "id": "report-space-view",
+      "label": "Report Space App View",
+      "description": "汇报空间声明式 App 组合根：以通用数据模块组织空间概览、汇报记录、动态和动作入口。",
+      "zone": "untrusted-browser",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/report-space-view/"],
+      "tags": ["browser", "untrusted", "app-view", "composition-root"]
+    },
+    {
+      "id": "agent-resources",
+      "label": "Trusted Provider Catalog",
+      "description": "受信 provider 目录：按 binding→contract→provider 四步派发资源提议，实例身份一次绑定、关闭永不重开。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/agent-resources/"],
+      "tags": ["resource", "provider", "binding"],
+      "docs": ["packages/bot/src/agent-resources/CLAUDE.md"]
+    },
+    {
+      "id": "managed-execution",
+      "label": "Managed Agent Lifecycle",
+      "description": "统一托管意图、依赖等待与恢复调度；通用 HTTP 工具循环和检查点在此，领域适配器持有当前授权与业务效果。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/managed-execution/"],
+      "tags": ["agent", "lifecycle", "recovery"],
+      "docs": ["packages/bot/src/managed-execution/README.md", "doc/design-managed-agent-lifecycle.md"]
+    },
+    {
+      "id": "app-agents",
+      "label": "App Agent Plane",
+      "description": "App 后端 agent 平面：inbox 游标、共享工具循环、预算与 actor 专用授权平面（agent 不继承 auto-allow）。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/app-agents/"],
+      "tags": ["agent", "app", "authority"]
+    },
+    {
+      "id": "topic-discussions",
+      "label": "Topic Discussion Secretary",
+      "description": "按议题建飞书群、持久消息、快速过滤与常驻秘书；独立 MCP Object 与会议范围工具。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/discussions/"],
+      "tags": ["agent", "feishu", "authority"],
+      "docs": ["packages/bot/src/discussions/README.md"]
+    },
+    {
+      "id": "workspace-files-plane",
+      "label": "Workspace Files Capability Plane",
+      "description": "工作区文件 capability 平面与可信 provider：独立 Object、ref vault 与 Gate 收口的读写。",
+      "zone": "control-plane",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/workspace-files/"],
+      "tags": ["capability", "workspace-files", "authority"],
+      "docs": ["packages/bot/src/workspace-files/CLAUDE.md"]
+    },
+    {
+      "id": "resource-stream-broker",
+      "label": "Resource Stream Broker",
+      "description": "资源流 broker：随机 handle、串行 pull、seq 双向核对与 per-scope 一次性取消。",
+      "zone": "control-plane",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/bot/src/resource-stream/"],
+      "tags": ["stream", "broker"]
+    },
+    {
+      "id": "crdt-doc-plane",
+      "label": "CRDT Trusted Replica",
+      "description": "CRDT 文档可信副本：校验→append+fsync→apply 的 update log 持久化与幂等 compaction。",
+      "zone": "control-plane",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/bot/src/crdt-doc/"],
+      "tags": ["crdt", "persistence"],
+      "docs": ["packages/bot/src/crdt-doc/CLAUDE.md"]
+    },
+    {
+      "id": "notify-plane",
+      "label": "Notify Delivery Plane",
+      "description": "notify/v1 可信侧：收件人 ref 保管、per-scope 限流与经 Router 的卡片投递。",
+      "zone": "control-plane",
+      "criticality": "normal",
+      "pathPrefixes": ["packages/bot/src/notify/"],
+      "tags": ["notify", "delivery"]
+    },
+    {
+      "id": "knowledge-graph",
+      "label": "Development Knowledge Graph",
+      "description": "把规则、ADR、包级文档、atlas、能力分类、交付记录、CLI 简报与 ticket_landings 投影成可重建的类型化图，并为工单启动装配有来源的上下文。",
+      "zone": "developer-tool",
+      "criticality": "high",
+      "pathPrefixes": ["packages/bot/src/knowledge/"],
+      "tags": ["derived", "sqlite", "retrieval"],
+      "docs": ["packages/bot/src/knowledge/CLAUDE.md", "doc/development/2026-08-20-knowledge-graph-redesign.md"]
+    },
+    {
+      "id": "architecture-observatory",
+      "label": "Architecture Observatory",
+      "description": "静态证据提取、约束评估与源码锚点；视图层已迁入 packages/dashboard-web 的架构页。",
+      "zone": "developer-tool",
+      "criticality": "supporting",
+      "pathPrefixes": ["packages/architecture-observatory/"],
+      "tags": ["review", "static-analysis"],
+      "docs": ["packages/architecture-observatory/CLAUDE.md"]
+    }
+  ],
+  "flows": [
+    {
+      "id": "dashboard-request",
+      "title": "Dashboard 请求门",
+      "description": "从不可信 HTTP 请求到受权 handler；身份、mutation 与 route policy 均在 body 解析前完成。",
+      "perspective": "authority",
+      "coverage": {
+        "mode": "critical-branches",
+        "scope": "DashboardServer.gate 从请求进入到拒绝、跳转或释放已授权 identity",
+        "exclusions": ["gate 之前的 devpipe 单轮 bearer 路由", "handler 解析 body 后的对象级二次授权"]
+      },
+      "entrySteps": [
+        {
+          "id": "http-request",
+          "label": "HTTP request",
+          "description": "请求字段不能自证 identity、role 或批准状态。",
+          "zone": "external",
+          "after": [],
+          "role": "input",
+          "anchorRequired": false
+        }
+      ]
+    },
+    {
+      "id": "capability-invocation",
+      "title": "Capability 唯一执行门",
+      "description": "Bound Context/slot 到固定 Object adapter 的五步收窄路径，以及 approval 分支。",
+      "perspective": "authority",
+      "coverage": {
+        "mode": "critical-branches",
+        "scope": "Gate.invoke 的品牌检查、所有收窄拒绝、approval 与 adapter 终态",
+        "exclusions": ["Object adapter 内部控制流", "审计 sink 的运维存储实现"]
+      },
+      "entrySteps": [
+        {
+          "id": "bound-request",
+          "label": "request(slot, operation, args)",
+          "description": "不可信侧能表达的全部；Context 与 Object 不在 payload。",
+          "zone": "control-plane",
+          "after": [],
+          "role": "input",
+          "anchorRequired": false
+        }
+      ]
+    },
+    {
+      "id": "agent-view-proposal",
+      "title": "Agent View 提议与重绑定",
+      "description": "不可信 View 只能发 action/params；可信父页验证 channel generation 并按自身身份重新解释。",
+      "perspective": "data",
+      "coverage": {
+        "mode": "critical-branches",
+        "scope": "Agent View propose() 与 Host 对 proposal 私有消息的验证、重绑、dispatch 及回复",
+        "exclusions": ["ready/height 协议消息", "window/MessagePort 握手", "destroy/reconstruct 的资源回收"]
+      },
+      "entrySteps": [
+        {
+          "id": "view-action",
+          "label": "Untrusted UI action",
+          "description": "发布者代码可以任意提议，但不能附带可信身份。",
+          "zone": "untrusted-browser",
+          "after": [],
+          "role": "input",
+          "anchorRequired": false
+        }
+      ]
+    },
+    {
+      "id": "approval-resume",
+      "title": "人工批准与原调用重检",
+      "description": "批准不铸造新权限；原 Context/slot/operation/args 被 claim 后重新跑完整 Gate。",
+      "perspective": "authority",
+      "coverage": {
+        "mode": "critical-branches",
+        "scope": "ApprovalDesk.approve 从已认证人工决定到前置拒绝、CAS 竞态或重检结果落盘",
+        "exclusions": ["reject/list/get 管理路径", "sweep 与 retention 清理"]
+      },
+      "entrySteps": [
+        {
+          "id": "human-decision",
+          "label": "Authenticated human decision",
+          "description": "只有真实浏览器会话能批准，Bearer 不能。",
+          "zone": "external",
+          "after": [],
+          "role": "approval",
+          "anchorRequired": false
+        }
+      ]
+    },
+    {
+      "id": "v3-lifecycle",
+      "title": "v3 最小控制面生命周期",
+      "description": "显式 composition root 只构造获准服务，并以相反顺序 drain/close。",
+      "perspective": "lifecycle",
+      "coverage": {
+        "mode": "critical-branches",
+        "scope": "bootstrapV3 配置预检后的事务性构造、启动回滚与返回的 stop 闭包",
+        "exclusions": ["进入 transactional composition 之前的配置拒绝", "外部 supervisor 的 signal 编排"]
+      },
+      "entrySteps": [
+        {
+          "id": "process-start",
+          "label": "Process start",
+          "zone": "external",
+          "after": [],
+          "role": "entry",
+          "anchorRequired": false
+        }
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "MOD-001",
+      "title": "跨模块非测试值依赖应当无环",
+      "description": "模块循环会让初始化、替换、测试隔离与变更边界互相绑死；测试和 type-only 边不计入该循环。构建工具等非测试源码仍属于模块耦合。",
+      "concern": "modularity",
+      "severity": "high",
+      "mechanism": { "kind": "no-cycles" }
+    },
+    {
+      "id": "TRUST-001",
+      "title": "不可信 View 不得可达可信 Dashboard",
+      "description": "两个浏览器信任域必须保持不同 origin、bundle 与依赖闭包。",
+      "concern": "trust",
+      "severity": "critical",
+      "mechanism": {
+        "kind": "forbid-dependency",
+        "from": ["agent-view-react", "session-plus-view"],
+        "to": ["dashboard-web", "dashboard-server", "dashboard-authz"],
+        "transitive": true
+      },
+      "evidence": [
+        {
+          "grade": "executable",
+          "label": "跨 origin、cookie、CSP 与父页存活的真浏览器边界套件",
+          "source": { "path": "packages/bot/src/session-plus/browser.e2e.test.ts", "line": 1 },
+          "command": "npx vitest run packages/bot/src/session-plus/browser.e2e.test.ts --maxWorkers=1"
+        }
+      ]
+    },
+    {
+      "id": "TRUST-002",
+      "title": "不可信浏览器包不得依赖 Node 内置能力",
+      "description": "浏览器 View 不应通过构建时 polyfill 或意外 bundle 获得文件、进程、网络等 Node surface。",
+      "concern": "trust",
+      "severity": "critical",
+      "mechanism": {
+        "kind": "forbid-external",
+        "from": ["agent-view-react", "session-plus-view"],
+        "patterns": ["^node:"],
+        "entrypoints": [
+          "packages/agent-view-react/src/index.ts",
+          "packages/session-plus-view/src/main.tsx"
+        ]
+      }
+    },
+    {
+      "id": "TRUST-003",
+      "title": "可信 Dashboard 不得依赖不可信 View 实现",
+      "description": "可信面板可依赖中立展示与共享协议，但不能把发布者 View runtime 拉进同一闭包。",
+      "concern": "trust",
+      "severity": "critical",
+      "mechanism": {
+        "kind": "forbid-dependency",
+        "from": ["dashboard-web"],
+        "to": ["agent-view-react", "session-plus-view"],
+        "transitive": true
+      }
+    },
+    {
+      "id": "KERNEL-001",
+      "title": "权限内核不依赖产品 surface",
+      "description": "Capability kernel 必须保持场景、HTTP、Runner、Bot 与 App Host 无关，产品只能调用它而不能反向进入。",
+      "concern": "authority",
+      "severity": "critical",
+      "mechanism": {
+        "kind": "forbid-dependency",
+        "from": ["capability-kernel"],
+        "to": ["dashboard-server", "dashboard-authz", "runner-authority", "runner-device", "engine-host", "engine-runtime", "bot-core", "channels"],
+        "transitive": true
+      }
+    },
+    {
+      "id": "TCB-001",
+      "title": "权限可信闭包预算必须显式准入",
+      "description": "从 core/gate 沿运行时值依赖计算闭包；新文件、超预算增长或明显缩小都要求人重新阅读并更新 baseline。",
+      "concern": "authority",
+      "severity": "critical",
+      "mechanism": {
+        "kind": "tcb-budget",
+        "budgetFile": "packages/capability-kernel/tcb-budget.json"
+      },
+      "evidence": [
+        {
+          "grade": "executable",
+          "label": "仓库现有 TCB 预算守卫（权威准入口径）",
+          "source": { "path": "packages/capability-kernel/src/tcb-budget.test.ts", "line": 1 },
+          "command": "npx vitest run packages/capability-kernel/src/tcb-budget.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "FLOW-001",
+      "title": "Dashboard 门的关键顺序必须有源码锚点",
+      "description": "identity → mutation gate → route authorization → handler 的顺序是安全内容。",
+      "concern": "authority",
+      "severity": "critical",
+      "mechanism": {
+        "kind": "flow-complete",
+        "flow": "dashboard-request",
+        "requiredSteps": ["http-request", "identify", "anonymous-deny", "mutation-gate", "mutation-deny", "route-authorize", "route-deny", "bootstrap-redirect", "handler"],
+        "requiredEdges": [
+          { "from": "http-request", "to": "identify" },
+          { "from": "identify", "to": "anonymous-deny" },
+          { "from": "identify", "to": "mutation-gate" },
+          { "from": "mutation-gate", "to": "mutation-deny" },
+          { "from": "mutation-gate", "to": "route-authorize" },
+          { "from": "route-authorize", "to": "route-deny" },
+          { "from": "route-authorize", "to": "bootstrap-redirect" },
+          { "from": "route-authorize", "to": "handler" }
+        ],
+        "requiredTerminals": ["anonymous-deny", "mutation-deny", "route-deny", "bootstrap-redirect", "handler"]
+      }
+    },
+    {
+      "id": "FLOW-002",
+      "title": "Capability 五步收窄路径必须有源码锚点",
+      "description": "authorize、参数验证、冻结、mandatory policy 与 adapter 不能被叙述性文档替代。",
+      "concern": "authority",
+      "severity": "critical",
+      "mechanism": {
+        "kind": "flow-complete",
+        "flow": "capability-invocation",
+        "requiredSteps": ["bound-request", "forged-approval", "authorize", "validate-args", "freeze-args", "mandatory-policy", "deny", "approval-required", "adapter", "audit-result", "audit-failure"],
+        "requiredEdges": [
+          { "from": "bound-request", "to": "forged-approval" },
+          { "from": "bound-request", "to": "authorize" },
+          { "from": "authorize", "to": "validate-args" },
+          { "from": "authorize", "to": "deny" },
+          { "from": "validate-args", "to": "freeze-args" },
+          { "from": "validate-args", "to": "deny" },
+          { "from": "freeze-args", "to": "mandatory-policy" },
+          { "from": "freeze-args", "to": "deny" },
+          { "from": "mandatory-policy", "to": "deny" },
+          { "from": "mandatory-policy", "to": "approval-required" },
+          { "from": "mandatory-policy", "to": "adapter" },
+          { "from": "adapter", "to": "audit-result" },
+          { "from": "adapter", "to": "audit-failure" }
+        ],
+        "requiredTerminals": ["forged-approval", "deny", "approval-required", "audit-result", "audit-failure"]
+      }
+    },
+    {
+      "id": "FLOW-003",
+      "title": "Agent View 提议路径必须有源码锚点",
+      "description": "提议字段收口、可信 Host 重绑定与同源 dispatch 的每一步都必须可跳转。",
+      "concern": "trust",
+      "severity": "critical",
+      "mechanism": {
+        "kind": "flow-complete",
+        "flow": "agent-view-proposal",
+        "requiredSteps": ["view-action", "no-channel", "shape-proposal", "host-validate", "stale-generation", "rate-fused", "invalid-envelope", "unsupported-message", "host-rebind", "message-too-large", "unknown-action", "same-origin-dispatch", "stale-reply", "host-reply"],
+        "requiredEdges": [
+          { "from": "view-action", "to": "no-channel" },
+          { "from": "view-action", "to": "shape-proposal" },
+          { "from": "shape-proposal", "to": "host-validate" },
+          { "from": "host-validate", "to": "stale-generation" },
+          { "from": "host-validate", "to": "rate-fused" },
+          { "from": "host-validate", "to": "invalid-envelope" },
+          { "from": "host-validate", "to": "unsupported-message" },
+          { "from": "host-validate", "to": "host-rebind" },
+          { "from": "host-rebind", "to": "message-too-large" },
+          { "from": "host-rebind", "to": "unknown-action" },
+          { "from": "host-rebind", "to": "same-origin-dispatch" },
+          { "from": "same-origin-dispatch", "to": "stale-reply" },
+          { "from": "same-origin-dispatch", "to": "host-reply" }
+        ],
+        "requiredTerminals": ["no-channel", "stale-generation", "rate-fused", "invalid-envelope", "unsupported-message", "message-too-large", "unknown-action", "stale-reply", "host-reply"]
+      }
+    },
+    {
+      "id": "FLOW-004",
+      "title": "批准必须回到原 Gate 重检",
+      "description": "原子 claim 后以原坐标 resume，批准不能成为一条绕过当前权限与 policy 的捷径。",
+      "concern": "authority",
+      "severity": "critical",
+      "mechanism": {
+        "kind": "flow-complete",
+        "flow": "approval-resume",
+        "requiredSteps": ["human-decision", "precondition-deny", "claim", "claim-lost", "resume", "recheck-gate", "gate-throws", "resume-success", "resume-denied", "resume-unknown", "approval-loop-deny", "resume-failed", "record-result"],
+        "requiredEdges": [
+          { "from": "human-decision", "to": "precondition-deny" },
+          { "from": "human-decision", "to": "claim" },
+          { "from": "claim", "to": "claim-lost" },
+          { "from": "claim", "to": "resume" },
+          { "from": "resume", "to": "recheck-gate" },
+          { "from": "recheck-gate", "to": "gate-throws" },
+          { "from": "recheck-gate", "to": "resume-success" },
+          { "from": "recheck-gate", "to": "resume-denied" },
+          { "from": "recheck-gate", "to": "resume-unknown" },
+          { "from": "recheck-gate", "to": "approval-loop-deny" },
+          { "from": "recheck-gate", "to": "resume-failed" },
+          { "from": "gate-throws", "to": "record-result" },
+          { "from": "resume-success", "to": "record-result" },
+          { "from": "resume-denied", "to": "record-result" },
+          { "from": "resume-unknown", "to": "record-result" },
+          { "from": "approval-loop-deny", "to": "record-result" },
+          { "from": "resume-failed", "to": "record-result" }
+        ],
+        "requiredTerminals": ["precondition-deny", "claim-lost", "record-result"]
+      }
+    },
+    {
+      "id": "FLOW-005",
+      "title": "v3 最小 composition 生命周期必须有源码锚点",
+      "description": "构造、listen、drain 与 reverse close 的位置应从结构回答，而不是从两份入口 diff 推断。",
+      "concern": "lifecycle",
+      "severity": "high",
+      "mechanism": {
+        "kind": "flow-complete",
+        "flow": "v3-lifecycle",
+        "requiredSteps": ["process-start", "compose", "listen", "drain", "already-stopped", "reverse-close", "startup-unwind"],
+        "requiredEdges": [
+          { "from": "process-start", "to": "compose" },
+          { "from": "compose", "to": "listen" },
+          { "from": "compose", "to": "startup-unwind" },
+          { "from": "listen", "to": "startup-unwind" },
+          { "from": "listen", "to": "drain" },
+          { "from": "drain", "to": "already-stopped" },
+          { "from": "drain", "to": "reverse-close" }
+        ],
+        "requiredTerminals": ["already-stopped", "reverse-close", "startup-unwind"]
+      }
+    },
+    {
+      "id": "AUTH-001",
+      "title": "身份与 Object 来自可信绑定，不来自 payload",
+      "description": "不可信侧只能说 slot/operation/args；Context、principal、Object 与 approved 均不可表达。",
+      "concern": "authority",
+      "severity": "critical",
+      "evidence": [
+        {
+          "grade": "executable",
+          "label": "Capability graph 与 forged evidence 反例矩阵",
+          "source": { "path": "packages/capability-kernel/src/invariants.test.ts", "line": 1 },
+          "command": "npx vitest run packages/capability-kernel/src/invariants.test.ts"
+        },
+        {
+          "grade": "declared",
+          "label": "TCB 人类阅读入口",
+          "document": "doc/tcb-reading-guide.md"
+        }
+      ]
+    },
+    {
+      "id": "AUTH-002",
+      "title": "每次真实资源访问都经过完整 Gate",
+      "description": "deny 与 approval_required 不接触 adapter；policy 抛错也必须 fail closed。",
+      "concern": "authority",
+      "severity": "critical",
+      "evidence": [
+        {
+          "grade": "executable",
+          "label": "Gate 负向矩阵逐条断言 adapter 未被调用",
+          "source": { "path": "packages/capability-kernel/src/gate.test.ts", "line": 1 },
+          "command": "npx vitest run packages/capability-kernel/src/gate.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "AUTH-003",
+      "title": "授权只能衰减且撤销沿祖先链立即生效",
+      "description": "derive 保持 Object、rights/terms 取子集；authorize 每次重走完整父链。",
+      "concern": "authority",
+      "severity": "critical",
+      "evidence": [
+        {
+          "grade": "executable",
+          "label": "衰减、损坏行、祖先撤销与 Context 回收测试",
+          "source": { "path": "packages/capability-kernel/src/core.test.ts", "line": 1 },
+          "command": "npx vitest run packages/capability-kernel/src/core.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "ROUTE-001",
+      "title": "HTTP 路由表与授权表双向完备",
+      "description": "注册无规则和规则无 handler 都 fail closed；门按真实路径查表而非信任 route id。",
+      "concern": "authority",
+      "severity": "critical",
+      "evidence": [
+        {
+          "grade": "executable",
+          "label": "真实 Fastify 路由表与 authz 表双向遍历",
+          "source": { "path": "packages/bot/src/dashboard/routes.test.ts", "line": 1 },
+          "command": "npx vitest run --project node packages/bot/src/dashboard/routes.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "DATA-001",
+      "title": "不可信 View 不接收身份或 capability 坐标",
+      "description": "projection 与 reply 不包含 owner/app/scope/instance/approved，敌意字段不被反射。",
+      "concern": "data",
+      "severity": "critical",
+      "evidence": [
+        {
+          "grade": "executable",
+          "label": "View transport 的出站字段、回执与身份反射测试",
+          "source": { "path": "packages/agent-view-react/src/client.test.ts", "line": 1 },
+          "command": "npx vitest run --project agent-view --maxWorkers=1"
+        }
+      ]
+    },
+    {
+      "id": "EFFECT-001",
+      "title": "重放安全与授权/effect 分开声明",
+      "description": "retrySafe 只回答重复执行是否等价；不可重放副作用在结果未知时不得自动重试。",
+      "concern": "reliability",
+      "severity": "critical",
+      "evidence": [
+        {
+          "grade": "executable",
+          "label": "中断恢复按 operation retrySafe 分流",
+          "source": { "path": "packages/capability-kernel/src/persistence.test.ts", "line": 1 },
+          "command": "npx vitest run packages/capability-kernel/src/persistence.test.ts"
+        },
+        {
+          "grade": "declared",
+          "label": "拒绝 durable replay 的设计论证",
+          "document": "doc/handover-security-migration.md"
+        }
+      ]
+    },
+    {
+      "id": "LIFE-001",
+      "title": "最小 composition root 不构造排除服务",
+      "description": "v3 bootstrap 的权限缩减由没有被构造出来的对象回答，并在 inventory 中显式列出。",
+      "concern": "lifecycle",
+      "severity": "critical",
+      "evidence": [
+        {
+          "grade": "executable",
+          "label": "排除服务构造即失败的 composition tests",
+          "source": { "path": "packages/bot/src/bootstrap-v3.test.ts", "line": 1 },
+          "command": "npx vitest run packages/bot/src/bootstrap-v3.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "DELIVERY-001",
+      "title": "发布产物身份与当前源码一致",
+      "description": "Agent View 缺失、截断与陈旧构建都拒绝；产物字节决定 release identity。",
+      "concern": "delivery",
+      "severity": "high",
+      "evidence": [
+        {
+          "grade": "executable",
+          "label": "输入 digest、产物 digest 与陈旧构建拒绝测试",
+          "source": { "path": "packages/agent-view-build/src/release.test.ts", "line": 1 },
+          "command": "npx vitest run --project node --maxWorkers=1 packages/agent-view-build"
+        }
+      ]
+    }
+  ]
+}

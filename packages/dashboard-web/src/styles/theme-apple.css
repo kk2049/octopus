@@ -1,0 +1,432 @@
+/*
+ * Theme: apple — a system-native, content-first profile informed by Apple's
+ * Human Interface Guidelines. This is an independent global theme, not a
+ * modifier layered over DeepSeek. Everything is scoped to `data-theme` so
+ * switching back leaves the other profiles byte-for-byte inert.
+ *
+ * Materials belong to navigation and floating chrome; content stays on opaque
+ * surfaces for readability. The palette uses accessible relatives of Apple
+ * system colours where a token carries small text (`#0066cc` rather than the
+ * decorative `#007aff`). No Apple artwork, trademarks, or remote font is used.
+ */
+
+html[data-theme="apple"] {
+  color-scheme: light dark;
+
+  --bg: #f5f5f7;
+  --card: #ffffff;
+  --tool-bg: #f2f2f7;
+  --user-bg: #e8f2ff;
+  --accent-soft: #e6f0ff;
+
+  --fg: #1d1d1f;
+  --muted: #5f6368;
+  --think: #665e6d;
+  --bad: #8e8e93;
+
+  --line: #d9d9de;
+  --line-strong: #b8b8be;
+
+  --accent: #0066cc;
+  --accent-fg: #ffffff;
+  --ok: #19733b;
+  --err: #c43131;
+  --q-normal: #0066cc;
+  --q-warning: #8a5b00;
+  --q-critical: #c43131;
+
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue",
+    "PingFang SC", sans-serif;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 15px;
+  --text-lg: 17px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --leading: 1.47;
+  --leading-footnote: 1.33;
+  --leading-body: 1.47;
+  --leading-title: 1.29;
+  --leading-display: 1.14;
+  --weight-regular: 400;
+  --weight-medium: 510;
+  --weight-semibold: 650;
+  --weight-bold: 700;
+  --page-title-size: var(--text-2xl);
+  --page-title-leading: var(--leading-display);
+  --section-title-size: var(--text-xl);
+  --section-title-leading: var(--leading-title);
+  --detail-title-weight: var(--weight-semibold);
+  --detail-title-leading: var(--leading-title);
+  --form-title-size: var(--text-2xl);
+  --knowledge-title-size: var(--text-2xl);
+  --leading-lead: var(--leading-body);
+
+  /* An 8pt-derived rhythm with a 4pt half-step for adjacent content. */
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 40px;
+  --control-height: 40px;
+  --control-weight: 590;
+  --card-padding: 24px;
+  --card-header-height: 52px;
+  --modal-padding: 24px;
+  --table-row-padding: 12px;
+  --table-cell-padding: 16px;
+  --list-row-min-height: 52px;
+  --grouped-list-surface: color-mix(in srgb, var(--card) 82%, var(--bg));
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 6%), 0 3px 10px rgb(0 0 0 / 4%);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 10%);
+  --shadow-lg: 0 18px 50px rgb(0 0 0 / 16%);
+  --shadow-overlay: 0 24px 70px rgb(0 0 0 / 22%);
+
+  --chrome-solid: #ffffff;
+  --chrome-material: rgb(255 255 255 / 76%);
+  --chrome-filter: saturate(180%) blur(24px);
+  --overlay-solid: #ffffff;
+  --overlay-material: rgb(255 255 255 / 90%);
+  --overlay-filter: saturate(180%) blur(30px);
+  --duration-fast: 180ms;
+  --duration-standard: 220ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --apple-action: #007aff;
+  --apple-material: var(--chrome-material);
+  --apple-material-strong: var(--overlay-material);
+  --apple-hover: rgb(0 0 0 / 5%);
+  --apple-pressed: rgb(0 0 0 / 9%);
+  --apple-halo: color-mix(in srgb, var(--apple-action) 24%, transparent);
+  --apple-ease: var(--ease-out);
+
+  /* The graph used to be a permanently dark island. These semantic tokens let
+   * it participate in both Apple schemes without changing its SVG contract. */
+  --knowledge-graph-bg: #f5f5f7;
+  --knowledge-graph-panel: #ffffff;
+  --knowledge-graph-raised: #f2f2f7;
+  --knowledge-graph-line: #d1d1d6;
+  --knowledge-graph-text: #1d1d1f;
+  --knowledge-graph-muted: #5f6368;
+  --knowledge-graph-intro: #f2f2f7;
+  --knowledge-graph-control: #ffffff;
+  --knowledge-graph-control-hover: #e8f2ff;
+  --knowledge-graph-accent: #0066cc;
+  --knowledge-graph-accent-strong: #0055aa;
+  --knowledge-graph-accent-soft: #0066cc;
+  --knowledge-graph-kicker: #0066cc;
+  --knowledge-graph-stat-bg: #f5f5f7;
+  --knowledge-graph-hover-border: #0055aa;
+  --knowledge-graph-focus: #0066cc;
+  --knowledge-graph-placeholder: #6e6e73;
+  --knowledge-graph-chip-line: #b8b8be;
+  --knowledge-graph-chip-text: #3a3a3c;
+  --knowledge-graph-results-border: #b8b8be;
+  --knowledge-graph-results-bg: #ffffff;
+  --knowledge-graph-grid: rgb(60 60 67 / 8%);
+  --knowledge-graph-stage-head: #5f6368;
+  --knowledge-graph-cluster-label: #5f6368;
+  --knowledge-graph-node-stroke: #ffffff;
+  --knowledge-graph-node-selected: #0066cc;
+  --knowledge-graph-node-selected-stroke: #004c99;
+  --knowledge-graph-node-text: #2c2c2e;
+  --knowledge-graph-node-selected-text: #ffffff;
+  --knowledge-graph-hint-border: rgb(60 60 67 / 28%);
+  --knowledge-graph-hint-bg: rgb(255 255 255 / 88%);
+  --knowledge-graph-hint-text: #5f6368;
+  --knowledge-graph-inspector-bg: #ffffff;
+  --knowledge-graph-code: #3a3a3c;
+  --knowledge-graph-relation-heading: #0066cc;
+  --knowledge-graph-relation-bg: #f2f2f7;
+  --knowledge-graph-relation-hover: #e8f2ff;
+  --knowledge-graph-detail-link: #0055aa;
+  --knowledge-graph-mark-border: #0066cc;
+  --knowledge-graph-mark: #0066cc;
+  --knowledge-graph-shadow: var(--shadow-md);
+  --knowledge-graph-overlay-shadow: var(--shadow-overlay);
+  --knowledge-graph-transition: var(--duration-fast) var(--ease-out);
+  --knowledge-graph-control-radius: var(--radius-sm);
+
+  --av-chat-inset: 18px;
+  --av-chat-user-radius: 18px;
+  --av-chat-user-padding: 9px 14px;
+  --av-chat-user-max-width: min(560px, 82%);
+  --av-chat-user-font: 15px/23px var(--font-ui);
+  --av-chat-turn-gap: 18px;
+  --av-chat-prose-font: 15px/25px var(--font-ui);
+  --av-chat-tool-radius: 12px;
+  --av-chat-card-border: var(--line);
+}
+
+html:where([data-color-scheme="dark"])[data-theme="apple"] {
+  --bg: #0b0b0d;
+  --card: #1c1c1e;
+  --tool-bg: #2c2c2e;
+  --user-bg: #1b3048;
+  --accent-soft: #172b42;
+
+  --fg: #f5f5f7;
+  --muted: #b0b0b5;
+  --think: #b7afbc;
+  --bad: #636366;
+
+  --line: #3a3a3c;
+  --line-strong: #5a5a5e;
+
+  --accent: #0a84ff;
+  --accent-fg: #00172b;
+  --ok: #30d158;
+  --err: #ff6961;
+  --q-normal: #64d2ff;
+  --q-warning: #ffd60a;
+  --q-critical: #ff6961;
+
+  --shadow-sm: 0 2px 8px rgb(0 0 0 / 28%);
+  --shadow-md: 0 10px 30px rgb(0 0 0 / 38%);
+  --shadow-lg: 0 20px 54px rgb(0 0 0 / 52%);
+  --shadow-overlay: 0 28px 80px rgb(0 0 0 / 62%);
+
+  --chrome-solid: #1c1c1e;
+  --chrome-material: rgb(28 28 30 / 78%);
+  --overlay-solid: #1c1c1e;
+  --overlay-material: rgb(28 28 30 / 92%);
+  --apple-action: #0a84ff;
+  --apple-material: var(--chrome-material);
+  --apple-material-strong: var(--overlay-material);
+  --apple-hover: rgb(255 255 255 / 8%);
+  --apple-pressed: rgb(255 255 255 / 13%);
+  --apple-halo: color-mix(in srgb, var(--apple-action) 30%, transparent);
+
+  --knowledge-graph-bg: #0b0b0d;
+  --knowledge-graph-panel: #1c1c1e;
+  --knowledge-graph-raised: #2c2c2e;
+  --knowledge-graph-line: #48484a;
+  --knowledge-graph-text: #f5f5f7;
+  --knowledge-graph-muted: #b0b0b5;
+  --knowledge-graph-intro: #161618;
+  --knowledge-graph-control: #242426;
+  --knowledge-graph-control-hover: #1b3048;
+  --knowledge-graph-accent: #64d2ff;
+  --knowledge-graph-accent-strong: #0a84ff;
+  --knowledge-graph-accent-soft: #64d2ff;
+  --knowledge-graph-kicker: #64d2ff;
+  --knowledge-graph-stat-bg: #161618;
+  --knowledge-graph-hover-border: #0a84ff;
+  --knowledge-graph-focus: #0a84ff;
+  --knowledge-graph-placeholder: #98989d;
+  --knowledge-graph-chip-line: #636366;
+  --knowledge-graph-chip-text: #d1d1d6;
+  --knowledge-graph-results-border: #636366;
+  --knowledge-graph-results-bg: #1c1c1e;
+  --knowledge-graph-grid: rgb(235 235 245 / 8%);
+  --knowledge-graph-stage-head: #b0b0b5;
+  --knowledge-graph-cluster-label: #b0b0b5;
+  --knowledge-graph-node-stroke: #0b0b0d;
+  --knowledge-graph-node-selected: #0a84ff;
+  --knowledge-graph-node-selected-stroke: #64d2ff;
+  --knowledge-graph-node-text: #e5e5ea;
+  --knowledge-graph-node-selected-text: #00172b;
+  --knowledge-graph-hint-border: rgb(235 235 245 / 28%);
+  --knowledge-graph-hint-bg: rgb(28 28 30 / 88%);
+  --knowledge-graph-hint-text: #b0b0b5;
+  --knowledge-graph-inspector-bg: #1c1c1e;
+  --knowledge-graph-code: #d1d1d6;
+  --knowledge-graph-relation-heading: #64d2ff;
+  --knowledge-graph-relation-bg: #242426;
+  --knowledge-graph-relation-hover: #1b3048;
+  --knowledge-graph-detail-link: #64d2ff;
+  --knowledge-graph-mark-border: #0a84ff;
+  --knowledge-graph-mark: #64d2ff;
+}
+
+html[data-theme="apple"] body {
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html[data-theme="apple"] :is(h1, h2, h3) {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+}
+
+html[data-theme="apple"] h1 {
+  font-size: var(--page-title-size);
+  line-height: var(--page-title-leading);
+}
+
+html[data-theme="apple"] h2 {
+  font-size: var(--section-title-size);
+  line-height: var(--section-title-leading);
+}
+
+html[data-theme="apple"] :is(time, code, pre, .badge, input) {
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-theme="apple"] ::selection {
+  background: color-mix(in srgb, var(--apple-action) 24%, transparent);
+}
+
+/* Regular material is reserved for persistent navigation chrome. Content
+ * cards remain opaque through `--card`, avoiding blur behind reading areas. */
+html[data-theme="apple"] nav {
+  background: var(--chrome-solid);
+  border-color: color-mix(in srgb, var(--line) 78%, transparent);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 22%);
+}
+
+@supports ((-webkit-backdrop-filter: blur(0)) or (backdrop-filter: blur(0))) {
+  html[data-theme="apple"] nav {
+    background: var(--chrome-material);
+    -webkit-backdrop-filter: var(--chrome-filter);
+    backdrop-filter: var(--chrome-filter);
+  }
+}
+
+html[data-theme="apple"] a.tab {
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-fast) var(--apple-ease),
+    background var(--duration-fast) var(--apple-ease),
+    transform var(--duration-fast) var(--apple-ease);
+}
+
+html[data-theme="apple"] a.tab:hover {
+  background: var(--apple-hover);
+}
+
+html[data-theme="apple"] a.tab:active {
+  background: var(--apple-pressed);
+  transform: scale(0.98);
+}
+
+html[data-theme="apple"] a.tab.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+html[data-theme="apple"] button {
+  min-height: var(--control-height);
+  border-color: color-mix(in srgb, var(--line-strong) 72%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--apple-material-strong);
+  box-shadow: var(--shadow-sm);
+  font-weight: 560;
+  transition:
+    background var(--duration-fast) var(--apple-ease),
+    border-color var(--duration-fast) var(--apple-ease),
+    box-shadow var(--duration-fast) var(--apple-ease),
+    transform var(--duration-fast) var(--apple-ease);
+}
+
+html[data-theme="apple"] button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--apple-material-strong) 90%, var(--fg) 10%);
+}
+
+html[data-theme="apple"] button:active:not(:disabled) {
+  box-shadow: none;
+  transform: scale(0.97);
+}
+
+html[data-theme="apple"] button.primary {
+  border-radius: 999px;
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+html[data-theme="apple"] button.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 88%, var(--fg));
+  border-color: transparent;
+}
+
+html[data-theme="apple"] :is(select, input[type="text"], input[type="search"], input[type="password"], textarea) {
+  min-height: var(--control-height);
+  border-color: color-mix(in srgb, var(--line-strong) 78%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 3%);
+  transition:
+    border-color var(--duration-fast) var(--apple-ease),
+    box-shadow var(--duration-fast) var(--apple-ease),
+    background var(--duration-fast) var(--apple-ease);
+}
+
+html[data-theme="apple"] :is(select, input[type="text"], input[type="search"], input[type="password"], textarea):focus {
+  border-color: var(--apple-action);
+  box-shadow: 0 0 0 3px var(--apple-halo);
+}
+
+html[data-theme="apple"] :is(pre, .badge) {
+  border-color: color-mix(in srgb, var(--line) 86%, transparent);
+}
+
+html[data-theme="apple"] pre {
+  border-radius: var(--radius-sm);
+  background: var(--tool-bg);
+}
+
+html[data-theme="apple"] .badge {
+  border-radius: 999px;
+  background: var(--apple-material-strong);
+}
+
+html[data-theme="apple"] * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+@media (prefers-contrast: more) {
+  html[data-theme="apple"] {
+    --line: var(--line-strong);
+    --focus: 3px solid var(--accent);
+  }
+
+  html[data-theme="apple"] nav,
+  html[data-theme="apple"] button,
+  html[data-theme="apple"] :is(select, input, textarea) {
+    backdrop-filter: none;
+    background: var(--card);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html[data-theme="apple"] {
+    --chrome-material: var(--chrome-solid);
+    --chrome-filter: none;
+    --overlay-material: var(--overlay-solid);
+    --overlay-filter: none;
+  }
+
+  html[data-theme="apple"] nav {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--chrome-solid);
+  }
+}
+
+@media (max-width: 720px) {
+  html[data-theme="apple"] :is(button, select, input:not([type="checkbox"]):not([type="radio"])) {
+    min-height: 44px;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-theme="apple"] nav,
+  html[data-theme="apple"] button {
+    box-shadow: none;
+  }
+}

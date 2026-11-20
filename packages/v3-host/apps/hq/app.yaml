@@ -1,0 +1,90 @@
+# 科研工作台 — HQ re-implemented as engine app #1.
+# One file declares: what can happen (actions), who may do it (predicate
+# words), which agent lives here, and which pages project the state.
+app: hq
+title: 科研工作台
+scope: per-user
+
+actions:
+  add_project:
+    title: 新建项目
+    predicate: owner
+    params:
+      title: { type: string, required: true, description: 项目名 }
+      one_liner: { type: string, description: 一句话说明 }
+      ddl: { type: string, description: 截止日 YYYY-MM-DD }
+  add_item:
+    title: 记一条
+    predicate: owner
+    params:
+      project: { type: string, required: true, description: 项目 slug, enum_bind: view.projectIds }
+      bucket: { type: string, required: true, enum: [block, run, verify, todo], description: 四格之一 }
+      text: { type: string, required: true, description: 内容 }
+  close_item:
+    title: 闭环条目
+    predicate: owner
+    params:
+      id: { type: string, required: true, description: 条目 id（如 it-3）, enum_bind: view.openIds }
+  move_item:
+    title: 挪格
+    predicate: owner
+    params:
+      id: { type: string, required: true, description: 条目 id, enum_bind: view.openIds }
+      bucket: { type: string, required: true, enum: [block, run, verify, todo], description: 目标格 }
+  add_plan:
+    title: 记计划
+    predicate: owner
+    params:
+      project: { type: string, required: true, description: 项目 slug, enum_bind: view.projectIds }
+      at: { type: string, description: YYYY-MM-DD，或留空/散文日期 }
+      text: { type: string, required: true, description: 计划内容 }
+  add_note:
+    title: 记一笔
+    predicate: owner
+    params:
+      project: { type: string, description: 项目 slug（可空）, enum_bind: view.projectIds }
+      text: { type: string, required: true, description: 笔记内容 }
+  correct:
+    title: 更正
+    predicate: owner
+    params:
+      id: { type: string, required: true, description: 要更正的条目/计划/笔记 id, enum_bind: view.correctables }
+      text: { type: string, required: true, description: 更正后的内容 }
+  close_segment:
+    title: 收束本段
+    predicate: owner
+    confirm: true
+  edit_doc:
+    title: 保存文档
+    predicate: owner
+    params:
+      text: { type: string, required: true, description: 文档全文（markdown） }
+  refresh:
+    title: 让秘书巡检
+    predicate: owner
+
+agents:
+  page:
+    adapter: openai-loop
+    prompt: prompts/page.md
+    daily: "04:00"
+    daily_prompt: 每日例行巡检：读一遍工作台状态，总结四格与逾期计划，把值得注意的事讲给用户。
+
+pages:
+  main: pages/main.yaml
+  input: pages/input.yaml
+  digest: pages/digest.yaml
+
+feishu:
+  cards: [digest, input]
+
+flows:
+  item:
+    states: [block, run, verify, todo, closed]
+    transitions:
+      - { from: block, to: run, via: move_item }
+      - { from: run, to: verify, via: move_item }
+      - { from: todo, to: run, via: move_item }
+      - { from: verify, to: closed, via: close_item }
+      - { from: run, to: closed, via: close_item }
+      - { from: block, to: closed, via: close_item }

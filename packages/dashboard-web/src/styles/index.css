@@ -1,0 +1,18 @@
+/*
+ * One explicit cascade for the trusted Dashboard.
+ *
+ * Native reset/theme rules are intentionally below Ant. Page CSS Modules stay
+ * unlayered, so a page can still make a deliberate local adjustment without
+ * fighting selector specificity. This replaces the growing list of
+ * `.ant-*` exclusions that previously coupled our themes to Ant's DOM.
+ */
+@layer dashboard-base, antd;
+
+@import "./tokens.css" layer(dashboard-base);
+@import "./theme-aurora.css" layer(dashboard-base);
+@import "./theme-ink.css" layer(dashboard-base);
+@import "./theme-feishu.css" layer(dashboard-base);
+@import "./theme-deepseek.css" layer(dashboard-base);
+@import "./theme-apple.css" layer(dashboard-base);
+@import "./flat-surfaces.css" layer(dashboard-base);
+@import "./color-scheme.css" layer(dashboard-base);

@@ -1,0 +1,36 @@
+{
+  "name": "@claude-bot/chat-ui-commons",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/transcript.ts",
+  "types": "src/transcript.ts",
+  "exports": {
+    ".": { "types": "./src/transcript.ts", "default": "./src/transcript.ts" },
+    "./transcript": { "types": "./src/transcript.ts", "default": "./src/transcript.ts" },
+    "./transcript-ui": { "types": "./src/transcript-ui.ts", "default": "./src/transcript-ui.ts" },
+    "./transcript-ui.css": "./src/transcript-ui.css",
+    "./mermaid": { "types": "./src/MermaidBlock.tsx", "default": "./src/MermaidBlock.tsx" },
+    "./file-mentions": { "types": "./src/file-mentions.ts", "default": "./src/file-mentions.ts" },
+    "./dom": { "types": "./src/dom.ts", "default": "./src/dom.ts" },
+    "./composer": { "types": "./src/composer.ts", "default": "./src/composer.ts" },
+    "./quota": { "types": "./src/quota.tsx", "default": "./src/quota.tsx" },
+    "./composer-react": { "types": "./src/composer-react.ts", "default": "./src/composer-react.ts" }
+  },
+  "scripts": {
+    "test": "pnpm --dir ../.. exec vitest run --project node packages/chat-ui-commons/src",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@claude-bot/agent-sessions-contract": "workspace:*",
+    "@tanstack/react-virtual": "^3.13.12",
+    "beautiful-mermaid": "1.1.3",
+    "react": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.2",
+    "typescript": "^5.7.0",
+    "vite": "^7.1.9"
+  }
+}

@@ -1,0 +1,15 @@
+# The declarative page description.
+#
+# Minimal on purpose: this App's browser half is a `agent-composition/v1`
+# document (`src/plan.ts`) rendered by the standard shell, so what is left here
+# is the release-asset stub the backend layout requires — the four backend
+# assets are a closed set, and this is one of them.
+#
+# `sources` is EMPTY and that is the whole point: a source is a capability-backed
+# read, and a declared App has no permission contract to make one under. Every
+# byte this App shows comes from its own projection.
+layout: showcase-notes-deck
+sources: {}
+actions:
+  add: add_note
+  deck: deck_command

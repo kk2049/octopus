@@ -1,0 +1,323 @@
+@import "dockview-react/dist/styles/dockview.css";
+
+/*
+ * Dockview owns geometry and interaction. Octopus owns the visual language and
+ * the module surface. All variables stay within the untrusted View bundle; no
+ * font, icon, worker or other secondary URL is introduced here.
+ */
+
+.av-dock-workspace {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  overflow: clip;
+  background: var(--av-canvas);
+  color: var(--av-fg);
+}
+
+.av-dock-host {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  /* The grid is a fixed viewport; document surfaces own their own scrolling. */
+  overflow: clip;
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rm);
+  --av-dock-material-background: var(--av-dock-host-material); background: var(--av-dock-host-solid);
+}
+
+.av-dock-host > div { min-width: 0; min-height: 0; }
+
+/* Dockview's always-rendered dormant overlays have no inline coordinates until
+ * first visibility. Without an origin their absolute static position follows
+ * the full-height grid, doubling its scroll extent even while hidden. Visible
+ * overlays keep Dockview's more specific inline top/left measurements. */
+.av-dock-workspace .dv-render-overlay {
+  top: 0;
+  left: 0;
+}
+
+/* A palette-neutral Dockview theme: geometry comes from Dockview, colour and
+ * density come from the Agent View tokens shared by every App. */
+.av-dock-workspace .dockview-theme-octopus {
+  color-scheme: inherit;
+  --dv-background-color: var(--av-canvas);
+  --dv-group-view-background-color: var(--av-surface);
+  --dv-paneview-active-outline-color: var(--av-accent);
+  --dv-tabs-and-actions-container-height: 32px;
+  --dv-tabs-and-actions-container-font-size: var(--av-sm);
+  --av-dock-material-background: var(--av-dock-chrome-material); --dv-tabs-and-actions-container-background-color: var(--av-dock-chrome-solid);
+  --dv-activegroup-visiblepanel-tab-background-color: var(--av-surface);
+  --dv-activegroup-hiddenpanel-tab-background-color: var(--av-raised);
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--av-surface);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: var(--av-raised);
+  --dv-activegroup-visiblepanel-tab-color: var(--av-fg);
+  --dv-activegroup-hiddenpanel-tab-color: var(--av-muted);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--av-fg);
+  --dv-inactivegroup-hiddenpanel-tab-color: var(--av-muted);
+  --dv-tab-divider-color: transparent;
+  --dv-tabs-container-scrollbar-color: var(--av-muted);
+  --dv-icon-hover-background-color: var(--av-tool-bg);
+  --dv-separator-border: var(--av-line);
+  --dv-paneview-header-border-color: var(--av-line);
+  --dv-sash-color: color-mix(in srgb, var(--av-line) 42%, transparent);
+  --dv-active-sash-color: var(--av-accent);
+  --dv-active-sash-transition-delay: 0ms;
+  --dv-active-sash-transition-duration: var(--av-duration);
+  --dv-overlay-z-index: 9;
+  --dv-border-radius: var(--av-rs);
+  --dv-sash-border-radius: 999px;
+  --dv-spacing-padding: 0;
+  --dv-drag-over-background-color: color-mix(in srgb, var(--av-accent) 14%, transparent);
+  --dv-drag-over-border-color: var(--av-accent);
+  --dv-drag-over-border: 2px solid var(--av-accent);
+  --dv-tab-font-size: var(--av-sm);
+  --dv-tab-margin: 3px 2px 0;
+  --dv-tab-border-radius: var(--av-rs) var(--av-rs) 0 0;
+  --dv-dropdown-border-radius: var(--av-rs);
+  --dv-tab-close-icon-size: 11px;
+  --dv-scrollbar-background-color: color-mix(in srgb, var(--av-muted) 42%, transparent);
+  --dv-floating-box-shadow: var(--av-shadow-sm);
+  --dv-floating-border: 1px solid var(--av-line);
+  --dv-floating-group-border: 1px solid var(--av-line);
+  --dv-floating-group-dragging-opacity: 0.72;
+  --dv-floating-titlebar-height: 24px;
+  --dv-floating-titlebar-background-color: var(--av-raised);
+  --dv-floating-titlebar-border-bottom: 1px solid var(--av-line);
+  --dv-tab-group-chip-padding: 3px 7px;
+  --dv-tab-group-chip-border-radius: var(--av-rs);
+  --dv-tab-group-chip-font-size: 11px;
+  --dv-tab-group-line-opacity: 0.72;
+  --dv-transition-duration: 140ms;
+}
+
+.av-dock-workspace .dockview-theme-octopus .dv-dockview {
+  background: var(--av-canvas);
+}
+
+/* Dockview puts the full-size sash overlay before the view containers. In a
+ * nested document split the later pane can otherwise win hit-testing even
+ * though the inner sash is enabled and painted above it. Lift the overlay as
+ * one stacking layer, then leave only the four-pixel sashes interactive so it
+ * cannot intercept ordinary panel input. */
+.av-dock-workspace .dv-sash-container {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.av-dock-workspace .dv-sash-container > .dv-sash {
+  pointer-events: auto;
+}
+
+.av-dock-workspace .dockview-theme-octopus .dv-groupview {
+  overflow: hidden;
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rs);
+  animation: av-dock-group-in var(--av-duration) ease-out both;
+  transition: border-color var(--av-duration), opacity var(--av-duration);
+}
+
+.av-dock-workspace .dockview-theme-octopus .dv-tabs-and-actions-container {
+  border-bottom: 1px solid var(--av-line);
+}
+
+.av-dock-workspace .dockview-theme-octopus .dv-tabs-container {
+  padding-inline: 3px;
+}
+
+.av-dock-workspace .dockview-theme-octopus .dv-tab {
+  border-radius: var(--dv-tab-border-radius);
+  transition:
+    color var(--av-duration),
+    background-color var(--av-duration),
+    box-shadow var(--av-duration);
+}
+
+.av-dock-workspace .dockview-theme-octopus .dv-tab.dv-active-tab {
+  box-shadow: inset 0 -2px 0 var(--av-accent);
+}
+
+.av-dock-workspace .dockview-theme-octopus .dv-tab:focus-within::after {
+  outline: 2px solid var(--av-accent) !important;
+  outline-offset: -2px;
+}
+
+.av-dock-workspace .dockview-theme-octopus .dv-tab.dv-inactive-tab:hover {
+  background: var(--av-tool-bg);
+  color: var(--av-fg);
+}
+
+/* Dockview's stock 300ms overlay trails the pointer on small panes. A short
+ * spatial transition still communicates the target without feeling elastic. */
+.av-dock-workspace .dockview-theme-octopus .dv-drop-target-container {
+  --dv-transition-duration: 140ms;
+}
+
+.av-dock-workspace .dockview-theme-octopus .dv-drop-target {
+  --dv-transition-duration: 80ms;
+}
+
+/* Dragged-tab geometry must track the pointer exactly. */
+.av-dock-workspace[data-av-dock-dragging] .dv-tab,
+.av-dock-workspace[data-av-dock-dragging] .dv-groupview {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* The header renderer may be cloned into Dockview's overflow UI. Select from
+ * the declarative marker so every copy stays out of sight and the AT tree. */
+.av-dock-workspace .dockview-theme-octopus .dv-tab:has([data-av-dock-dormant-tab="1"]) {
+  display: none;
+}
+
+.av-dock-workspace .dockview-theme-octopus .dv-default-tab-content {
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.av-dock-document,
+.av-dock-flow {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: var(--av-surface);
+}
+
+.av-dock-surface-inset {
+  padding: var(--av-s2) var(--av-s3);
+}
+
+.av-dock-surface-inset-compact {
+  padding: var(--av-s1) var(--av-s3);
+}
+
+.av-dock-document > .av-panel,
+.av-dock-flow > .av-panel {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+@keyframes av-dock-group-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.av-dock-flow > .av-panel[hidden] {
+  display: none;
+}
+
+.av-dock-reset {
+  flex: none;
+  padding: 5px 9px;
+  border-bottom: 1px solid var(--av-line);
+  background: color-mix(in srgb, var(--av-warn) 11%, var(--av-surface));
+  color: var(--av-fg);
+  font-size: 12px;
+}
+
+.av-dock-mobile-bar { position: sticky; top: 0; z-index: 10;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--av-line);
+  --av-dock-material-background: var(--av-mobile-chrome-material); background: var(--av-mobile-chrome-solid);
+}
+
+@supports ((-webkit-backdrop-filter: blur(0)) or (backdrop-filter: blur(0))) {
+  :is(.av-dock-host, .av-dock-workspace .dockview-theme-octopus .dv-tabs-and-actions-container, .av-dock-mobile-bar) {
+    background: var(--av-dock-material-background); -webkit-backdrop-filter: var(--av-dock-material-filter); backdrop-filter: var(--av-dock-material-filter); }
+}
+
+/* One equal column per DECLARED section; the shell sets the count inline
+   because only it knows how many the composition actually has. */
+.av-dock-mobile-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* The App's own phone chrome (a refresh control). `flex: none` so a long
+   section label never squeezes it into a broken glyph. */
+.av-dock-mobile-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.av-dock-mobile-bar button {
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--av-muted);
+}
+
+.av-dock-mobile-bar button[aria-selected="true"] {
+  border-color: var(--av-line);
+  background: var(--av-canvas);
+  color: var(--av-fg);
+}
+
+.av-dock-mobile-bar button:focus-visible {
+  outline: 2px solid var(--av-accent);
+  outline-offset: 1px;
+}
+
+.av-dock-workspace [data-av-dirty="1"] .dv-default-tab-content::before {
+  content: "●";
+  margin-inline-end: 5px;
+  color: var(--av-warn);
+  font-size: 9px;
+}
+
+.av-dock-workspace[data-av-narrow] .dv-sash,
+.av-dock-workspace[data-av-narrow] .dv-drop-target-container {
+  display: none;
+}
+
+/* The phone region switch already names the maximized area. A one-tab strip
+ * merely repeats that chrome; multiple resource tabs keep their tab strip. */
+.av-dock-workspace[data-av-narrow] .dv-tabs-and-actions-container.dv-single-tab,
+.av-dock-workspace[data-av-narrow]
+  .dv-groupview[data-av-dock-visible-tabs="1"] > .dv-tabs-and-actions-container,
+.av-dock-workspace[data-av-narrow]
+  .dv-groupview[data-av-dock-mobile-visible-tabs="0"] > .dv-tabs-and-actions-container,
+.av-dock-workspace[data-av-narrow]
+  .dv-groupview[data-av-dock-mobile-visible-tabs="1"] > .dv-tabs-and-actions-container {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .av-dock-host {
+    border-radius: var(--av-rs);
+  }
+
+  .av-dock-surface-inset,
+  .av-dock-surface-inset-compact {
+    padding: 6px 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .av-dock-workspace * {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

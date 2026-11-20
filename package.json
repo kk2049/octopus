@@ -1,0 +1,56 @@
+{
+  "name": "claude-bot",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm --filter @claude-bot/bot dev",
+    "bot-ctl": "tsx ctl/bot-ctl.ts",
+    "docs:check": "node scripts/check-agent-docs.mjs",
+    "app:pack": "tsx packages/bot/src/app-registry/pack-cli.ts",
+    "app:release": "tsx ctl/app-release.ts",
+    "app:pack:showcase": "tsx packages/bot/src/app-registry/showcase-pack-cli.ts",
+    "app:pack:ppt-studio": "tsx packages/bot/src/app-registry/app-pack-cli.ts packages/ppt-studio-view/src/pack.ts",
+    "app:pack:chess": "tsx packages/bot/src/app-registry/app-pack-cli.ts packages/chess-view/src/pack.ts",
+    "app:pack:meeting-room": "tsx packages/bot/src/app-registry/app-pack-cli.ts packages/meeting-room-view/src/pack.ts",
+    "app:pack:expense-intake": "tsx packages/bot/src/app-registry/app-pack-cli.ts packages/expense-intake-view/src/pack.ts",
+    "app:pack:research-program": "tsx packages/bot/src/app-registry/app-pack-cli.ts packages/research-program-view/src/pack.ts",
+    "app:pack:research-v2": "tsx packages/bot/src/app-registry/app-pack-cli.ts packages/research-canvas-view/src/pack.ts",
+    "app:pack:daily-brief": "tsx packages/bot/src/app-registry/app-pack-cli.ts packages/daily-brief-view/src/pack.ts",
+    "app:pack:report-space": "tsx packages/bot/src/app-registry/app-pack-cli.ts packages/report-space-view/src/pack.ts",
+    "app:preview": "tsx packages/agent-view-preview/src/cli.ts",
+    "convergence:gates": "tsx packages/convergence-gates/src/cli.ts",
+    "devpipe:call": "tsx packages/bot/src/devpipe/call-mcp.ts",
+    "knowledge:build": "tsx packages/bot/src/knowledge/cli.ts build --root .",
+    "knowledge:context": "tsx packages/bot/src/knowledge/cli.ts context --root .",
+    "knowledge:report": "tsx packages/bot/src/knowledge/cli.ts report",
+    "knowledge:validate": "tsx packages/bot/src/knowledge/cli.ts validate-curated --root .",
+    "knowledge:repairs": "tsx packages/bot/src/knowledge/eval/repair-batch.ts",
+    "knowledge:journeys": "tsx packages/bot/src/knowledge/eval/journeys.ts",
+    "knowledge:vector:benchmark": "tsx packages/bot/src/knowledge/eval/vector-benchmark.ts",
+    "code-index:build": "tsx packages/architecture-observatory/src/code-index/cli.ts build",
+    "code-index:query": "tsx packages/bot/src/knowledge/code-index-cli.ts",
+    "knowledge:artifact:build": "node scripts/ops/knowledge-artifact-build.mjs",
+    "app:pack:research-docs": "tsx packages/bot/src/app-registry/app-pack-cli.ts packages/research-docs-view/src/pack.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "playwright": "1.62.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.0"
+  },
+  "dependencies": {
+    "@larksuiteoapi/lark-mcp": "^0.5.1"
+  },
+  "pnpm": {
+    "neverBuiltDependencies": [
+      "onnxruntime-node"
+    ],
+    "overrides": {
+      "@types/react": "^19.2.2",
+      "@types/react-dom": "^19.2.1"
+    }
+  },
+  "packageManager": "pnpm@9.15.0"
+}

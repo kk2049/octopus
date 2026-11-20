@@ -1,0 +1,19 @@
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body { font: 14px/1.65 -apple-system, "Segoe UI", "PingFang SC", sans-serif; color: var(--av-fg); background: var(--av-canvas); }
+#root { height: 100%; min-height: 0; display: flex; padding: 10px 12px; box-sizing: border-box; }
+.daily-brief { flex: 1; min-height: 0; }
+.brief-head { flex: none; display: flex; align-items: flex-end; gap: 20px; padding: 5px 8px 9px; border-bottom: 1px solid var(--av-line); }
+.brief-head > div { display: flex; flex-direction: column; }
+.brief-head b { font-size: 21px; letter-spacing: .02em; }
+.brief-head > span { color: var(--av-muted); font-size: 12px; padding-bottom: 2px; }
+.brief-kicker { color: var(--av-accent); font-size: 9px; font-weight: 750; letter-spacing: .18em; }
+.brief-fixed-rail { padding: 8px; background: color-mix(in srgb, var(--av-surface) 94%, var(--av-accent) 6%); }
+.brief-fixed-actions { padding: 6px 8px; }
+.brief-fixed-actions .av-panel { min-width: 0; }
+.brief-document .dv-detail { padding: 20px clamp(18px, 4vw, 54px); max-width: 980px; margin: 0 auto; }
+.brief-document .dv-body { font-size: 15px; line-height: 1.82; }
+.brief-document .dv-facts { padding: 8px 12px; border: 1px solid var(--av-line); border-radius: var(--av-rm); background: color-mix(in srgb, var(--av-surface) 96%, var(--av-accent) 4%); }
+.brief-document .dv-record-actions { padding: 4px 0 10px; }
+.brief-document .dv-section, .brief-document .dv-thread { margin-top: 6px; }
+.brief-fixed-rail .dv-facts--stats .dv-fact { flex: 1; min-width: 64px; }
+@media (max-width: 720px) { #root { padding: 6px; } .brief-head > span, .brief-kicker { display: none; } .brief-head { padding: 3px 5px 7px; } }

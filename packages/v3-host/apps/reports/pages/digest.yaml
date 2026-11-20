@@ -1,0 +1,7 @@
+title: 信箱摘要
+layout:
+  - [stats, unreadlist, compose]
+slots:
+  stats: { widget: kv, bind: view.stats, props: { title: 信箱 } }
+  unreadlist: { widget: markdown, bind: view.digest, props: { title: 待处理 } }
+  compose: { widget: form, props: { action: send_report } }

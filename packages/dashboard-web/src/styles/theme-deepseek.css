@@ -1,0 +1,245 @@
+/*
+ * Theme: deepseek — transcribed from deepseek-harness web. OWNED by the deepseek art
+ * workstream; other theme workstreams must not edit this file. Everything in
+ * here must be scoped under html[data-theme="deepseek"], so the file is inert
+ * otherwise.
+ *
+ * ── Design statement ─────────────────────────────────────────────────────────
+ *
+ * The former version inferred a DeepSeek-like blue-violet palette from the
+ * public chat product. Harness makes the actual system explicit: neutral ink
+ * rather than tinted ink, a white base with #f9fafb module chrome, pale
+ * #edf3fe user bubbles, 22px input/bubble capsules and one #4176e6 business
+ * blue. Dark mode is equally neutral (#151517 / #232324), not indigo.
+ *
+ * Harness uses #4176e6 for business controls. Dashboard's --accent also carries
+ * small link text, so the text-safe #315fc7 is used there while the literal
+ * upstream swatch remains --ds-action for focus/decorative treatment.
+ *
+ * Source map, contrast policy and tradeoffs:
+ * doc/deliveries/2026-08-13-deepseek-harness-theme-and-chat.md.
+ *
+ * Mechanics (same trap theme-aurora.css documents): these selectors outrank
+ * the :root dark block in tokens.css, so every variable the light block sets
+ * MUST be answered in the dark block below, or dark mode inherits the light
+ * value.
+ */
+
+/* ── palette · Harness light ── */
+
+html[data-theme="deepseek"] {
+  /* surfaces */
+  --bg: #ffffff;
+  --card: #ffffff;
+  --tool-bg: #f5f6f7;
+  --user-bg: #edf3fe;
+  --accent-soft: #e4edfd;
+
+  /* ink */
+  --fg: #0f1115;
+  --muted: #61666b;
+  --think: #61666b;
+  --bad: #adb2b8;
+
+  /* lines */
+  --line: #ebedf0;
+  --line-strong: #dfe3e9;
+
+  /* Text-safe relative of Harness's literal #4176e6 business-control swatch. */
+  --accent: #315fc7;
+  --accent-fg: #ffffff;
+
+  /* status */
+  --ok: #14804a;
+  --err: #cd3345;
+
+  /* Harness uses 6px tool rows, 8/12px controls and 22px chat capsules. */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 22px;
+
+  /* Upstream lv1/lv2/lv3 shadow stack. */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.02), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 0 1px rgba(0, 0, 0, 0.2), 0 12px 32px rgba(0, 0, 0, 0.08);
+  --shadow-overlay: var(--shadow-lg);
+
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --leading: 1.571428;
+
+  /* Upstream literal values which never carry small text in this shell. */
+  --ds-action: #4176e6;
+  --ds-sidebar: #f9fafb;
+  --ds-hover: rgba(38, 49, 72, 0.06);
+  --ds-hover-strong: #f1f3f5;
+  --ds-halo: color-mix(in srgb, var(--ds-action) 20%, transparent);
+
+  /* Shared chat consumes these in both the trusted shell and isolated View.
+   * Keep the Harness visual language without narrowing the host layout. */
+  --av-chat-inset: 16px;
+  --av-chat-user-radius: 22px;
+  --av-chat-user-padding: 10px 16px;
+  --av-chat-user-max-width: min(525px, 82%);
+  --av-chat-user-font: 16px/24px var(--font-ui);
+  --av-chat-turn-gap: 16px;
+  --av-chat-prose-font: 16px/28px var(--font-ui);
+  --av-chat-tool-radius: 6px;
+  --av-chat-card-border: transparent;
+}
+
+/* ── palette · Harness dark ── */
+
+html:where([data-color-scheme="dark"])[data-theme="deepseek"] {
+  --bg: #151517;
+  --card: #232324;
+  --tool-bg: #2c2c2e;
+  --user-bg: #2c2c2e;
+  --accent-soft: #34344a;
+
+  --fg: #f9fafb;
+  --muted: #adb2b8;
+  --think: #adb2b8;
+  --bad: #67696d;
+
+  --line: #303033;
+  --line-strong: #444448;
+
+  --accent: #679efe;
+  --accent-fg: #0f1115;
+
+  --ok: #55c17e;
+  --err: #f28b87;
+
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.24);
+  --shadow-lg: 0 0 1px rgba(255, 255, 255, 0.16), 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-overlay: var(--shadow-lg);
+
+  --ds-action: #679efe;
+  --ds-sidebar: #1b1b1c;
+  --ds-hover: rgba(255, 255, 255, 0.08);
+  --ds-hover-strong: #353638;
+  --ds-halo: color-mix(in srgb, var(--ds-action) 24%, transparent);
+}
+
+/* ── texture · type ── */
+
+html[data-theme="deepseek"] body {
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+html[data-theme="deepseek"] h1,
+html[data-theme="deepseek"] h2,
+html[data-theme="deepseek"] h3 {
+  letter-spacing: -0.01em;
+}
+
+html[data-theme="deepseek"] ::selection {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+html[data-theme="deepseek"] a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+/* ── texture · navigation ──
+ * `tab`/`active` are stable contract names (the browser suite reads them);
+ * styling them is allowed, removing them is not. The active item is a soft
+ * accent chip, pill-shaped like the chat UI's model selector.
+ */
+
+html[data-theme="deepseek"] a.tab {
+  border-radius: var(--radius-sm);
+  transition:
+    background 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html[data-theme="deepseek"] a.tab.active {
+  background: color-mix(in srgb, var(--ds-action) 12%, var(--ds-sidebar));
+  color: var(--accent);
+}
+
+html[data-theme="deepseek"] nav {
+  background: var(--ds-sidebar);
+  border-color: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+
+html[data-theme="deepseek"] a.tab:hover {
+  background: var(--ds-hover);
+}
+
+/* ── texture · controls ──
+ * Buttons stay flat (no blanket shadow — module CSS has many borderless
+ * link-style buttons; see the aurora notes) and hover with a quiet gray wash;
+ * primary deepens toward ink instead of glowing.
+ */
+
+html[data-theme="deepseek"] button {
+  transition:
+    background 0.1s ease,
+    border-color 0.1s ease,
+    color 0.1s ease,
+    transform 0.1s ease;
+}
+
+html[data-theme="deepseek"] button:hover:not(:disabled) {
+  background: var(--ds-hover-strong);
+}
+
+html[data-theme="deepseek"] button.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 88%, var(--fg));
+  border-color: color-mix(in srgb, var(--accent) 88%, var(--fg));
+}
+
+html[data-theme="deepseek"] button.danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--err) 8%, transparent);
+}
+
+/*
+ * Fields: white surface and the composer signature — a rounded field whose
+ * focus answers with the logo-blue halo (the keyboard :focus-visible outline
+ * still applies on top; two indicators never hurt).
+ */
+html[data-theme="deepseek"] select,
+html[data-theme="deepseek"] input[type="text"],
+html[data-theme="deepseek"] input[type="search"],
+html[data-theme="deepseek"] input[type="password"],
+html[data-theme="deepseek"] textarea {
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--fg) 10%, transparent);
+  border-radius: var(--radius-md);
+  transition:
+    border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html[data-theme="deepseek"] select:focus,
+html[data-theme="deepseek"] input[type="text"]:focus,
+html[data-theme="deepseek"] input[type="search"]:focus,
+html[data-theme="deepseek"] input[type="password"]:focus,
+html[data-theme="deepseek"] textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ds-halo);
+}
+
+/* ── texture · code ── */
+
+html[data-theme="deepseek"] pre {
+  border-radius: 8px;
+  background: var(--tool-bg);
+}
+
+/* ── texture · chrome details ── */
+
+html[data-theme="deepseek"] .badge {
+  border-radius: 999px;
+}
+
+html[data-theme="deepseek"] * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}

@@ -1,0 +1,1927 @@
+/*
+ * The sessions modules' own styles.
+ *
+ * They travel with the modules rather than with an App. The transcript's
+ * host-neutral baseline lives in `@claude-bot/chat-ui-commons` so both release
+ * lanes consume the exact surface; the rest of the sessions-only chrome stays
+ * here. An App never has to re-derive either half.
+ *
+ * ── Explicit data anchors are the test CONTRACT; class names are styling ────
+ *
+ * `data-av-*` attributes, ARIA roles and accessible names are read from OUTSIDE
+ * the frame by `packages/bot/src/session-plus/browser.e2e.test.ts`. Classes may
+ * be renamed or reorganised without changing those behavior-level assertions;
+ * Dockview and CodeMirror private classes remain only in tests of their own
+ * drag, tab and editing behavior.
+ *
+ * Everything colour- or spacing-shaped comes from the Agent View SDK's `--av-*`
+ * tokens, so an App gets dark mode and reduced motion without a second theme.
+ * What an App still owns is the SLOT chrome — how wide the rail is, what a card
+ * looks like — because that is composition, not module behaviour.
+ */
+
+/* ── which panels grow ──────────────────────────────────────────────────────
+ * The shell makes every panel flexible; a search box and a status strip are the
+ * two that must not be. Stated here rather than in the App because it follows
+ * from what these modules ARE.
+ */
+.av-panel[data-av-module^="session.search/"],
+.av-panel[data-av-module^="session.operations/"] {
+  flex: none;
+}
+
+.searchpane {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.rosterpane {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.railhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--av-s2);
+  margin-bottom: var(--av-s2);
+}
+
+.railhead h2 { margin: 0; margin-right: auto; }
+
+/* A permanent, bounded footer: status changes never resize either index. */
+.directory-index-status {
+  box-sizing: border-box;
+  flex: 0 0 var(--av-control-h-md);
+  overflow: auto;
+  overflow-wrap: anywhere;
+  padding: var(--av-s1) var(--av-s2);
+  color: var(--av-warn);
+  font-size: var(--av-font-sm);
+}
+
+.directory-index-status p { margin: 0; }
+
+/*
+ * The dot-entry knob stands on BOTH layers (ticket #350).
+ *
+ * The manual ↻ steps back on the phone because the index re-lists itself
+ * anyway; this one has no such substitute — a home directory whose thirty
+ * dotfiles the reader cannot switch off is exactly as unbrowsable on a phone.
+ * So it keeps a full touch target instead of standing down.
+ */
+.railhead .wshidden-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--av-s6);
+  min-height: var(--av-control-h-compact);
+  padding: 0 var(--av-g6);
+}
+
+/* The reveal for directories folded away as long-idle. */
+.idle-more {
+  padding: var(--av-s1) var(--av-s2);
+  color: var(--av-muted);
+  font-size: var(--av-font-sm);
+  cursor: pointer;
+}
+
+.tools { display: flex; gap: var(--av-g6); margin-bottom: var(--av-s2); }
+
+/*
+ * The box takes the row; the button keeps its label on ONE line.
+ *
+ * `.tools input` is `width: 100%`, so as a flex item the button is the one that
+ * gives — and a two-character label squeezed to its minimum wraps to one glyph
+ * per line. On the phone layer, where every control already has the shared
+ * touch-target height, that turned the search row into the tallest thing above the
+ * tree for no information at all (ticket #181). This is not a mobile-only rule
+ * because a button label broken mid-word is never the intended rendering.
+ */
+.tools > .av-button {
+  flex: none;
+  white-space: nowrap;
+}
+
+.tools input {
+  width: 100%;
+  min-width: 0;
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-r-sm);
+  padding: var(--av-g6) var(--av-s2);
+  background: var(--av-canvas);
+  color: var(--av-fg);
+  font: inherit;
+}
+
+.results {
+  border-top: var(--av-hairline) solid var(--av-line);
+  margin-top: var(--av-s2);
+  padding-top: var(--av-s2);
+  max-height: var(--av-g260);
+  overflow: auto;
+}
+
+.results .hit { padding: var(--av-g5) var(--av-g7); border-radius: var(--av-g7); cursor: pointer; }
+.results .hit:hover { background: var(--av-canvas); }
+.results .search-pager { display: flex; flex-wrap: wrap; gap: var(--av-s3); margin-block: var(--av-s2); }
+
+#list { flex: 1 1 0; min-height: 0; overflow: auto; }
+
+.sess { min-height: var(--av-list-row-h); padding: var(--av-g6) var(--av-s2); border-radius: var(--av-r-sm); cursor: pointer; border: var(--av-hairline) solid transparent; }
+.sess:hover { background: var(--av-canvas); }
+.sess.on { border-color: var(--av-accent); background: var(--av-canvas); }
+.sess .t { display: flex; align-items: center; font-weight: var(--av-weight-control); }
+.sess .session-title-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sess .m { font-size: var(--av-font-label); color: var(--av-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sess .pin { flex: none; color: var(--av-warn); margin-right: var(--av-s1); }
+/* Reserve the full painted status, including the completed dot's outer ring.
+ * Only the title text clips; icons keep the same slot even in a narrow row. */
+.sess .activity-slot { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 var(--av-s4); height: var(--av-s4); margin-right: var(--av-s1); }
+.sess .activity-slot > :is(.live-dot, .review-dot) { flex: none; margin-right: 0; }
+
+.live-dot {
+  width: var(--av-g10);
+  height: var(--av-g10);
+  border-width: var(--av-g1-5);
+  margin-right: var(--av-g5);
+}
+
+.review-dot {
+  display: inline-block;
+  width: var(--av-g7);
+  height: var(--av-g7);
+  border-radius: 50%;
+  background: var(--av-accent);
+  box-shadow: 0 0 0 var(--av-s0) color-mix(in srgb, var(--av-accent) 14%, transparent);
+  margin-right: var(--av-g6);
+}
+
+.recenthead,
+.devhead { display: flex; align-items: center; gap: var(--av-g5); font-weight: var(--av-weight-strong); margin: var(--av-s1) var(--av-s1); }
+.recenthead { margin-top: 0; }
+.devhead { margin-top: var(--av-g9); }
+
+.recent-index {
+  flex: none;
+  margin: var(--av-s0) 0 var(--av-g7);
+  border-bottom: var(--av-hairline) solid var(--av-line);
+  padding-bottom: var(--av-g7);
+}
+
+.navigation-index-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.navigation-index-body > .wsfiles {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.recent-index-toggle {
+  width: calc(100% - var(--av-s2));
+  border: 0;
+  border-radius: var(--av-g6);
+  padding: var(--av-s1);
+  background: transparent;
+  color: var(--av-fg);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.recent-index-toggle:hover { background: var(--av-canvas); }
+
+.recent-session-list {
+  max-height: min(34vh, var(--av-g280));
+  overflow: auto;
+  padding: var(--av-s0) 0 0 var(--av-g10);
+}
+
+.treehead {
+  min-width: 0;
+  flex: 1;
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dhead {
+  display: flex;
+  align-items: center;
+  gap: var(--av-s1);
+  min-height: var(--av-g27);
+  color: var(--av-muted);
+  font-size: var(--av-font-label);
+  border-radius: var(--av-g7);
+}
+
+.dhead:hover { background: var(--av-canvas); color: var(--av-fg); }
+.dhead .treehead { padding: var(--av-g3) 0; }
+
+.badge {
+  display: inline-block;
+  min-width: var(--av-g17);
+  padding: 0 var(--av-s1);
+  border-radius: var(--av-pill);
+  background: var(--av-canvas);
+  color: var(--av-muted);
+  font-size: var(--av-font-xs);
+  font-weight: var(--av-weight-control);
+  text-align: center;
+}
+
+.dirplus {
+  flex: none;
+  width: var(--av-g22);
+  height: var(--av-g22);
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--av-g6);
+  color: var(--av-accent);
+  border-color: transparent;
+  background: transparent;
+  font-weight: var(--av-weight-bold);
+}
+
+.dirplus:hover { border-color: var(--av-accent); background: var(--av-surface); }
+
+/*
+ * The global "start anywhere" entry.
+ *
+ * A full-width row above the tree rather than another `＋`: the folder somebody
+ * just created has no row to hang one on, and that is precisely the case the
+ * per-row shortcuts cannot serve.
+ */
+.newanywhere {
+  width: calc(100% - var(--av-s2));
+  margin: var(--av-s0) var(--av-s1) var(--av-g6);
+  text-align: left;
+  color: var(--av-accent);
+  border-style: dashed;
+}
+
+.newanywhere:hover { border-style: solid; background: var(--av-surface); }
+
+.sect-divider { height: var(--av-hairline); background: var(--av-line); margin: var(--av-g9) var(--av-s1); }
+.recent-more { padding: var(--av-s1) var(--av-s2); color: var(--av-muted); font-size: var(--av-font-sm); cursor: pointer; }
+.source-note { padding: var(--av-s0) var(--av-s1) var(--av-g7); color: var(--av-muted); font-size: var(--av-font-sm); }
+.readonly-source { opacity: 0.78; }
+
+.detailhead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--av-g10);
+  margin-bottom: var(--av-s2);
+}
+
+.detailhead .title {
+  min-width: 0;
+  font-size: var(--av-font-title);
+  font-weight: var(--av-weight-bold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.detailhead .meta { font-size: var(--av-font-label); color: var(--av-muted); font-weight: var(--av-weight-regular); }
+
+.workspace-reveal-button {
+  flex: none;
+  max-width: min(42%, var(--av-g320));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--av-g5);
+}
+
+.workspace-reveal-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-reveal-note {
+  padding: var(--av-g3) var(--av-g10);
+  border-bottom: var(--av-hairline) solid var(--av-line);
+  color: var(--av-warn, #b45309);
+  font-size: var(--av-font-sm);
+  word-break: break-word;
+}
+
+/* ── provider-originated question / permission card ─────────────────────── */
+
+.agent-interaction-card {
+  flex: none;
+  max-height: min(52%, var(--av-g520));
+  overflow: auto;
+  margin: var(--av-s2) 0;
+  padding: var(--av-s3);
+  border: var(--av-hairline) solid var(--av-accent);
+  border-radius: var(--av-g10);
+  background: var(--av-surface);
+  box-shadow: 0 var(--av-s2) var(--av-s5) rgb(0 0 0 / 12%);
+}
+
+.agent-interaction-head,
+.agent-interaction-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--av-s3);
+}
+
+.agent-interaction-head h3 { margin: var(--av-s0) 0 0; font-size: var(--av-font-title); }
+
+.agent-interaction-provider,
+.agent-interaction-waiting,
+.agent-interaction-tool {
+  color: var(--av-muted);
+  font-size: var(--av-font-sm);
+}
+
+.agent-interaction-waiting { white-space: nowrap; }
+.agent-interaction-description,
+.agent-interaction-question p { margin: var(--av-s2) 0; white-space: pre-wrap; }
+
+.agent-interaction-question {
+  border: 0;
+  border-top: var(--av-hairline) solid var(--av-line);
+  margin: var(--av-g10) 0 0;
+  padding: var(--av-g10) 0 0;
+}
+
+.agent-interaction-question legend { padding-right: var(--av-s2); font-weight: var(--av-weight-strong); }
+.agent-interaction-options { display: grid; gap: var(--av-g6); }
+
+.agent-interaction-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--av-s2);
+  margin: 0;
+  padding: var(--av-g7) var(--av-g9);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-r-sm);
+  color: var(--av-fg);
+  cursor: pointer;
+}
+
+.agent-interaction-option > input { margin-top: var(--av-g3); accent-color: var(--av-accent); }
+.agent-interaction-option small { display: block; margin-top: var(--av-s0); color: var(--av-muted); }
+
+.agent-interaction-other,
+.agent-interaction-message {
+  display: grid;
+  gap: var(--av-s1);
+  margin-top: var(--av-s2);
+  color: var(--av-muted);
+  font-size: var(--av-font-sm);
+}
+
+.agent-interaction-detail { margin-top: var(--av-g10); color: var(--av-muted); font-size: var(--av-font-sm); }
+.agent-interaction-detail pre {
+  max-height: var(--av-g220);
+  overflow: auto;
+  padding: var(--av-s2);
+  border-radius: var(--av-r-sm);
+  background: var(--av-canvas);
+  color: var(--av-fg);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.agent-interaction-actions { justify-content: flex-end; margin-top: var(--av-g10); }
+.agent-interaction-error { margin-top: var(--av-s2); color: var(--av-error); font-size: var(--av-font-sm); }
+
+.agent-interaction-card-resolved {
+  max-height: none;
+  margin: var(--av-g5) 0;
+  padding: var(--av-g7) var(--av-g10);
+  border-color: var(--av-line);
+  box-shadow: none;
+}
+
+.agent-interaction-resolved-title {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--av-g7);
+  font-size: var(--av-font-label);
+}
+
+.agent-interaction-resolved-title code { color: var(--av-muted); }
+.agent-interaction-resolved-badge { color: var(--av-muted); font-size: var(--av-font-sm); white-space: nowrap; }
+
+/* A Dock group can be shorter than the chat's fixed controls. Keep a real
+ * transcript viewport in that case and let the document's existing outer
+ * scroll handle the overflow; zero-height flex shells let transcript padding
+ * paint under the composer and intercept its pointer target. */
+.av-panel[data-av-module^="agent.chat/"] .av-chat-scroller-shell {
+  min-height: var(--av-g80);
+}
+
+.command-pane { flex: none; min-height: 0; overflow: visible; display: flex; flex-direction: column; }
+
+/* Runtime and session actions share one popup anchored inside the draft. */
+.turn-stop {
+  display: flex;
+  align-items: center;
+  gap: var(--av-s2);
+  min-width: 0;
+  margin-bottom: var(--av-g10);
+  padding-bottom: var(--av-g10);
+  border-bottom: var(--av-hairline) solid var(--av-line);
+}
+.turn-stop-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--av-muted);
+  font-size: var(--av-font-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html[data-av-theme] .turn-stop .av-button.turn-stop-action {
+  flex: none;
+  min-height: var(--av-control-h-compact);
+  padding: 0 var(--av-g10);
+  font-size: var(--av-font-label);
+}
+.codex-release {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--av-s3);
+  margin: 0 var(--av-s3) var(--av-s2);
+  padding: var(--av-g10) var(--av-s3);
+  border: var(--av-hairline) solid color-mix(in srgb, var(--av-warn) 55%, var(--av-line));
+  border-radius: var(--av-rm);
+  background: color-mix(in srgb, var(--av-warn) 9%, var(--av-surface));
+}
+.codex-release > div:first-child { min-width: 0; }
+.codex-release .small { margin-top: var(--av-g3); }
+.codex-release-done {
+  border-color: color-mix(in srgb, var(--av-ok) 55%, var(--av-line));
+  background: color-mix(in srgb, var(--av-ok) 9%, var(--av-surface));
+}
+.codex-release-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  width: min(var(--av-g520), calc(100vw - var(--av-s6)));
+  max-height: calc(100dvh - var(--av-s6));
+  margin: auto;
+  overflow: auto;
+  padding: var(--av-g20);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-rm);
+  background: var(--av-overlay-solid);
+  color: var(--av-fg);
+  box-shadow: 0 var(--av-g18) var(--av-g60) color-mix(in srgb, var(--av-fg) 28%, transparent);
+}
+.codex-release-dialog h3 { margin: 0 0 var(--av-g10); font-size: var(--av-font-control); }
+.codex-release-dialog p { margin: 0 0 var(--av-g14); color: var(--av-muted); line-height: 1.55; }
+.codex-release-check { display: flex; align-items: flex-start; gap: var(--av-s2); line-height: 1.45; }
+.codex-release-check input { flex: none; margin-top: var(--av-g3); }
+.codex-release-actions { justify-content: flex-end; margin-top: var(--av-g18); }
+.composer {
+  position: relative;
+  flex: 1;
+  min-height: var(--av-g115);
+  padding-top: var(--av-s2);
+  display: flex;
+  flex-direction: column;
+}
+.composer-entry {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--av-s2);
+  min-width: 0;
+}
+.composer-input-shell {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  position: relative;
+  display: flex;
+  min-width: 0;
+  height: 100%;
+}
+html[data-av-theme] .composer-input-shell .av-textarea.ant-input {
+  width: 100%;
+}
+.composer-entry > .av-button { flex: none; }
+.chat-file-input { display: none; }
+html[data-av-theme] .composer-input-shell.chat-file-drop .av-textarea.ant-input {
+  border-color: var(--av-accent);
+  box-shadow: 0 0 0 var(--av-s0) color-mix(in srgb, var(--av-accent) 18%, transparent);
+}
+.composer-entry > .composer-options {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  grid-column: 2;
+  grid-row: 2;
+}
+.composer-entry > .chat-upload-button {
+  grid-column: 3;
+  grid-row: 2;
+  white-space: nowrap;
+}
+.composer-entry > .primary {
+  grid-column: 4;
+  grid-row: 2;
+}
+.composer-options {
+  position: absolute;
+  right: var(--av-g6);
+  bottom: var(--av-g6);
+  z-index: 30;
+}
+.composer-options > summary {
+  display: grid;
+  width: var(--av-control-h-lg);
+  height: var(--av-control-h-lg);
+  place-items: center;
+  list-style: none;
+  border: 0;
+  border-radius: var(--av-g9);
+  color: var(--av-muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--av-font-subheading);
+}
+.composer-options > summary::-webkit-details-marker { display: none; }
+.composer-options[open] > summary { background: var(--av-raised); color: var(--av-fg); }
+.composer-options-card {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--av-s2));
+  width: min(var(--av-g420), calc(100vw - var(--av-s5)));
+  max-height: min(60dvh, var(--av-g440));
+  overflow: auto;
+  padding: var(--av-s3);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-r-md);
+  background: var(--av-overlay-solid);
+  box-shadow: var(--av-shadow-sm);
+}
+.composer-options-card .row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--av-g7);
+}
+.composer-options-card .row .av-button {
+  width: 100%;
+  min-height: var(--av-control-h-lg);
+  white-space: normal;
+}
+.session-title-control {
+  display: grid;
+  gap: var(--av-g6);
+  margin-bottom: var(--av-g10);
+  padding-bottom: var(--av-g10);
+  border-bottom: var(--av-hairline) solid var(--av-line);
+}
+.session-title-control > label { color: var(--av-muted); font-size: var(--av-font-label); }
+.composer-options-card .session-title-control .row { grid-template-columns: minmax(0, 1fr) auto; }
+.session-title-control .av-input { min-width: 0; }
+.session-title-control .av-button { min-width: var(--av-g104); }
+.session-title-error { color: var(--av-danger); font-size: var(--av-font-label); }
+.composer .composer-options-card .hint {
+  display: grid;
+  gap: var(--av-g3);
+  margin-top: var(--av-s2);
+}
+
+.composer .hint {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--av-g10);
+  margin-top: var(--av-g5);
+  color: var(--av-muted);
+  font-size: var(--av-font-sm);
+}
+
+.chat-submit-compact { display: none; }
+
+.flow { flex: 1; min-height: 0; overflow: auto; display: grid; align-content: start; gap: var(--av-g14); }
+.flowhead { display: flex; align-items: center; justify-content: space-between; gap: var(--av-g10); }
+
+/* The launch surface is an empty chat (ticket #767): a slim head, a
+ * transcript-shaped stage holding the first message and its receipt, and the
+ * same composer grid the chat uses. Its second row carries the shared
+ * run-configuration bar, so nothing about a launch is a separate form. */
+.new-session-chat {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, var(--av-g920));
+  margin-inline: auto;
+  padding: var(--av-s3) var(--av-s4) var(--av-s2);
+  box-sizing: border-box;
+}
+
+.new-session-head .title { min-width: 0; }
+
+.new-session-head h2 {
+  margin: 0;
+  color: var(--av-fg);
+  font-size: var(--av-font-control);
+  font-weight: var(--av-weight-strong);
+  line-height: 1.4;
+}
+
+.new-session-head .meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.new-session-stage {
+  flex: 1;
+  min-height: var(--av-g80);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--av-g10);
+  padding: var(--av-s4) 0 var(--av-s2);
+}
+
+.new-session-empty {
+  display: grid;
+  gap: var(--av-s1);
+  max-width: 62ch;
+  margin: auto;
+  color: var(--av-muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.new-session-empty-title {
+  color: var(--av-fg);
+  font-size: var(--av-font-subheading);
+  font-weight: var(--av-weight-strong);
+}
+
+.new-session-turn { display: grid; gap: var(--av-s2); }
+
+.new-session-echo {
+  justify-self: end;
+  max-width: min(var(--av-g520), 78%);
+  padding: var(--av-g10) var(--av-g14);
+  border-radius: var(--av-g18) var(--av-g18) var(--av-rs) var(--av-g18);
+  background: color-mix(in srgb, var(--av-accent) 12%, var(--av-surface));
+  color: var(--av-fg);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.new-session-lane-hint { color: var(--av-muted); font-size: var(--av-font-sm); }
+.new-session-problem { color: var(--av-error); font-size: var(--av-font-label); }
+.new-session-command-pane { flex: none; }
+.new-session-entry { position: relative; }
+.new-session-entry > .primary { min-width: var(--av-g80); border-radius: var(--av-pill); }
+
+/* A stable two-row form inside the chat, including narrow desktop Dock groups. */
+.new-session-config {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--av-s2);
+  width: 100%;
+}
+.new-session-config > .run-config-field { flex: 1 1 var(--av-g148); }
+.new-session-config > .run-config-wide { flex-basis: 100%; order: -1; }
+.new-session-config .run-config-field {
+  height: auto;
+  min-height: var(--av-touch-target);
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--av-g3);
+  padding: var(--av-s1) var(--av-s2);
+  border-radius: var(--av-rs);
+}
+.new-session-config .run-config-field :is(select, input.av-input.ant-input) {
+  width: 100%;
+  max-width: none;
+  height: var(--av-control-h-compact);
+  border-radius: var(--av-rs);
+}
+.new-session-config .run-config-field select {
+  appearance: none;
+  padding-right: var(--av-s5);
+  background-image: linear-gradient(45deg, transparent 50%, var(--av-muted) 50%), linear-gradient(135deg, var(--av-muted) 50%, transparent 50%);
+  background-position: calc(100% - var(--av-g10)) 50%, calc(100% - var(--av-g6)) 50%;
+  background-size: var(--av-s1) var(--av-s1);
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+.new-session-entry > input[type="file"] { display: none; }
+/* Anchor the launch ⚙ card to the composer, not to the ⚙ icon: opened from
+ * the icon it extended left past a narrow Dock group and was clipped. */
+.new-session-entry > .composer-options { position: static; }
+.new-session-entry > .composer-options > .composer-options-card {
+  right: 0;
+  bottom: calc(100% + var(--av-s2));
+  width: min(var(--av-g420), calc(100% - var(--av-s5)));
+  max-height: min(48dvh, var(--av-g420));
+}
+
+/* On phones the gear lives inside the input shell. Keep the icon there, but
+ * size and anchor its card to the shell rather than the icon's 44px box. */
+.new-session-entry .composer-input-shell > .composer-options { position: static; }
+.new-session-entry .composer-input-shell > .composer-options > summary {
+  position: absolute;
+  right: var(--av-s1);
+  bottom: var(--av-s1);
+}
+.new-session-entry .composer-input-shell > .composer-options > .composer-options-card {
+  right: var(--av-s1);
+  width: min(var(--av-g340), calc(100% - 2 * var(--av-s1)));
+  max-height: min(40dvh, var(--av-g340));
+}
+
+.new-session-options .composer-options-card { display: grid; gap: var(--av-g10); }
+.new-session-options .safety { line-height: 1.6; }
+
+.new-session-placement {
+  display: grid;
+  justify-items: start;
+  gap: var(--av-g6);
+}
+
+.codex-account-choices { display: grid; gap: var(--av-g6); }
+.codex-account-choices label { display: flex; align-items: center; flex-wrap: wrap; gap: var(--av-g6); min-height: var(--av-control-h-lg); cursor: pointer; }
+.codex-account-choices input[type="radio"] { width: var(--av-s4); height: var(--av-s4); min-height: var(--av-s4); margin: 0; padding: 0; flex: none; }
+
+/* Shared run-configuration bar (components/RunConfig.tsx). Desktop composers
+ * put it in the otherwise empty left cell of their second row, beside ⚙ and
+ * send, so it never takes height from the input above it (ticket #411). */
+.run-config-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--av-g6);
+  min-width: 0;
+}
+
+/* A settings bar is a full row of its own under the input: Dock groups are
+ * often narrower than the viewport, and sharing the button row there squeezed
+ * the pickers to a few characters. With a bar present the ⚙/upload/send
+ * buttons take the next row; composers without one keep the original rows. */
+.composer-entry > .run-config-bar {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.composer-entry-configured > :is(.composer-options, .chat-upload-button, .primary) {
+  grid-row: 3;
+}
+
+.composer-options-card .run-config-bar {
+  margin-bottom: var(--av-g10);
+  padding-bottom: var(--av-g10);
+  border-bottom: var(--av-hairline) solid var(--av-line);
+}
+
+.run-config-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--av-g6);
+  min-width: 0;
+  max-width: 100%;
+  height: var(--av-control-h-compact);
+  padding: 0 var(--av-s1) 0 var(--av-g10);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-pill);
+  background: var(--av-canvas);
+  color: var(--av-fg);
+  font-size: var(--av-font-label);
+  box-sizing: border-box;
+}
+
+.run-config-field:focus-within {
+  border-color: color-mix(in srgb, var(--av-accent) 66%, var(--av-line));
+  box-shadow: var(--av-focus);
+}
+
+.run-config-field > :is(label, .run-config-label) {
+  flex: none;
+  color: var(--av-muted);
+  font-size: var(--av-font-sm);
+  font-weight: var(--av-weight-strong);
+  white-space: nowrap;
+}
+
+/* No theme attribute in these selectors: the classic theme is the ABSENCE of
+ * data-av-theme, so a theme-gated reset would leave the boxed text field
+ * inside the pill in the default appearance. */
+.run-config-field select,
+.run-config-field input.av-input.ant-input {
+  min-width: 0;
+  max-width: var(--av-g220);
+  height: 100%;
+  min-height: 0;
+  padding: 0 var(--av-s1);
+  border: 0;
+  border-radius: var(--av-pill);
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  text-overflow: ellipsis;
+}
+
+/* Native popup menus do not inherit a transparent select's painted surface. */
+:where(.run-config-field, .field, .session-history-tools, .remote-terminal-workspace) select {
+  color-scheme: inherit;
+}
+:where(.run-config-field, .field, .session-history-tools, .remote-terminal-workspace) option {
+  background-color: var(--av-canvas);
+  color: var(--av-fg);
+}
+
+.run-config-wide { flex: 1 1 var(--av-g220); }
+.run-config-wide input.av-input.ant-input { flex: 1; width: 100%; max-width: none; }
+.run-config-invalid { border-color: var(--av-error); }
+.run-config-value { padding-right: var(--av-g6); white-space: nowrap; }
+.run-config-note { color: var(--av-muted); font-size: var(--av-font-sm); white-space: nowrap; }
+.field { display: grid; gap: var(--av-g5); }
+.field label, .legend { color: var(--av-muted); font-size: var(--av-font-label); font-weight: var(--av-weight-strong); }
+
+.field select,
+.field input {
+  width: 100%;
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-r-sm);
+  padding: var(--av-g7) var(--av-g9);
+  background: var(--av-canvas);
+  color: var(--av-fg);
+  font: inherit;
+}
+
+.fieldgrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--av-g10); }
+
+.safety {
+  padding: var(--av-g9) var(--av-g10);
+  border-left: var(--av-g3) solid var(--av-warn);
+  background: var(--av-canvas);
+  color: var(--av-muted);
+  font-size: var(--av-font-label);
+}
+
+/* The launch receipt (ticket #191): the answer to the click, above the button
+ * that made it. `.err` recolours the text; the border is what makes a failure
+ * findable in a form that is otherwise all fields. */
+.launchnote {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--av-g10);
+  padding: var(--av-s2) var(--av-g10);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-g9);
+  background: var(--av-canvas);
+  font-size: var(--av-font-label);
+}
+
+.launchnote span { min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.launchnote.err { border-color: var(--av-error); color: var(--av-error); }
+
+.ops { flex: none; display: grid; gap: var(--av-g6); margin: var(--av-g7) 0; max-height: var(--av-g132); overflow: auto; }
+
+.op {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--av-s2);
+  padding: var(--av-g7) var(--av-g9);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-g9);
+  background: var(--av-canvas);
+}
+
+.opbody { min-width: 0; flex: 1; }
+.opmsg { font-size: var(--av-font-label); }
+.opdetail { color: var(--av-muted); font-size: var(--av-font-sm); white-space: pre-wrap; word-break: break-word; }
+.permission-note { color: var(--av-warn); font-size: var(--av-font-sm); }
+
+.remote-terminal-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--av-surface);
+}
+
+.remote-terminal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--av-s2);
+  min-height: var(--av-primary-action-h);
+  padding: var(--av-g7) var(--av-s3);
+  border-bottom: var(--av-hairline) solid var(--av-line);
+  background: color-mix(in srgb, var(--av-raised) 88%, transparent);
+}
+
+.remote-terminal-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--av-g7);
+  min-width: 0;
+}
+
+.remote-terminal-spacer { flex: 1; }
+
+.remote-terminal-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: var(--av-s2);
+  padding: var(--av-s3);
+}
+
+.remote-terminal-handshake {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: var(--av-s2);
+}
+
+.remote-terminal-workspace {
+  display: grid;
+  gap: var(--av-s1);
+  min-width: min(var(--av-g320), 100%);
+  color: var(--av-muted);
+  font-size: var(--av-font-sm);
+}
+
+.remote-terminal-workspace select,
+.remote-terminal-composer textarea {
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-rs);
+  background: var(--av-surface);
+  color: var(--av-fg);
+  font: inherit;
+}
+
+.remote-terminal-workspace select {
+  min-height: var(--av-control-h-md);
+  padding: var(--av-g5) var(--av-g9);
+}
+
+.remote-terminal-handshake p {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--av-muted);
+  font-size: var(--av-font-sm);
+}
+
+.remote-terminal-empty {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--av-s2);
+  padding: var(--av-s3);
+  border: var(--av-hairline) dashed var(--av-line);
+  border-radius: var(--av-rm);
+  color: var(--av-muted);
+}
+
+.remote-terminal-empty p { flex: 1 1 var(--av-g280); margin: 0; }
+
+.remote-terminal-screen {
+  min-height: var(--av-g148);
+  max-height: 42vh;
+  margin: 0;
+  overflow: auto;
+  padding: var(--av-s3);
+  border: var(--av-hairline) solid color-mix(in srgb, var(--av-line) 74%, transparent);
+  border-radius: var(--av-rm);
+  background: light-dark(#111716, #080b0b);
+  color: light-dark(#d7efe7, #d8eee8);
+  font-family: var(--av-mono);
+  font-size: var(--av-font-label);
+  line-height: 1.48;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.remote-terminal-composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: var(--av-s2);
+}
+
+.remote-terminal-composer textarea {
+  min-width: 0;
+  resize: vertical;
+  padding: var(--av-s2) var(--av-g10);
+  font-family: var(--av-mono);
+  line-height: 1.4;
+}
+
+.remote-terminal-error {
+  margin: 0;
+  color: var(--av-error);
+  font-size: var(--av-font-label);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .remote-terminal-panel * { scroll-behavior: auto !important; }
+}
+.small { font-size: var(--av-font-label); color: var(--av-muted); }
+.muted { color: var(--av-muted); }
+.err { color: var(--av-error); }
+
+/* ── DeepSeek Harness conversation treatment ─────────────────────────────
+ *
+ * The generic module DOM remains provider-neutral. When the Host selects the
+ * DeepSeek appearance, the composer adopts Harness's single floating capsule:
+ * var(--av-g22) radius, faint lv2 shadow, 16/24 draft and low-chrome toolbar. This is a
+ * skin over the existing pending-send / approval / typed-port lifecycle — no
+ * backend kind is inferred from appearance and every agent gets the same fast
+ * path when this theme is selected.
+ */
+html[data-av-theme="deepseek"] .command-pane {
+  overflow: visible;
+  padding: var(--av-g20) var(--av-s4) var(--av-s2);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--av-canvas) 0%, transparent) 0,
+    var(--av-canvas) var(--av-g20)
+  );
+}
+
+html[data-av-theme="deepseek"] .composer {
+  align-self: stretch;
+  gap: var(--av-s3);
+  width: 100%;
+  min-height: var(--av-g112);
+  padding: var(--av-g10) var(--av-s2) var(--av-s2);
+  border: var(--av-hairline) solid color-mix(in srgb, var(--av-fg) 10%, transparent);
+  border-radius: var(--av-g22);
+  background: var(--av-surface);
+  box-shadow: var(--av-shadow-sm);
+}
+
+html[data-av-theme="deepseek"] .composer .av-textarea.ant-input {
+  min-height: var(--av-g52);
+  padding: var(--av-s1) var(--av-g48) 0 var(--av-s2);
+  border: 0;
+  border-radius: var(--av-rl);
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+  font: var(--av-font-control)/var(--av-s5) var(--av-font);
+  resize: none;
+}
+
+html[data-av-theme="deepseek"] .composer:not(.composer-compact) .av-textarea.ant-input {
+  padding-right: var(--av-s2);
+}
+
+html[data-av-theme="deepseek"] .composer .av-textarea.ant-input:focus {
+  box-shadow: none;
+}
+
+html[data-av-theme="deepseek"] .composer .row {
+  justify-content: flex-end;
+  gap: var(--av-s2);
+  margin: 0;
+  padding: 0;
+}
+
+html[data-av-theme="deepseek"] .composer .av-button {
+  border-radius: var(--av-pill);
+}
+
+html[data-av-theme="deepseek"] .composer .hint {
+  margin: 0;
+  padding: 0 var(--av-s1);
+  font-size: var(--av-font-label);
+  line-height: var(--av-g18);
+}
+
+html[data-av-theme="deepseek"] .agent-interaction-card {
+  padding: var(--av-s4);
+  border-color: var(--av-line);
+  border-radius: var(--av-s4);
+  box-shadow: var(--av-shadow-sm);
+}
+
+/* ── unified directory index & chat file links ─────────────────────────── */
+
+/* A 📝 row's path, offered as an action. Styled as a link, not a button: it
+   sits inside a <summary> and must not read as a second fold control. */
+.ev-file-open {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--av-accent);
+  text-decoration: underline;
+  cursor: pointer;
+  word-break: break-all;
+}
+
+.filelink-note {
+  font-size: var(--av-font-sm);
+  color: var(--av-muted);
+  padding: var(--av-g3) var(--av-g10);
+  border-bottom: var(--av-hairline) solid var(--av-line);
+  word-break: break-word;
+}
+
+/* The selected session dropped out of THIS roster frame (device timeout, row
+   cap, plane failure). The chat keeps rendering retained facts and says so —
+   absence is not deletion, and focus never jumps on it. */
+.session-absent-note {
+  font-size: var(--av-font-sm);
+  color: var(--av-warn, #b45309);
+  padding: var(--av-g3) var(--av-g10);
+  border-bottom: var(--av-hairline) solid var(--av-line);
+  word-break: break-word;
+}
+
+/* A Hook-proven live turn must always have a visible frontier, even between
+   tool cards and text frames. The shared spinner supplies the motion. */
+.agent-thinking-tail {
+  display: flex;
+  align-items: center;
+  gap: var(--av-g7);
+  min-height: var(--av-control-h-md);
+  margin: var(--av-g6) var(--av-s2) var(--av-g10);
+  padding: var(--av-g6) var(--av-g9);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-rm);
+  color: var(--av-muted);
+  background: var(--av-raised);
+  font-size: var(--av-font-label);
+}
+
+/* Per-device standing of the workspace-plane operations. Display only — the
+   words come verbatim from the trusted side. */
+.wsaccess {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--av-s1);
+  padding: var(--av-s0) var(--av-s1) var(--av-s1) var(--av-g20);
+}
+
+.wsaccess-chip {
+  font-size: var(--av-font-2xs);
+  color: var(--av-muted);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-r-sm);
+  padding: 0 var(--av-g6);
+  white-space: nowrap;
+}
+
+/* The phone layer's folded form of the same chips (ticket #181): one muted
+   summary line by default, the identical strip when opened. */
+.wsaccess-fold { padding: 0 var(--av-s1) var(--av-s0) var(--av-g20); }
+
+.wsaccess-fold > summary {
+  display: inline-block;
+  color: var(--av-muted);
+  font-size: var(--av-font-sm);
+  cursor: pointer;
+}
+
+.wsaccess-fold > .wsaccess { padding-left: 0; }
+
+.wsaccess-chip[data-tone="auto"] { color: var(--av-ok, #2c7); border-color: currentColor; }
+.wsaccess-chip[data-tone="ask"] { color: var(--av-accent); border-color: currentColor; }
+.wsaccess-chip[data-tone="off"] { opacity: 0.7; }
+
+/* File-first navigation: an exact-key session entry beside a directory row. */
+.home-device {
+  margin-top: var(--av-g5);
+  color: var(--av-fg);
+  font-weight: var(--av-weight-strong);
+}
+
+/* Ticket #201: the device header is a tree row, so it inherits the row
+ * skeleton (`.wsrow-main > button`) instead of restating its own box. What is
+ * left here is the only thing that should differ — weight and colour. */
+.wsdevice {
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+.wsdevice .wsglyph-device { color: var(--av-fg); }
+
+.device-terminal-open {
+  flex: none;
+  min-width: var(--av-g30);
+  min-height: var(--av-g30);
+  padding-inline: var(--av-g7);
+  font-family: var(--av-mono);
+  font-weight: var(--av-weight-bold);
+}
+
+.home-directory .wsdir {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  color: var(--av-muted);
+  text-align: start;
+}
+
+/* The chevron column exists in every surface that draws tree rows, including
+ * the two here (`.dhead`, `.devhead`) that are not `.wsrow-main` children. */
+.dhead .treehead,
+.devhead .treehead {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--av-g6);
+  min-width: 0;
+}
+
+.directory-sessions-anchor { display: inline-flex; }
+
+.wsrow .directory-sessions-trigger {
+  height: var(--av-control-h-compact);
+  min-height: var(--av-control-h-compact);
+  margin-inline-start: var(--av-g6);
+  padding-inline: var(--av-g6);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-pill);
+  color: var(--av-accent);
+  background: color-mix(in srgb, var(--av-accent) 11%, transparent);
+  font-size: var(--av-font-2xs);
+  font-weight: var(--av-weight-bold);
+}
+
+.wsrow .directory-sessions-trigger:hover {
+  background: color-mix(in srgb, var(--av-accent) 18%, transparent);
+}
+
+.directory-sessions-popover {
+  position: fixed;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-g9);
+  padding: var(--av-g6);
+  background: var(--av-overlay-solid);
+  color: var(--av-fg);
+  box-shadow: var(--av-shadow-sm);
+}
+
+.directory-sessions-resize {
+  position: absolute;
+  inset-block: 0;
+  z-index: 2;
+  width: var(--av-g7);
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.directory-sessions-resize[data-av-resize-edge="left"] { left: 0; }
+.directory-sessions-resize[data-av-resize-edge="right"] { right: 0; }
+.directory-sessions-resize:hover,
+.directory-sessions-resize:focus-visible {
+  background: color-mix(in srgb, var(--av-accent) 25%, transparent);
+}
+
+@supports ((-webkit-backdrop-filter: blur(0)) or (backdrop-filter: blur(0))) {
+  :is(.codex-release-dialog, .composer-options-card, .directory-sessions-popover) {
+    background: var(--av-overlay-material);
+    -webkit-backdrop-filter: var(--av-overlay-filter);
+    backdrop-filter: var(--av-overlay-filter);
+  }
+}
+
+.directory-sessions-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--av-g6);
+  margin: var(--av-g-n2) var(--av-g-n2) var(--av-g3);
+  padding: var(--av-s0) var(--av-s0) var(--av-s1) var(--av-g6);
+  border-bottom: var(--av-hairline) solid var(--av-line);
+  background: var(--av-raised);
+  font-size: var(--av-font-sm);
+  font-weight: var(--av-weight-strong);
+}
+
+.directory-sessions-head .av-button {
+  min-width: var(--av-s5);
+  height: var(--av-s5);
+  padding: 0;
+}
+
+.directory-sessions-list {
+  display: grid;
+  min-height: 0;
+  overflow: auto;
+}
+
+.directory-session {
+  padding: var(--av-s1) 0;
+  border-top: var(--av-hairline) solid var(--av-line);
+}
+
+.directory-session:first-child { border-top: 0; }
+
+.directory-session-depth {
+  display: inline-block;
+  margin: 0 var(--av-s2) var(--av-s0);
+  padding: var(--av-hairline) var(--av-g6);
+  border-radius: var(--av-pill);
+  background: var(--av-canvas);
+  color: var(--av-muted);
+  font-size: var(--av-font-2xs);
+}
+
+/* A session remains the same text role in the recent list and directory
+ * popover. Density changes vertical spacing, not its type scale or left edge. */
+.directory-session .sess { padding: var(--av-s1) var(--av-s2); }
+
+@media (max-width: 720px) {
+  /* This count lives inside the file navigator's deliberately compact row
+   * skeleton, below the global phone touch-target size. Keep the marker
+   * on that skeleton and trim its horizontal chrome so directory labels keep
+   * the available width. */
+  .wsrow .directory-sessions-trigger {
+    height: var(--av-control-h-compact);
+    min-height: var(--av-control-h-compact);
+    margin-inline-start: var(--av-s1);
+    padding-inline: var(--av-s1);
+    gap: var(--av-g3);
+    line-height: 1;
+  }
+  .new-session-chat {
+    width: 100%;
+    padding: var(--av-s2) var(--av-g10) var(--av-s1);
+  }
+  .new-session-stage { padding-top: var(--av-s2); }
+  /* The phone launcher has no transcript yet, so its settings stay visible
+   * under the two-column input + send grid, packed two per line (directory on
+   * its own line) instead of one tall pill per setting. */
+  .run-config-field { height: var(--av-touch-target); }
+  .run-config-wide { flex-basis: 100%; }
+  .new-session-config {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: dense;
+  }
+  .new-session-config > .run-config-field { grid-column: span 1; }
+  .new-session-config > .run-config-wide { grid-column: 1 / -1; }
+  .new-session-config .run-config-field :is(select, input.av-input.ant-input) {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+  }
+  .chat-submit-wide { display: none; }
+  .chat-submit-compact { display: inline; }
+  .detailhead {
+    min-height: var(--av-g28);
+    margin-bottom: var(--av-s0);
+    align-items: center;
+  }
+  .detailhead .title {
+    font-size: var(--av-font-caption);
+    white-space: nowrap;
+  }
+  .detailhead .meta,
+  .windowbar {
+    display: none;
+  }
+  .workspace-reveal-button {
+    display: inline-flex;
+    min-width: var(--av-touch-target);
+    min-height: var(--av-touch-target);
+    max-width: none;
+    padding-inline: var(--av-g10);
+    justify-content: center;
+  }
+  .workspace-reveal-label { display: none; }
+  html[data-av-theme] .command-pane {
+    overflow: visible;
+    padding: 0;
+    background: transparent;
+  }
+  .turn-stop {
+    margin-bottom: var(--av-s2);
+    padding-bottom: var(--av-s2);
+  }
+  .codex-release {
+    align-items: stretch;
+    flex-direction: column;
+    margin: 0 var(--av-s2) var(--av-g6);
+  }
+  .codex-release > .row { justify-content: stretch; }
+  .codex-release > .row .av-button { flex: 1; min-height: var(--av-touch-target); }
+  html[data-av-theme] .composer.composer-compact {
+    position: relative;
+    align-self: stretch;
+    min-height: 0;
+    padding: var(--av-s1) 0;
+    gap: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .composer-entry {
+    grid-template-columns: minmax(0, 1fr) var(--av-g56);
+    grid-template-rows: none;
+    gap: var(--av-g6);
+  }
+  .composer-input-shell {
+    grid-column: auto;
+    grid-row: auto;
+    height: auto;
+  }
+  .composer-entry > .primary {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  html[data-av-theme] .composer-entry .av-textarea.ant-input {
+    width: 100%;
+    min-height: var(--av-g52);
+    max-height: min(24dvh, var(--av-g144));
+    padding: var(--av-g7) var(--av-g48) var(--av-g7) var(--av-g9);
+    border: var(--av-hairline) solid var(--av-line);
+    border-radius: var(--av-g10);
+    background: var(--av-canvas);
+    box-shadow: none;
+    font: var(--av-font-control)/1.45 var(--av-font);
+    resize: none;
+  }
+  .composer-entry > .av-button {
+    width: var(--av-g56);
+    min-width: var(--av-g56);
+    min-height: var(--av-touch-target);
+    padding: 0 var(--av-s2);
+  }
+  .new-session-entry > .chat-upload-button {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: start;
+    width: auto;
+  }
+  .composer-options {
+    right: var(--av-s1);
+    bottom: var(--av-s1);
+  }
+  .composer-options > summary {
+    width: var(--av-touch-target);
+    height: var(--av-touch-target);
+  }
+  .composer-options-card {
+    width: min(var(--av-g340), calc(100vw - var(--av-s5)));
+  }
+  .composer-options-card .row .av-button {
+    min-height: var(--av-touch-target);
+  }
+  .fieldgrid { grid-template-columns: 1fr; }
+  .agent-interaction-card { max-height: 60%; }
+  .agent-interaction-head { align-items: flex-start; }
+  .agent-interaction-actions { flex-wrap: wrap; }
+}
+
+/* Pasted-picture chips above the composer (ticket #201). Same mail-attachment
+ * shape the trusted panel uses; the ✕ is what makes the ref removable, since
+ * the prompt's attachment lines are composed from this list at send time. */
+.chat-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--av-g6);
+  margin: var(--av-s1) 0;
+}
+
+.chat-attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--av-g6);
+  max-width: 100%;
+  padding: var(--av-s0) var(--av-s1) var(--av-s0) var(--av-s2);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-pill);
+  font-size: var(--av-font-label);
+}
+
+.chat-attachment-name {
+  overflow: hidden;
+  color: var(--av-accent);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-attachment-size { color: var(--av-muted); }
+
+.chat-attachment-remove {
+  width: var(--av-g18);
+  height: var(--av-g18);
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--av-muted);
+  font-size: var(--av-font-xs);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.chat-attachment-remove:hover { background: var(--av-canvas); color: var(--av-fg); }
+
+.chat-upload {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--av-s1) var(--av-g6);
+  width: min(100%, 18rem);
+  padding: var(--av-s1) var(--av-s2);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-r-sm);
+  font-size: var(--av-font-label);
+}
+
+.chat-upload-progress { grid-column: 1 / -1; display: flex; }
+.chat-upload-progress progress { width: 100%; accent-color: var(--av-accent); }
+.chat-upload-percent { color: var(--av-muted); font-variant-numeric: tabular-nums; }
+.chat-upload-failed { grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; }
+
+.chat-attachment-note { color: var(--av-muted); font-size: var(--av-font-label); }
+.chat-attachment-bad { color: var(--av-error); font-size: var(--av-font-label); }
+
+/* Search has its own tinted surface; input and primary action remain distinct. */
+.searchpane {
+  padding: var(--av-s2);
+  border: var(--av-hairline) solid color-mix(in srgb, var(--av-accent) 25%, var(--av-line));
+  border-radius: var(--av-r-sm);
+  background: color-mix(in srgb, var(--av-accent) 7%, var(--av-surface));
+}
+.searchpane .tools { margin-bottom: 0; }
+.searchpane .tools input { background: var(--av-surface); }
+.searchpane .tools input:focus-visible {
+  border-color: var(--av-accent);
+  outline: none;
+  box-shadow: var(--av-focus);
+}
+.session-family-card { display: flex; align-items: center; min-width: 0; }
+.session-family-card .sess { flex: 1; min-width: 0; }
+.session-subagents-toggle {
+  flex: none;
+  margin: 0 var(--av-s2) 0 0;
+  padding: var(--av-s1);
+  color: var(--av-accent);
+  font-size: var(--av-font-label);
+}
+.session-subagents {
+  margin: 0 0 var(--av-s1) var(--av-s3);
+  padding-left: var(--av-s1);
+  border-left: var(--av-hairline) solid var(--av-line);
+}
+
+.session-history-control { flex: 0 0 auto; }
+.session-history-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--av-s3); margin-block: var(--av-s3); }
+.session-history-tools :is(label, select) { max-width: 100%; }
+.session-history-list { max-height: 55vh; overflow: auto; overscroll-behavior: contain; }
+
+/* ── navigator (2026-10-22) ──────────────────────────────────────────────────
+ * One rail, three views behind an activity bar: sessions (favorites, folders,
+ * recent, automated), files and full-text search. Every view stays mounted;
+ * only `hidden` changes, so scroll positions and tree expansion survive a
+ * switch. Data anchors (`data-av-navigator`, `data-av-nav-*`) are the test
+ * contract; these classes only style.
+ */
+.navigator {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: var(--av-touch-target) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+.navigator.narrow {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+.activity-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--av-s1);
+  padding: var(--av-s1) 0;
+  border-inline-end: var(--av-hairline) solid var(--av-line);
+}
+.navigator.narrow .activity-bar {
+  flex-direction: row;
+  gap: var(--av-s0);
+  padding: 0 0 var(--av-s1);
+  border-inline-end: 0;
+  border-bottom: var(--av-hairline) solid var(--av-line);
+}
+.activity-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--av-s1);
+  width: var(--av-control-h-lg);
+  height: var(--av-control-h-lg);
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--av-r-sm);
+  background: transparent;
+  color: var(--av-muted);
+  cursor: pointer;
+}
+.activity-tab:hover { color: var(--av-fg); background: var(--av-canvas); }
+.activity-tab[aria-selected="true"] { color: var(--av-fg); }
+.activity-tab[aria-selected="true"]::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--av-g7);
+  inset-inline-start: calc(-1 * var(--av-s1));
+  width: var(--av-s0);
+  border-radius: var(--av-pill);
+  background: var(--av-accent);
+}
+.activity-tab:focus-visible { outline: none; box-shadow: var(--av-focus); }
+.navigator.narrow .activity-tab {
+  flex: 1;
+  width: auto;
+  height: var(--av-touch-target);
+  font-size: var(--av-font-label);
+}
+.navigator.narrow .activity-tab[aria-selected="true"]::before {
+  inset-block: auto 0;
+  inset-inline: var(--av-s3);
+  width: auto;
+  height: var(--av-s0);
+}
+.activity-glyph { flex: none; }
+.navigator-view {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-inline-start: var(--av-s2);
+}
+.navigator.narrow .navigator-view { padding-inline-start: 0; padding-top: var(--av-s1); }
+.navigator-view[hidden] { display: none; }
+/* Search is a whole view here, not a tinted card above the tree. */
+.navigator-view > .searchpane {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--av-s1) 0 0;
+  border: 0;
+  background: transparent;
+}
+.navigator-view > .searchpane .results { max-height: none; }
+.navigator-view > .searchpane .results .hit b {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.session-navigator {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.nav-head {
+  display: flex;
+  align-items: center;
+  gap: var(--av-s1);
+  min-height: var(--av-control-h-lg);
+}
+.nav-head .nav-title {
+  margin: 0 auto 0 0;
+  font-size: var(--av-font-label);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.nav-actions { display: flex; align-items: center; gap: var(--av-s0); }
+.nav-actions .av-button.nav-action,
+.nav-actions .session-history-control .av-button {
+  width: var(--av-control-h-compact);
+  min-width: var(--av-control-h-compact);
+  height: var(--av-control-h-compact);
+  min-height: var(--av-control-h-compact);
+  padding: 0;
+  color: var(--av-muted);
+}
+.nav-actions .av-button.nav-action:hover { color: var(--av-fg); }
+/* Icon actions are borderless in every theme, like an editor's view title bar. */
+.nav-actions .av-button.nav-action.ant-btn,
+.nav-actions .session-history-control .av-button.ant-btn {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.nav-actions .av-button.nav-action.ant-btn:hover,
+.nav-actions .session-history-control .av-button.ant-btn:hover {
+  background: var(--av-canvas);
+}
+.nav-glyph { display: block; }
+.nav-filter { margin: var(--av-s1) 0 var(--av-s2); }
+.nav-selection {
+  display: flex;
+  align-items: center;
+  gap: var(--av-s2);
+  margin-bottom: var(--av-s2);
+  padding: var(--av-s1) var(--av-s2);
+  border-radius: var(--av-r-sm);
+  background: color-mix(in srgb, var(--av-accent) 12%, var(--av-surface));
+  font-size: var(--av-font-label);
+}
+.nav-selection > span { margin-right: auto; font-weight: var(--av-weight-strong); }
+.nav-selection button {
+  min-height: var(--av-control-h);
+  padding: 0 var(--av-s2);
+  font-size: var(--av-font-label);
+}
+.nav-notice {
+  margin: 0 0 var(--av-s2);
+  color: var(--av-error);
+  font-size: var(--av-font-label);
+}
+.nav-scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-bottom: var(--av-s4);
+}
+.nav-section { margin-bottom: var(--av-s1); border-radius: var(--av-r-sm); }
+.nav-section.drop,
+.nav-folder.drop {
+  background: color-mix(in srgb, var(--av-accent) 10%, transparent);
+  box-shadow: inset 0 0 0 var(--av-hairline) color-mix(in srgb, var(--av-accent) 55%, transparent);
+}
+.nav-section-head {
+  display: flex;
+  align-items: center;
+}
+.nav-section-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--av-g5);
+  min-height: var(--av-control-h);
+  padding: 0 var(--av-s1);
+  border: 0;
+  border-radius: var(--av-g6);
+  background: transparent;
+  color: var(--av-muted);
+  font-size: var(--av-font-label);
+  font-weight: var(--av-weight-strong);
+  text-align: start;
+  cursor: pointer;
+}
+.nav-section-toggle:hover { color: var(--av-fg); background: var(--av-canvas); }
+.nav-section-glyph { color: var(--av-warn); }
+.nav-section-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-section-body { padding: var(--av-s0) 0 var(--av-s1); }
+.nav-empty,
+.nav-hint {
+  margin: var(--av-s1) var(--av-s2) var(--av-s2) var(--av-g22);
+  color: var(--av-muted);
+  font-size: var(--av-font-label);
+}
+.nav-hint { margin-top: 0; }
+.nav-folder { border-radius: var(--av-r-sm); }
+.nav-folder-head {
+  display: flex;
+  align-items: center;
+  gap: var(--av-g5);
+  min-height: var(--av-control-h);
+  padding: 0 var(--av-s1);
+  border-radius: var(--av-g6);
+  font-size: var(--av-font-caption);
+  cursor: pointer;
+  user-select: none;
+}
+.nav-folder-head:hover { background: var(--av-canvas); }
+.nav-folder-head:focus-visible { outline: none; box-shadow: var(--av-focus); }
+.nav-folder-head.creating { cursor: default; }
+.nav-folder-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-folder-head .live-dot { margin-right: 0; }
+.nav-folder-items {
+  margin-inline-start: var(--av-g13);
+  padding-inline-start: var(--av-s1);
+  border-inline-start: var(--av-hairline) solid var(--av-line);
+}
+.nav-rename {
+  flex: 1;
+  min-width: 0;
+  height: var(--av-control-h);
+  padding: 0 var(--av-g6);
+  border: var(--av-hairline) solid var(--av-accent);
+  border-radius: var(--av-g6);
+  background: var(--av-surface);
+  color: var(--av-fg);
+  font: inherit;
+}
+.nav-rename:focus-visible { outline: none; box-shadow: var(--av-focus); }
+.session-navigator .sess { position: relative; }
+.session-navigator .sess.chosen {
+  background: color-mix(in srgb, var(--av-accent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--av-accent) 40%, transparent);
+}
+.session-navigator .sess.missing .session-title-text { color: var(--av-muted); }
+.session-navigator .sess[draggable="true"] { cursor: grab; }
+/* Overlays the row's end on hover instead of reserving title width. */
+.sess-menu {
+  position: absolute;
+  top: var(--av-g5);
+  inset-inline-end: var(--av-s1);
+  width: var(--av-g22);
+  min-height: var(--av-g22);
+  height: var(--av-g22);
+  padding: 0;
+  border: 0;
+  border-radius: var(--av-g6);
+  background: var(--av-surface);
+  color: var(--av-muted);
+  line-height: 1;
+  opacity: 0;
+}
+.nav-folder-head { position: relative; }
+.nav-folder-head .sess-menu { top: calc((var(--av-control-h) - var(--av-g22)) / 2); }
+.sess:is(:hover, :focus-within) .sess-menu,
+.nav-folder-head:is(:hover, :focus-within) .sess-menu,
+.sess-menu:focus-visible { opacity: 1; }
+.sess-menu:hover { color: var(--av-fg); background: var(--av-canvas); }
+@media (hover: none) {
+  .sess-menu { opacity: 1; }
+}
+.nav-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: var(--av-g148);
+  max-width: var(--av-g280);
+  max-height: var(--av-g320);
+  overflow: auto;
+  padding: var(--av-s1);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-r-sm);
+  background: var(--av-surface);
+  box-shadow: 0 var(--av-s2) var(--av-s5) color-mix(in srgb, var(--av-fg) 18%, transparent);
+}
+.nav-menu-title {
+  padding: var(--av-s1) var(--av-s2);
+  color: var(--av-muted);
+  font-size: var(--av-font-label);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--av-s3);
+  width: 100%;
+  min-height: var(--av-control-h);
+  padding: 0 var(--av-s2);
+  border: 0;
+  border-radius: var(--av-g6);
+  background: transparent;
+  color: var(--av-fg);
+  text-align: start;
+  font-size: var(--av-font-caption);
+}
+.nav-menu-item:is(:hover, :focus-visible):not(:disabled) {
+  outline: none;
+  background: color-mix(in srgb, var(--av-accent) 14%, transparent);
+}
+.nav-menu-item.danger { color: var(--av-error); }
+.nav-menu-item.back { color: var(--av-muted); }
+.searchpane .hit-meta { color: var(--av-muted); font-size: var(--av-font-label); }

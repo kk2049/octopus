@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "repairs": [
+    {
+      "record_id": "decision:cur:b22:177:13",
+      "fingerprint": "3283e3f12058176b14fd7fc6a99c9a08083cf4aa799b7338e106d1006fd71853",
+      "problem": "wrong_scope",
+      "investigation": {
+        "record_id": "decision:cur:b22:177:13",
+        "original_motivation": "ticket:177#message:666 记录设备侧 tmux 无回执重复键入问题；防重发账本记录已尝试提交。",
+        "proposed_motivation": "工单 611 的 UI 回执查询命中省略设备侧条件的摘要，可能把防重发记账误读为模型已接收。",
+        "proposed_behavior": "同一知识记录补全设备侧防重发账本的对象和不确定条件，明确不能推出 UI 已送达。",
+        "alternatives": "不删除原始决策，也不改为历史失效；原始防重发机制仍有效，问题是摘要丢失适用范围。",
+        "impact": "保留原消息指针、短引文与 Agent 证据层级；UI 接收状态继续依赖原有真实回执。",
+        "verification": "回放原记录与 UI 未确认查询，检查限定语义出现及无范围的旧句不再出现。"
+      },
+      "steps": [
+        {
+          "id": "J001.1",
+          "query": {
+            "code_index": "none",
+            "input_ref": "decision:cur:b22:177:13"
+          },
+          "qrels": [
+            {
+              "match": "record_id",
+              "value": "decision:cur:b22:177:13",
+              "relevance": 3
+            },
+            {
+              "match": "text_contains",
+              "value": "设备侧 tmux 终端重发保护",
+              "relevance": 3
+            }
+          ],
+          "forbidden": [],
+          "expected_unknown": [],
+          "no_answer": false,
+          "max_chars": 7000
+        },
+        {
+          "id": "J001.2",
+          "query": {
+            "code_index": "none",
+            "input_ref": "decision:cur:b22:177:13",
+            "text": "tmux 未确认 UI 显示送达"
+          },
+          "qrels": [
+            {
+              "match": "text_contains",
+              "value": "不证明模型已接收",
+              "relevance": 3
+            }
+          ],
+          "forbidden": [
+            {
+              "text_contains": "未确认的提交按“已送达”记账。"
+            }
+          ],
+          "expected_unknown": [],
+          "no_answer": false,
+          "max_chars": 7000
+        }
+      ]
+    },
+    {
+      "record_id": "requirement:cur:b27:96:5",
+      "fingerprint": "ec3bf141fdc63547bb8b244f8f0ace0043399129c99f0df6b550117ea088f617",
+      "problem": "wrong_scope",
+      "investigation": {
+        "record_id": "requirement:cur:b27:96:5",
+        "original_motivation": "ticket:96 的要求规范 Sessions+ 导航分类，对导航任务仍然有效，应继续保留。",
+        "proposed_motivation": "工单 610 查询 attach_file 上传延迟时，宽泛模块邻居挤入导航与时间线决策，缺少问题相关性。",
+        "proposed_behavior": "具体路径与问题同时存在时，叙述性条目须有实质问题词或明确路径/引用；Sessions+ 等主体名称和宽泛模块邻居不能单独填槽。",
+        "alternatives": "不删除导航记录，也不硬编码屏蔽工单 id；保留无问题的路径浏览及真实直接检索命中。",
+        "impact": "低相关的需求/决策槽可为空并显示缺失；现行原则、机械约束和精确引用继续保留。",
+        "verification": "回放 610 原始路径和上传延迟问题，禁止四条无关摘要；相邻导航查询仍命中原导航要求。"
+      },
+      "steps": [
+        {
+          "id": "J001.1",
+          "query": {
+            "code_index": "none",
+            "paths": [
+              "packages/agent-sessions-view/src/components/AgentChat.tsx",
+              "packages/bot/src/session-plus",
+              "packages/bot/src/session-resource"
+            ],
+            "text": "Session+ attach_file 上传在 99% 等待 30 秒以上，上传处理与资源投影刷新延迟"
+          },
+          "qrels": [
+            {
+              "match": "record_id",
+              "value": "doc:packages/bot/src/session-resource/CLAUDE.md",
+              "relevance": 3
+            }
+          ],
+          "forbidden": [
+            {
+              "record_id": "requirement:cur:b27:96:5"
+            },
+            {
+              "record_id": "decision:cur:b27:138:25"
+            },
+            {
+              "record_id": "decision:cur:b27:138:26"
+            },
+            {
+              "record_id": "decision:cur:b22:101:7"
+            }
+          ],
+          "expected_unknown": [],
+          "no_answer": false,
+          "max_chars": 7000
+        },
+        {
+          "id": "J001.2",
+          "query": {
+            "code_index": "none",
+            "input_ref": "requirement:cur:b27:96:5",
+            "text": "Sessions+ sessions 和具体文件导航分类"
+          },
+          "qrels": [
+            {
+              "match": "record_id",
+              "value": "requirement:cur:b27:96:5",
+              "relevance": 3
+            }
+          ],
+          "forbidden": [],
+          "expected_unknown": [],
+          "no_answer": false,
+          "max_chars": 7000
+        }
+      ]
+    }
+  ]
+}

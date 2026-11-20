@@ -1,0 +1,3 @@
+#!/bin/bash
+# bot-ctl — Claude Bot instance management CLI
+exec npx tsx "$(dirname "$0")/ctl/bot-ctl.ts" "$@"

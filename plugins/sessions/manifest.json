@@ -1,0 +1,12 @@
+{
+  "name": "sessions",
+  "transport": "stdio",
+  "command": "{{node}}",
+  "args": ["{{pluginDir}}/dist/server.js"],
+  "systemPrompt": "## 本机会话调查工具\n\n用于调查用户最近在本机用 Claude Code / Codex / Oh My Pi(omp) 做了什么。会话历史存放在真实用户 home 下的 ~/.claude/projects、~/.codex/sessions 和 ~/.omp/agent/sessions。\n\n可用工具：\n- list_recent_sessions：按最近活动倒序列出最近的会话（可按 source=claude|codex|omp|all、limit、since_hours 过滤），返回每个会话的项目/工作目录、起止时间、消息数、首条用户提问和最新预览。先用它了解全貌。\n- read_session：读取某个会话的完整对话（用 id 或 path 定位，max_messages 控制返回最近多少条），把内容拍平成 role/text，工具调用压成 tool: name。\n- search_sessions：在全部会话的文本里做不区分大小写的子串搜索（从最新到最旧，分页），返回命中的会话摘要和命中片段；回答带 next_cursor 时把它作为 cursor 再调用即可继续搜索更早的会话，直到 complete=true。\n\n扫描根目录优先取环境变量 SESSIONS_HOME，回退 $HOME；每个工具也接受可选 home 参数覆盖。",
+  "allowedTools": [
+    "mcp__sessions__list_recent_sessions",
+    "mcp__sessions__read_session",
+    "mcp__sessions__search_sessions"
+  ]
+}

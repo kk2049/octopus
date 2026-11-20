@@ -1,0 +1,37 @@
+# Synthetic demo data for the probe. Replayed into data/apps/hq/<scope>/log.jsonl
+# on first boot only (delete the data dir to re-seed).
+scopes:
+  lht:
+    - { type: project_created, by: "user:lht", at: "2026-07-20T09:00:00Z",
+        data: { slug: v3-probe, title: 秘书网络 v3 探针, one_liner: 引擎假设的可证伪试验, ddl: "2026-08-05" } }
+    - { type: project_created, by: "user:lht", at: "2026-07-21T02:00:00Z",
+        data: { slug: octopus-rl, title: 论文 Octopus-RL, one_liner: RL 训练收敛性研究, ddl: "2026-09-15" } }
+    - { type: item_added, by: "user:lht", at: "2026-07-21T03:00:00Z",
+        data: { id: it-1, project: v3-probe, bucket: run, text: 引擎核心三原语（store/dispatch/projection） } }
+    - { type: item_added, by: "user:lht", at: "2026-07-21T03:01:00Z",
+        data: { id: it-2, project: v3-probe, bucket: verify, text: 飞书渲染器 golden 测试 } }
+    - { type: item_added, by: "user:lht", at: "2026-07-21T03:02:00Z",
+        data: { id: it-3, project: v3-probe, bucket: todo, text: 工单应用移植到引擎 } }
+    - { type: item_added, by: "user:lht", at: "2026-07-22T08:00:00Z",
+        data: { id: it-4, project: octopus-rl, bucket: block, text: 等 A100 配额审批（第 9 天） } }
+    - { type: item_added, by: "user:lht", at: "2026-07-22T08:05:00Z",
+        data: { id: it-5, project: octopus-rl, bucket: run, text: baseline 复现（PPO/GRPO 各一版） } }
+    - { type: item_added, by: "user:lht", at: "2026-07-23T01:00:00Z",
+        data: { id: it-6, project: octopus-rl, bucket: block, text: 数据集授权邮件待回复 } }
+    - { type: item_status, by: "user:lht", at: "2026-07-25T10:00:00Z",
+        data: { id: it-1, closed: false, bucket: verify } }
+    - { type: plan_added, by: "user:lht", at: "2026-07-24T02:00:00Z",
+        data: { id: pl-1, project: v3-probe, at: "2026-07-26", text: 跑通 dispatch 串行化压测 } }
+    - { type: plan_added, by: "user:lht", at: "2026-07-24T02:01:00Z",
+        data: { id: pl-2, project: v3-probe, at: "2026-07-27", text: 三应用之一上引擎 } }
+    - { type: plan_added, by: "user:lht", at: "2026-07-24T02:02:00Z",
+        data: { id: pl-3, project: octopus-rl, at: "2026-08-01", text: 与导师过一遍实验矩阵 } }
+    - { type: plan_added, by: "user:lht", at: "2026-07-24T02:03:00Z",
+        data: { id: pl-4, project: octopus-rl, at: 周末找空, text: 整理实验日志成周报 } }
+    - { type: note_added, by: "user:lht", at: "2026-07-25T15:00:00Z",
+        data: { project: v3-probe, text: dispatch 的串行链设计比预想的干净——race 用结构消灭，不写锁。 } }
+    - { type: note_added, by: "agent:hq/page@lht", at: "2026-07-26T04:00:00Z",
+        data: { project: "", text: "巡检：A100 配额已卡 8 天，建议今天升级催办渠道；v3 探针两条计划集中在本周末，注意串行。" } }
+  bob:
+    - { type: project_created, by: "user:bob", at: "2026-07-25T09:00:00Z",
+        data: { slug: demo, title: bob 的演示项目, one_liner: 用来测跨用户隔离 } }

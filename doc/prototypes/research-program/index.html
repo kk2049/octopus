@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fieldnote · 科研项目工作台原型</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #15231d;
+        --muted: #64736b;
+        --paper: #f6f5ef;
+        --panel: #fffef9;
+        --line: #d9ddd4;
+        --forest: #1f6247;
+        --forest-dark: #174a37;
+        --mint: #dceee4;
+        --amber: #b9632d;
+        --amber-soft: #fff0df;
+        --danger: #a43a3a;
+        --danger-soft: #fff0ee;
+        --blue: #275f84;
+        --shadow: 0 18px 55px rgba(36, 54, 45, 0.09);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; color: var(--ink); background: var(--paper); }
+      button, select, input { font: inherit; }
+      button, select, input, [tabindex] { outline-offset: 3px; }
+      :focus-visible { outline: 3px solid #4b9dcc; }
+      button { cursor: pointer; }
+      button:disabled { cursor: not-allowed; opacity: 0.55; }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+      .app { min-height: 100vh; display: grid; grid-template-columns: 286px minmax(0, 1fr); }
+      .rail { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; background: #18392d; color: #f5fbf7; border-right: 1px solid #294d40; }
+      .brand { padding: 24px 22px 18px; display: flex; gap: 12px; align-items: center; border-bottom: 1px solid rgba(255,255,255,.11); }
+      .brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 11px 11px 18px 11px; background: #f5c269; color: #17392d; font-weight: 900; }
+      .brand strong { display: block; font-size: 15px; letter-spacing: .02em; }
+      .brand span { display: block; margin-top: 2px; color: #bcd0c7; font-size: 12px; }
+      .rail-head { padding: 18px 18px 8px; display: flex; align-items: center; justify-content: space-between; }
+      .rail-head span { color: #bcd0c7; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+      .icon-button { border: 1px solid rgba(255,255,255,.18); border-radius: 9px; background: transparent; color: inherit; width: 32px; height: 32px; }
+      .projects { padding: 0 10px 18px; overflow: auto; flex: 1; }
+      .portfolio-label { padding: 14px 10px 7px; color: #8fb0a1; font-size: 11px; font-weight: 750; }
+      .project { width: 100%; border: 0; border-radius: 12px; padding: 11px 10px; display: grid; grid-template-columns: 10px 1fr auto; gap: 9px; align-items: start; background: transparent; color: #eef6f1; text-align: left; }
+      .project:hover { background: rgba(255,255,255,.07); }
+      .project.active { background: #2b5645; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+      .project-dot { width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: #66c28e; }
+      .project-dot.warn { background: #f0af61; }
+      .project-dot.quiet { background: #91a69c; }
+      .project-name { display: block; font-weight: 720; font-size: 13px; }
+      .project-agent { display: block; margin-top: 4px; color: #bdd0c8; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .project-count { margin-top: 1px; min-width: 21px; height: 20px; padding: 0 6px; display: grid; place-items: center; border-radius: 10px; background: rgba(255,255,255,.11); color: #dce8e2; font-size: 10px; }
+      .rail-foot { padding: 14px 18px 18px; border-top: 1px solid rgba(255,255,255,.11); color: #bcd0c7; font-size: 11px; line-height: 1.5; }
+
+      .main { min-width: 0; }
+      .prototype-bar { min-height: 44px; padding: 8px 24px; display: flex; gap: 12px; align-items: center; justify-content: space-between; background: #fffae9; border-bottom: 1px solid #eadfb9; color: #695c31; font-size: 12px; }
+      .prototype-bar strong { color: #493f20; }
+      .fixture-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+      .fixture-controls label { display: flex; align-items: center; gap: 5px; }
+      .fixture-controls select { min-height: 28px; border: 1px solid #d4c99f; border-radius: 7px; background: #fffdf3; color: #493f20; font-size: 11px; }
+
+      .workspace { padding: 28px clamp(20px, 3vw, 44px) 48px; }
+      .project-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: end; }
+      .eyebrow { color: var(--forest); font-size: 11px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+      h1 { margin: 7px 0 7px; font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(27px, 3vw, 40px); line-height: 1.07; letter-spacing: -.02em; }
+      .project-meta { color: var(--muted); font-size: 13px; }
+      .header-actions { display: flex; gap: 8px; }
+      .button { min-height: 38px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font-weight: 720; font-size: 12px; }
+      .button:hover { border-color: #aeb9b1; }
+      .button.primary { border-color: var(--forest); background: var(--forest); color: white; }
+      .button.primary:hover { background: var(--forest-dark); }
+      .button.subtle { background: transparent; }
+      .button.danger { color: var(--danger); }
+
+      .current-strip { margin-top: 24px; display: grid; grid-template-columns: minmax(250px, .8fr) minmax(340px, 1.2fr); gap: 12px; }
+      .current { min-width: 0; padding: 15px 16px; display: grid; grid-template-columns: 39px minmax(0, 1fr) auto; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,254,249,.76); }
+      .current-icon { width: 39px; height: 39px; display: grid; place-items: center; border-radius: 12px; background: var(--mint); color: var(--forest); font-weight: 900; }
+      .current.document .current-icon { background: #e8ebf4; color: #4e5f8b; }
+      .current-label { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+      .current-value { margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 760; }
+      .current-detail { margin-top: 2px; color: var(--muted); font-size: 11px; }
+      .link-button { padding: 5px; border: 0; background: transparent; color: var(--forest); font-size: 12px; font-weight: 800; }
+
+      .status-banner { display: none; margin-top: 14px; padding: 13px 15px; border: 1px solid; border-radius: 12px; font-size: 12px; line-height: 1.45; }
+      .status-banner.show { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+      .status-banner.pending { border-color: #dfbd84; background: var(--amber-soft); color: #7c461f; }
+      .status-banner.refused { border-color: #e2aaa2; background: var(--danger-soft); color: #7d2e2e; }
+
+      .content-grid { margin-top: 18px; display: grid; grid-template-columns: minmax(0, 1.36fr) minmax(330px, .64fr); gap: 18px; align-items: start; }
+      .surface { border: 1px solid var(--line); border-radius: 17px; background: var(--panel); box-shadow: var(--shadow); overflow: hidden; }
+      .surface-head { min-height: 60px; padding: 13px 17px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid var(--line); }
+      .surface-title { min-width: 0; }
+      .surface-title strong { display: block; font-size: 13px; }
+      .surface-title span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .tabs { display: flex; gap: 3px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: #f2f2ec; }
+      .tab { min-height: 28px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); font-size: 11px; font-weight: 720; }
+      .tab[aria-selected="true"] { background: white; color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+
+      .chat { min-height: 565px; max-height: 68vh; overflow: auto; scroll-behavior: smooth; }
+      .day { padding: 15px 18px 6px; color: #88938d; font-size: 10px; font-weight: 750; text-align: center; }
+      .message { padding: 12px 18px; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 11px; }
+      .message + .message { border-top: 1px solid #eef0ea; }
+      .avatar { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; background: #e7eee9; color: var(--forest); font-size: 11px; font-weight: 900; }
+      .message.agent .avatar { background: #17392d; color: #f2c674; }
+      .message-head { display: flex; gap: 8px; align-items: baseline; }
+      .message-head strong { font-size: 12px; }
+      .message-head time { color: #8b9690; font-size: 10px; }
+      .message-body { margin-top: 5px; color: #34423b; font-size: 13px; line-height: 1.58; }
+      .intent-link { margin-top: 9px; width: 100%; padding: 11px 12px; display: grid; grid-template-columns: 30px minmax(0,1fr) auto; gap: 10px; align-items: center; border: 1px solid #cad9d1; border-radius: 11px; background: #f3faf6; color: var(--ink); text-align: left; }
+      .intent-link:hover { border-color: #82aa95; }
+      .file-type { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: white; color: var(--blue); font-size: 10px; font-weight: 900; }
+      .intent-link strong { display: block; font-size: 11px; }
+      .intent-link span { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
+      .intent-link b { color: var(--forest); font-size: 11px; }
+      .thinking { margin-top: 8px; border-left: 2px solid #cbd4ce; padding-left: 10px; color: #718078; font-size: 11px; }
+
+      .doc-body { min-height: 565px; max-height: 68vh; overflow: auto; }
+      .doc-cover { padding: 22px 20px 18px; border-bottom: 1px solid var(--line); background: linear-gradient(145deg, #f1f4ed, #fffdf5); }
+      .doc-cover h2 { margin: 7px 0 6px; font-family: Georgia, "Noto Serif SC", serif; font-size: 23px; line-height: 1.2; }
+      .doc-cover p { margin: 0; color: var(--muted); font-size: 11px; }
+      .doc-section { padding: 18px 20px; }
+      .doc-section + .doc-section { border-top: 1px solid #eceee8; }
+      .doc-section h3 { margin: 0 0 9px; font-size: 12px; }
+      .doc-section p, .doc-section li { color: #435149; font-size: 12px; line-height: 1.58; }
+      .doc-section ul { margin: 0; padding-left: 18px; }
+      .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+      .metric { padding: 10px; border-radius: 10px; background: #f1f4ee; }
+      .metric b { display: block; font-size: 18px; }
+      .metric span { color: var(--muted); font-size: 9px; }
+      .callout { padding: 11px 12px; border-left: 3px solid var(--amber); background: var(--amber-soft); color: #684220; font-size: 11px; line-height: 1.5; }
+
+      .panel { display: none; }
+      .panel.active { display: block; }
+      .history-list, .member-list { margin: 0; padding: 0; list-style: none; }
+      .history-item, .member-item { padding: 15px 18px; display: grid; grid-template-columns: 32px minmax(0,1fr) auto; gap: 11px; align-items: start; border-bottom: 1px solid #eceee8; }
+      .history-mark { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: #edf1eb; color: var(--forest); font-weight: 850; font-size: 10px; }
+      .history-item strong, .member-item strong { display: block; font-size: 12px; }
+      .history-item p, .member-item p { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+      .history-item time { color: #87928c; font-size: 10px; }
+      .member-avatar { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; background: #e4ebe7; font-size: 10px; font-weight: 900; }
+      .role-pill { padding: 4px 8px; border-radius: 999px; background: #edf1eb; color: #526159; font-size: 9px; font-weight: 800; }
+
+      .empty { min-height: 460px; padding: 60px 28px; display: grid; place-items: center; text-align: center; }
+      .empty-inner { max-width: 370px; }
+      .empty-icon { margin: 0 auto 16px; width: 54px; height: 54px; display: grid; place-items: center; border-radius: 18px; background: var(--mint); color: var(--forest); font-size: 22px; }
+      .empty h2 { margin: 0 0 8px; font-family: Georgia, "Noto Serif SC", serif; }
+      .empty p { margin: 0 0 18px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+
+      dialog { width: min(520px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--line); border-radius: 17px; color: var(--ink); background: var(--panel); box-shadow: 0 28px 90px rgba(20,35,28,.24); }
+      dialog::backdrop { background: rgba(13, 28, 22, .55); backdrop-filter: blur(2px); }
+      .dialog-head { padding: 18px 20px 14px; display: flex; align-items: start; justify-content: space-between; border-bottom: 1px solid var(--line); }
+      .dialog-head h2 { margin: 0; font-family: Georgia, "Noto Serif SC", serif; font-size: 21px; }
+      .dialog-head p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+      .dialog-close { width: 31px; height: 31px; border: 0; border-radius: 8px; background: #eff1ec; color: var(--ink); }
+      .dialog-body { padding: 18px 20px; }
+      .field { display: grid; gap: 6px; margin-bottom: 15px; }
+      .field label { font-size: 11px; font-weight: 800; }
+      .field select, .field input { width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid #cdd3cc; border-radius: 9px; background: white; color: var(--ink); }
+      .field small { color: var(--muted); font-size: 10px; line-height: 1.45; }
+      .scope-note { padding: 11px 12px; border-radius: 10px; background: #eef4f0; color: #3f574b; font-size: 10px; line-height: 1.5; }
+      .dialog-foot { padding: 14px 20px 18px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--line); }
+      .notice { min-height: 18px; margin-top: 8px; color: var(--danger); font-size: 11px; }
+
+      [data-role-hidden="true"] { display: none !important; }
+
+      @media (max-width: 900px) {
+        .app { grid-template-columns: 1fr; }
+        .rail { position: relative; height: auto; max-width: 100vw; }
+        .brand { padding: 14px 16px; }
+        .rail-head, .rail-foot, .portfolio-label { display: none; }
+        .projects { padding: 9px 12px 12px; display: flex; gap: 7px; overflow-x: auto; }
+        .project { min-width: 210px; max-width: 240px; background: rgba(255,255,255,.05); }
+        .prototype-bar { padding: 9px 14px; align-items: flex-start; flex-direction: column; }
+        .project-header { grid-template-columns: 1fr; align-items: start; }
+        .header-actions { flex-wrap: wrap; }
+        .current-strip { grid-template-columns: 1fr; }
+        .content-grid { grid-template-columns: 1fr; }
+        .chat, .doc-body { max-height: none; min-height: 0; }
+      }
+
+      @media (max-width: 520px) {
+        .workspace { padding: 21px 13px 36px; }
+        .project-header { gap: 15px; }
+        .header-actions { display: grid; grid-template-columns: 1fr 1fr; }
+        .header-actions .button:last-child { grid-column: 1 / -1; }
+        .current { grid-template-columns: 36px minmax(0,1fr) auto; padding: 12px; }
+        .content-grid { gap: 13px; }
+        .surface-head { align-items: flex-start; flex-direction: column; }
+        .tabs { width: 100%; overflow-x: auto; }
+        .tab { flex: 1; white-space: nowrap; }
+        .message { padding: 12px 13px; }
+        .doc-cover, .doc-section { padding-left: 15px; padding-right: 15px; }
+        .metric-row { grid-template-columns: 1fr; }
+        .status-banner.show { align-items: flex-start; flex-direction: column; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="rail" aria-label="科研项目导航">
+        <div class="brand"><div class="brand-mark" aria-hidden="true">F</div><div><strong>Fieldnote</strong><span>自主科研项目台</span></div></div>
+        <div class="rail-head"><span>资助项目</span><button class="icon-button owner-only" aria-label="创建科研项目">＋</button></div>
+        <nav class="projects" aria-label="按项目组合分组">
+          <div class="portfolio-label">活跃研究</div>
+          <button class="project active" data-project="ocean"><i class="project-dot"></i><span><span class="project-name">深海蛋白折叠</span><span class="project-agent">主导 · Aster / 第 48 轮</span></span><span class="project-count">3</span></button>
+          <button class="project" data-project="battery"><i class="project-dot warn"></i><span><span class="project-name">钠离子界面</span><span class="project-agent">待确认主导文档</span></span><span class="project-count">1</span></button>
+          <button class="project" data-project="climate"><i class="project-dot"></i><span><span class="project-name">城市热岛反演</span><span class="project-agent">主导 · Kepler / 第 19 轮</span></span><span class="project-count">2</span></button>
+          <div class="portfolio-label">归档</div>
+          <button class="project" data-project="archive"><i class="project-dot quiet"></i><span><span class="project-name">催化剂先导筛选</span><span class="project-agent">只读 · 2026-07-12 结项</span></span><span class="project-count">0</span></button>
+        </nav>
+        <div class="rail-foot">每个项目是独立授权单位。项目成员、工作目录与 agent 绑定不会跨项目继承。</div>
+      </aside>
+
+      <main class="main">
+        <div class="prototype-bar">
+          <span><strong>交互原型</strong> · 仅使用虚构数据，不会保存、邀请或绑定任何对象</span>
+          <div class="fixture-controls" aria-label="原型状态切换">
+            <label>角色 <select id="roleFixture"><option value="owner">负责人</option><option value="member">协作者</option><option value="visitor">只读访客</option></select></label>
+            <label>状态 <select id="stateFixture"><option value="normal">正常</option><option value="pending">绑定处理中</option><option value="refused">绑定被拒绝</option><option value="empty">首次使用</option><option value="terminal">项目已结项</option></select></label>
+          </div>
+        </div>
+
+        <div class="workspace">
+          <header class="project-header">
+            <div><div class="eyebrow">国家自然探索基金 · NF-26-041</div><h1 id="projectTitle">深海蛋白折叠</h1><div class="project-meta" id="projectMeta">负责人 林晗 · 4 位成员 · 最近活动 8 分钟前</div></div>
+            <div class="header-actions owner-only"><button class="button" data-open="historyDialog">绑定历史</button><button class="button" data-tab-target="members">成员与权限</button><button class="button primary" data-open="inviteDialog">邀请成员</button></div>
+          </header>
+
+          <section class="current-strip" aria-label="当前项目主导对象">
+            <article class="current"><div class="current-icon" aria-hidden="true">A</div><div><div class="current-label">当前主导 Agent</div><div class="current-value" id="leadAgent">Aster · hypothesis-orchestrator</div><div class="current-detail">会话 第 48 轮 · 运行于 project scope</div></div><button class="link-button owner-only binding-action" data-open="agentDialog">切换</button></article>
+            <article class="current document"><div class="current-icon" aria-hidden="true">§</div><div><div class="current-label">当前状态文档</div><div class="current-value" id="leadDocument">阶段 3：低温结构域验证</div><div class="current-detail">reports/phase-3-status.md · 12 分钟前更新</div></div><button class="link-button owner-only binding-action" data-open="documentDialog">切换</button></article>
+          </section>
+
+          <div id="pendingBanner" class="status-banner pending" role="status"><span><strong>正在提交主导绑定</strong> · 当前选择保持不变，完成前不能重复提交。</span><button class="button subtle" disabled>处理中…</button></div>
+          <div id="refusedBanner" class="status-banner refused" role="alert"><span><strong>绑定未被接受</strong> · 所选 agent 尚未挂载本项目工作目录。你的选择已保留，可检查范围后重试。</span><button class="button" data-open="agentDialog">检查并重试</button></div>
+
+          <section class="content-grid" id="normalContent">
+            <article class="surface">
+              <div class="surface-head"><div class="surface-title"><strong>最新主导会话</strong><span>Aster / research-lead · session rs_48</span></div><div class="tabs" role="tablist" aria-label="项目信息"><button class="tab" role="tab" aria-selected="true" data-tab="chat">会话</button><button class="tab" role="tab" aria-selected="false" data-tab="history">主导历史</button><button class="tab" role="tab" aria-selected="false" data-tab="members">成员</button></div></div>
+              <div class="panel active" id="panel-chat" role="tabpanel">
+                <div class="chat" tabindex="0" aria-label="最新主导会话转录">
+                  <div class="day">今天 · 第 48 轮</div>
+                  <article class="message"><div class="avatar">LH</div><div><div class="message-head"><strong>林晗</strong><time>12:41</time></div><div class="message-body">把低温组的结构域置信区间补齐，并核对上周异常样本是否会改变阶段结论。</div></div></article>
+                  <article class="message agent"><div class="avatar">AS</div><div><div class="message-head"><strong>Aster</strong><time>12:44</time></div><div class="message-body">已将异常样本分成制备偏差与模型外推两组。主要结论不变，但第二结构域的可信下界从 0.71 调整到 0.66。</div><div class="thinking">思考摘要 · 对 4 个候选解释做了反事实比较，排除仪器漂移作为共同原因。</div><button class="intent-link" aria-label="打开阶段三状态文档的异常样本小节"><span class="file-type">MD</span><span><strong>阶段 3：低温结构域验证</strong><span>reports/phase-3-status.md · § 异常样本复核</span></span><b>打开 →</b></button></div></article>
+                  <article class="message"><div class="avatar">QZ</div><div><div class="message-head"><strong>邱真</strong><time>12:52</time></div><div class="message-body">建议在明天的湿实验前冻结 v6 数据集；我已把三条排除标准写进复核记录。</div></div></article>
+                  <article class="message agent"><div class="avatar">AS</div><div><div class="message-head"><strong>Aster</strong><time>13:06</time></div><div class="message-body">下一步已收敛为两个动作：冻结 v6 清单；对 14 个边界样本追加盲判。我会在两项都有证据后再建议推进里程碑。</div><button class="intent-link" aria-label="打开边界样本清单"><span class="file-type">CSV</span><span><strong>边界样本盲判清单</strong><span>datasets/borderline-v6.csv · 14 行</span></span><b>打开 →</b></button></div></article>
+                </div>
+              </div>
+              <div class="panel" id="panel-history" role="tabpanel">
+                <ol class="history-list"><li class="history-item"><span class="history-mark">A</span><div><strong>Aster 成为主导 agent</strong><p>由林晗切换；接替 Darwin，绑定会话 rs_48。</p></div><time>今天 09:12</time></li><li class="history-item"><span class="history-mark">§</span><div><strong>阶段 3 报告成为主导文档</strong><p>由 Aster 通过项目端口提议，林晗确认。</p></div><time>昨天 18:30</time></li><li class="history-item"><span class="history-mark">D</span><div><strong>Darwin 完成阶段 2 主导</strong><p>保留原会话与文档引用，只读可追溯。</p></div><time>08-21</time></li></ol>
+              </div>
+              <div class="panel" id="panel-members" role="tabpanel">
+                <ul class="member-list"><li class="member-item"><span class="member-avatar">LH</span><div><strong>林晗</strong><p>项目负责人 · 可管理成员、绑定与项目设置</p></div><span class="role-pill">Owner</span></li><li class="member-item"><span class="member-avatar">QZ</span><div><strong>邱真</strong><p>协作者 · 可查看会话和文档，可在已授予范围内操作</p></div><span class="role-pill">Member</span></li><li class="member-item"><span class="member-avatar">MW</span><div><strong>Mina Wu</strong><p>观察员 · 仅可查看允许公开的项目状态</p></div><span class="role-pill">Viewer</span></li></ul>
+              </div>
+            </article>
+
+            <aside class="surface" aria-label="当前状态文档">
+              <div class="surface-head"><div class="surface-title"><strong>现状汇报</strong><span>主导文档 · 自动定位到最新摘要</span></div><button class="button">在文件中打开</button></div>
+              <div class="doc-body">
+                <div class="doc-cover"><div class="eyebrow">Milestone 3 / 5</div><h2>低温结构域验证</h2><p>Owner: Aster · 更新于 2026-08-27 13:02</p></div>
+                <section class="doc-section"><h3>阶段判断</h3><p>核心折叠路径在低温组保持稳定。异常样本降低第二结构域下界，但不足以推翻当前机制假设。</p></section>
+                <section class="doc-section"><div class="metric-row"><div class="metric"><b>0.82</b><span>核心置信度</span></div><div class="metric"><b>14</b><span>待盲判样本</span></div><div class="metric"><b>2 / 3</b><span>退出条件完成</span></div></div></section>
+                <section class="doc-section"><h3>下一步</h3><ul><li>冻结 v6 数据与排除标准</li><li>完成边界样本双盲复核</li><li>湿实验前生成 go / hold 建议</li></ul></section>
+                <section class="doc-section"><div class="callout"><strong>风险：</strong>样本制备批次仍与温度条件弱相关。未解除前，不应把相关性写成因果结论。</div></section>
+              </div>
+            </aside>
+          </section>
+
+          <section class="surface empty" id="emptyContent" hidden><div class="empty-inner"><div class="empty-icon" aria-hidden="true">⌁</div><h2>先建立项目的第一个主导点</h2><p>绑定一个已获项目范围的 agent，再选择一份状态文档。两项都完成后，成员进入项目就会直接看到最新会话与现状。</p><button class="button primary owner-only" data-open="agentDialog">绑定主导 agent</button></div></section>
+        </div>
+      </main>
+    </div>
+
+    <dialog id="agentDialog" aria-labelledby="agentDialogTitle">
+      <form method="dialog" id="agentForm"><div class="dialog-head"><div><h2 id="agentDialogTitle">切换主导 agent</h2><p>只显示已经绑定到“深海蛋白折叠”授权范围的 agent。</p></div><button class="dialog-close" value="cancel" aria-label="关闭">×</button></div><div class="dialog-body"><div class="field"><label for="agentChoice">主导 agent</label><select id="agentChoice" required><option value="aster">Aster · hypothesis-orchestrator（当前）</option><option value="darwin">Darwin · evidence-scout</option><option value="tesla">Tesla · wetlab-planner</option></select><small>切换只改变项目入口与主导记录，不会删除旧会话，也不会授予新权限。</small></div><div class="field"><label for="agentReason">切换说明</label><input id="agentReason" value="由证据汇总转入实验规划" autocomplete="off" /></div><div class="scope-note">项目范围：NF-26-041。agent 的身份、工作目录挂载和工具权限由可信项目绑定决定，不能在此表单中声明。</div><div class="notice" id="agentNotice" aria-live="polite"></div></div><div class="dialog-foot"><button class="button" value="cancel">取消</button><button class="button primary" id="agentSubmit" value="default">提交绑定（原型）</button></div></form>
+    </dialog>
+
+    <dialog id="documentDialog" aria-labelledby="documentDialogTitle">
+      <form method="dialog" id="documentForm"><div class="dialog-head"><div><h2 id="documentDialogTitle">切换主导文档</h2><p>成员进入项目时默认打开的现状汇报。</p></div><button class="dialog-close" value="cancel" aria-label="关闭">×</button></div><div class="dialog-body"><div class="field"><label for="documentChoice">项目内文档</label><select id="documentChoice" required><option>reports/phase-3-status.md（当前）</option><option>reports/wetlab-readiness.md</option><option>decisions/sample-exclusions.md</option></select><small>原文档会留在历史中。路径仅作为显示值；原型不会读取文件。</small></div><div class="field"><label for="documentReason">绑定说明</label><input id="documentReason" value="阶段入口转为湿实验准备" autocomplete="off" /></div><div class="notice" id="documentNotice" aria-live="polite"></div></div><div class="dialog-foot"><button class="button" value="cancel">取消</button><button class="button primary" value="default">提交绑定（原型）</button></div></form>
+    </dialog>
+
+    <dialog id="inviteDialog" aria-labelledby="inviteDialogTitle">
+      <form method="dialog" id="inviteForm"><div class="dialog-head"><div><h2 id="inviteDialogTitle">邀请项目成员</h2><p>成员资格只适用于当前资助项目。</p></div><button class="dialog-close" value="cancel" aria-label="关闭">×</button></div><div class="dialog-body"><div class="field"><label for="inviteIdentity">账号或邮箱</label><input id="inviteIdentity" type="email" placeholder="researcher@example.org" autocomplete="off" required /></div><div class="field"><label for="inviteRole">项目角色</label><select id="inviteRole"><option>协作者 · 可读写已授权资源</option><option>观察员 · 只读项目状态</option></select><small>邀请不会自动暴露其它项目、历史私密会话或未挂载的工作目录。</small></div><div class="scope-note">邀请需由受邀人接受。原型不发送消息，也不模拟接受成功。</div><div class="notice" id="inviteNotice" aria-live="polite"></div></div><div class="dialog-foot"><button class="button" value="cancel">取消</button><button class="button primary" value="default">生成邀请（原型）</button></div></form>
+    </dialog>
+
+    <dialog id="historyDialog" aria-labelledby="historyDialogTitle"><div class="dialog-head"><div><h2 id="historyDialogTitle">绑定历史</h2><p>主导 agent 与主导文档按发生顺序保留。</p></div><button class="dialog-close" data-close="historyDialog" aria-label="关闭">×</button></div><ol class="history-list"><li class="history-item"><span class="history-mark">A</span><div><strong>Aster / rs_48</strong><p>当前 · 由林晗切换</p></div><time>今天 09:12</time></li><li class="history-item"><span class="history-mark">§</span><div><strong>reports/phase-3-status.md</strong><p>当前 · 由 Aster 提议，林晗确认</p></div><time>昨天 18:30</time></li><li class="history-item"><span class="history-mark">D</span><div><strong>Darwin / rs_42</strong><p>历史主导 agent · 保留只读引用</p></div><time>08-21</time></li></ol><div class="dialog-foot"><button class="button" data-close="historyDialog">关闭</button></div></dialog>
+
+    <script>
+      const roleSelect = document.querySelector('#roleFixture');
+      const stateSelect = document.querySelector('#stateFixture');
+      const normalContent = document.querySelector('#normalContent');
+      const emptyContent = document.querySelector('#emptyContent');
+      const pendingBanner = document.querySelector('#pendingBanner');
+      const refusedBanner = document.querySelector('#refusedBanner');
+      const projectTitle = document.querySelector('#projectTitle');
+      const projectMeta = document.querySelector('#projectMeta');
+
+      const projects = {
+        ocean: ['深海蛋白折叠', '负责人 林晗 · 4 位成员 · 最近活动 8 分钟前', 'normal'],
+        battery: ['钠离子界面', '负责人 林晗 · 2 位成员 · 尚未绑定主导文档', 'empty'],
+        climate: ['城市热岛反演', '负责人 Mina Wu · 5 位成员 · 最近活动 26 分钟前', 'normal'],
+        archive: ['催化剂先导筛选', '已于 2026-07-12 结项 · 所有操作只读', 'terminal']
+      };
+
+      function applyFixtures() {
+        const role = roleSelect.value;
+        const state = stateSelect.value;
+        document.querySelectorAll('.owner-only').forEach(el => el.dataset.roleHidden = String(role !== 'owner'));
+        document.querySelectorAll('.binding-action, dialog button[value="default"]').forEach(el => el.disabled = state === 'pending' || state === 'terminal' || role !== 'owner');
+        normalContent.hidden = state === 'empty';
+        emptyContent.hidden = state !== 'empty';
+        pendingBanner.classList.toggle('show', state === 'pending');
+        refusedBanner.classList.toggle('show', state === 'refused');
+        if (state === 'terminal') projectMeta.textContent = '已于 2026-07-12 结项 · 所有项目内容只读';
+      }
+
+      roleSelect.addEventListener('change', applyFixtures);
+      stateSelect.addEventListener('change', applyFixtures);
+      document.querySelectorAll('.project').forEach(button => button.addEventListener('click', () => {
+        document.querySelectorAll('.project').forEach(p => p.classList.toggle('active', p === button));
+        const [title, meta, state] = projects[button.dataset.project];
+        projectTitle.textContent = title;
+        projectMeta.textContent = meta;
+        stateSelect.value = state;
+        applyFixtures();
+      }));
+
+      document.querySelectorAll('[data-open]').forEach(button => button.addEventListener('click', () => {
+        const dialog = document.getElementById(button.dataset.open);
+        if (dialog && !button.disabled) dialog.showModal();
+      }));
+      document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.close).close()));
+
+      document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(item => item.setAttribute('aria-selected', String(item === tab)));
+        document.querySelectorAll('.panel').forEach(panel => panel.classList.toggle('active', panel.id === `panel-${tab.dataset.tab}`));
+      }));
+      document.querySelectorAll('[data-tab-target]').forEach(button => button.addEventListener('click', () => document.querySelector(`[data-tab="${button.dataset.tabTarget}"]`)?.click()));
+
+      [['agentForm', 'agentNotice'], ['documentForm', 'documentNotice'], ['inviteForm', 'inviteNotice']].forEach(([formId, noticeId]) => {
+        document.getElementById(formId).addEventListener('submit', event => {
+          event.preventDefault();
+          const notice = document.getElementById(noticeId);
+          notice.textContent = '原型已保留输入，但不会发送、保存或假装操作成功。请用上方“状态”切换查看处理中与拒绝恢复。';
+        });
+      });
+      applyFixtures();
+    </script>
+  </body>
+</html>

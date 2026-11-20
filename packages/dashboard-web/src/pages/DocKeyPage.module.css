@@ -1,0 +1,130 @@
+.wrap {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10vh var(--space-4) var(--space-6);
+  overflow-y: auto;
+}
+
+.box {
+  width: 560px;
+  max-width: 100%;
+}
+
+.box :global(.ant-card-body) {
+  padding: 28px;
+}
+
+.box h1 {
+  margin: 0;
+  font-size: var(--page-title-size);
+  line-height: var(--page-title-leading);
+}
+
+.brand {
+  margin: 0 0 var(--space-1);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.doc {
+  margin: var(--space-1) 0 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.languagePick {
+  width: 100%;
+  margin: var(--space-4) 0 var(--space-3);
+  padding: 5px 8px;
+  color: var(--fg);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font: inherit;
+}
+
+.status,
+.bad {
+  margin: 0 0 var(--space-4);
+  overflow-wrap: anywhere;
+}
+
+.status {
+  color: var(--muted);
+}
+
+.bad {
+  color: var(--err);
+}
+
+.rights {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  border: 0;
+}
+
+.rights legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+  font-weight: var(--weight-semibold);
+}
+
+.rights :global(.ant-radio-wrapper) {
+  align-items: flex-start;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.rights small {
+  display: block;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.hint {
+  margin: var(--space-3) 0 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.done {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.way p {
+  margin: 0 0 var(--space-2);
+}
+
+.code {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-3);
+  background: var(--tool-bg);
+  border-radius: var(--radius-sm);
+  font: var(--text-sm) / 1.5 var(--mono);
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: all;
+}
+
+.way + .way {
+  margin-top: var(--space-4);
+}
+
+@media (max-width: 720px) {
+  .wrap {
+    padding: max(16px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+  }
+
+  .box :global(.ant-card-body) {
+    padding: 20px 16px;
+  }
+}

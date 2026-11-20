@@ -1,0 +1,12 @@
+# The declarative page description.
+#
+# Minimal on purpose: this App's browser half is an `agent-composition/v1`
+# document (`src/plan.ts`) rendered by the standard shell; this file is the
+# release-asset stub the closed backend layout requires. `sources` is empty
+# because a declared App has no permission contract to read anything under —
+# every byte it shows comes from its own projection.
+layout: chess-board
+sources: {}
+actions:
+  move: move
+  say: comment

@@ -1,0 +1,10 @@
+.rv-app .rv-workbench { position: absolute; top: 87px; bottom: 70px; right: 24px; width: min(610px, calc(100% - 48px)); overflow: auto; background: var(--card, #fff); border: 1px solid var(--line, #d8dee8); border-radius: 14px; box-shadow: 0 8px 30px #40583525; z-index: 2000000015; }
+.rv-app .rv-workbench[hidden], .rv-app .rv-workbench [hidden] { display: none; }
+.rv-app .rv-workbench > header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--card, #fff); border-bottom: 1px solid var(--line, #d8dee8); }
+.rv-app .rv-workbench .rv-workflows { width: 100%; min-width: 0; box-sizing: border-box; border: 0; }
+.rv-app .rv-source-panel { padding: 12px 16px; }
+.rv-app .rv-source-panel > button, .rv-app .rv-source-panel > div { margin: 5px 0; }
+.rv-app .rv-source-panel article { padding: 10px 0; border-bottom: 1px solid var(--line, #d8dee8); }
+.rv-app .rv-source-panel progress { width: 100%; }
+.rv-app .rv-review-badge { padding: .1em .5em; font-size: .68em; color: #7a4b00; background: #fff2d2; border: 1px solid #e9c87b; }
+@media (max-width: 800px) { .rv-app .rv-header-actions { flex-wrap: wrap; gap: 3px; justify-content: flex-end; } .rv-app .rv-project-header { left: 10px; right: 10px; } .rv-app .rv-workbench { right: 10px; width: calc(100% - 20px); top: 87px; bottom: 65px; } .rv-app .rv-header-actions button { padding-inline: 6px; } }

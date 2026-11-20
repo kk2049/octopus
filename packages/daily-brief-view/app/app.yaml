@@ -1,0 +1,49 @@
+id: daily-brief
+# schema 3 so the trusted coordinator stamps real authorship (user:<owner>) on
+# human events and hands handlers `ctx.actor`. schema 2 stamped every human
+# action with the app id, which made "发布者" read as "daily-brief" forever.
+schema: 3
+state:
+  scope: account
+actions:
+  request_summary:
+    binding: runtime
+    handler: request_summary
+    title: 请求总结
+    description: 记录一项待本地 Agent 处理的总结请求；不在服务器启动模型。
+    human_only: true
+    params:
+      period: {type: string, max: 120, required: true, description: 总结周期或日期}
+      focus: {type: string, max: 1000, required: false, description: 希望重点回答的问题}
+  publish_summary:
+    binding: runtime
+    handler: publish_summary
+    title: 发布总结
+    description: 由外部 Agent 写入完成的总结和已披露的证据快照。
+    agent_only: true
+    params:
+      period: {type: string, max: 120, required: true, description: 总结周期或日期}
+      headline: {type: string, max: 200, required: true, description: 一句话标题}
+      body: {type: string, max: 4096, required: true, description: Markdown 总结正文}
+      evidence: {type: string, max: 4096, required: false, description: Markdown 证据清单与必要摘录}
+      coverage: {type: string, max: 800, required: false, description: 读取了哪些来源、遗漏了什么}
+      request_id: {type: string, max: 80, required: false, description: 回应的请求 id（投影 requests 里的 id）；周期相同也会自动关联}
+  correct_summary:
+    binding: runtime
+    handler: correct_summary
+    title: 修正总结
+    description: 本人以一条追加事件修正既有总结，不改写历史。
+    human_only: true
+    params:
+      summary_id: {type: string, max: 80, required: true, description: 投影里的总结 id}
+      body: {type: string, max: 4096, required: true, description: 修正后的 Markdown 正文}
+      reason: {type: string, max: 500, required: true, description: 修正原因}
+  acknowledge_summary:
+    binding: runtime
+    handler: acknowledge_summary
+    title: 确认已读
+    human_only: true
+    params:
+      summary_id: {type: string, max: 80, required: true, description: 投影里的总结 id}
+view:
+  page: pages/main.yaml

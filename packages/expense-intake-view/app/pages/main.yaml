@@ -1,0 +1,6 @@
+layout: expense-intake
+sources: {}
+actions:
+  submit: submit_expense
+  approve: approve_expense
+  reject: reject_expense

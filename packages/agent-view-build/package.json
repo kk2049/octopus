@@ -1,0 +1,51 @@
+{
+  "name": "@claude-bot/agent-view-build",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/build.ts",
+  "types": "src/build.ts",
+  "exports": {
+    ".": {
+      "types": "./src/build.ts",
+      "default": "./src/build.ts"
+    },
+    "./release": {
+      "types": "./src/release.ts",
+      "default": "./src/release.ts"
+    },
+    "./theme-tokens": {
+      "types": "./src/theme-tokens.ts",
+      "default": "./src/theme-tokens.ts"
+    },
+    "./runtime": {
+      "types": "./src/runtime.ts",
+      "default": "./src/runtime.ts"
+    },
+    "./module-assets": {
+      "types": "./src/module-assets.ts",
+      "default": "./src/module-assets.ts"
+    },
+    "./scope-css": {
+      "types": "./src/scope-css.ts",
+      "default": "./src/scope-css.ts"
+    },
+    "./presentation-audit": {
+      "types": "./src/presentation-audit.ts",
+      "default": "./src/presentation-audit.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@claude-bot/dashboard-web": "workspace:*",
+    "@vitejs/plugin-react": "^5.0.4",
+    "vite": "^7.1.9",
+    "postcss": "8.5.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}

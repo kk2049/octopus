@@ -1,0 +1,20 @@
+title: 登记
+layout:
+  - [f_item, f_plan]
+  - [f_note, f_project]
+  - [f_fix, ops]
+slots:
+  f_item: { widget: form, props: { action: add_item } }
+  f_plan: { widget: form, props: { action: add_plan } }
+  f_note: { widget: form, props: { action: add_note } }
+  f_project: { widget: form, props: { action: add_project } }
+  f_fix:
+    widget: section
+    props: { title: 更正与收束 }
+    children:
+      - { widget: form, props: { action: correct } }
+      - widget: actions
+        props:
+          items:
+            - { action: close_segment, label: 📦 收束本段 }
+  ops: { widget: actions, props: { items: [{ action: refresh, label: 🔄 让秘书巡检 }] } }

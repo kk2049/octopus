@@ -1,0 +1,87 @@
+.wrap {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  overflow-y: auto;
+}
+
+@media (max-width: 720px) {
+  .wrap {
+    align-items: flex-start;
+    padding: max(28px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+  }
+
+  .box {
+    width: 100%;
+    max-width: none;
+  }
+
+  .box :global(.ant-card-body) {
+    padding: 22px 18px;
+  }
+}
+
+.box {
+  width: 360px;
+  max-width: 92vw;
+}
+
+.box :global(.ant-card-body) {
+  padding: 28px;
+}
+
+.box h1 {
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+
+.languagePick {
+  width: 100%;
+  margin: 0 0 var(--space-3);
+  padding: 5px 8px;
+  color: var(--fg);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font: inherit;
+}
+
+.box p {
+  margin: 0 0 var(--space-4);
+}
+
+.box :global(.ant-input-affix-wrapper) {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.box button {
+  margin-top: 10px;
+  width: 100%;
+  padding: var(--space-2);
+  border-radius: 8px;
+}
+
+.err {
+  color: var(--err);
+  font-size: var(--text-xs);
+  margin-top: var(--space-2);
+  min-height: 1.4em;
+}
+
+.oauth {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.oauth span {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}

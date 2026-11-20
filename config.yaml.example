@@ -1,0 +1,424 @@
+# Octopus bot — 配置文件(packages/bot/src/bootstrap-v3.ts 读取)
+# 复制此文件为 config.yaml 并填入实际凭证。
+# 已下线功能留在旧 config.yaml 里的键(plugins、skills、remotes、presets、rag、
+# group_mode、notify_on_start、lifecycle、security、session_channel、fleet、
+# channels.websocket、secretary 除 scan_homes 外的键)照常加载、不再生效。
+# 其余顶层键拼错不会生效，启动时日志会对未知顶层键告警。
+
+# Bot 实例基本信息（生产只记录 name；数据目录取 DATA_DIR 环境变量，data_dir 不生效）
+instance:
+  name: "my-bot"
+  data_dir: "/data"
+
+# 飞书应用凭据:议题会议群(discussions)、飞书网关的工具目录与 Agent 完成通知的
+# 直发卡片使用。v2 的飞书/WebSocket 聊天通道已于 2026-10-15 下线。
+channels:
+  feishu:
+    enabled: false
+    app_id: "cli_xxxxx"
+    app_secret: "xxxxx"
+    # bot_open_id: "ou_xxx"  # 可选:议题群里精确识别 @Bot
+
+# App agent 的缺省模型(app_agents.default_model 未设时)
+agent:
+  provider: "openai"   # "openai" | "claude"
+  model: "gpt-4.1-mini"
+
+# OpenAI 兼容端点:议题会议、知识助手与 App agent 的模型请求都走这里
+openai:
+  base_url: "https://api.openai.com/v1"
+  api_key: "sk-YOUR_OPENAI_API_KEY"
+
+# 可选：科研画布会议录音。Head 只选择已有设备及等待预算；需要该设备在线、
+# 已发布会议转写能力，并由录音归属人显式授予会议转写的六项操作。
+# 固定 MOSS 程序、模型和输出目录由设备管理员在 Runner 本机配置，
+# 参见 packages/runner/README.md；Head 配置和页面不传可执行路径或命令。
+# 旧 moss.workspace/script/output_root/model_dir 字段仍可留在旧 YAML 中，
+# 新版本忽略这些执行路径字段，不再通过通用 exec 权限运行录音任务。
+# research_v2:
+#   moss:
+#     device: "gpu-box"
+#     timeout_ms: 7200000
+
+# v4 议题会议：复用上面的 OpenAI 兼容端点与飞书 Bot；参见
+# packages/bot/src/discussions/README.md。需 runner.enabled、channels.feishu.enabled、
+# 飞书身份绑定、建群/消息/历史权限，以及接收群内所有消息的事件权限；
+# 按本示例（飞书关闭）它不会启动。
+discussions:
+  enabled: true
+  owners: [lht]
+  max_concurrent: 2
+  filter:
+    model: "gpt-5.6-sol"
+    effort: "low"
+    # prompt: |
+    #   自定义快速过滤规则；必须输出 {"wake": boolean, "reason": string} JSON。
+  secretary:
+    model: "gpt-6-astra"
+    effort: "high"
+    # prompt: |
+    #   协助 lht 和 lilei 推进 Octopus 迭代、实验设计与证据核对。
+
+# Anthropic 凭据:只在旧配置未写 agent.provider 时用于推断 provider
+anthropic:
+  base_url: "https://api.anthropic.com"
+  api_key: "sk-YOUR_ANTHROPIC_API_KEY"
+
+# 飞书 OAuth（启用飞书用户级 API 时配置；建议与 channel 使用同一应用）
+# feishu_oauth:
+#   app_id: "..."
+#   app_secret: "..."
+
+# 飞书云文档原生 Agent 卡片（默认关闭；复用 feishu_oauth 的应用凭据）
+# feishu_docs_addon:
+#   enabled: false
+#   tenant_key: "实际 tenant_key，不是开发者后台的数字 tenant ID"
+#   allowed_origins: ["https://实际小组件iframe来源"]
+#   block_type_id: "blk_…"   # 组件的块类型 ID；配置后 Agent 可用 feishu_doc_place 把卡片插进文档
+# 配置与发布步骤：packages/feishu-docs-addon/README.md。
+
+# Agent 能拿到的飞书能力(SEC-03)。
+#
+# 网关解决的是「以谁的身份」:agent 手里没有任何飞书凭据,调用一律以用户本人的
+# OAuth 身份执行,**没有 UAT 就是失败,不会退到租户身份**。这一段解决的是另一个
+# 问题——「拿这个身份能做什么」。默认开放目录中全部**用户身份**能力:读操作免逐次
+# 批准,写/建/删仍由账号主人在 /pending 对精确参数逐次批准。没有 UAT 就不提供这些
+# 工具,绝不回退到租户身份。配置块只用于收窄默认值或按用户覆盖。
+#
+# 管理会话成员、授权文档，以及 lark-mcp 明确只支持租户令牌的发消息/读消息/建群，
+# 位于独立特权 Object；只能逐用户名列在 privileged_users，且连读操作也逐次批准。
+# 名字写错、把特权 operation 写入普通块、auto_allow 超出 operations，启动即报错。
+# feishu_gateway:
+#   chat_agent:
+#     # 这里是可选的全局收窄；省略整个块即为全部普通用户目录。
+#     operations: [doc_read, doc_search]
+#     # 只能是上面 operations 中的读类。
+#     auto_allow: [doc_read]
+#   # 按用户覆盖:存在即**取代**上面的 chat_agent(不是叠加)。
+#   users:
+#     lht:
+#       operations: [doc_read, doc_search, calendar_primary, calendar_list_events]
+#       auto_allow: [doc_read, calendar_primary]
+#   # 无全局默认、无 auto_allow；只有显式用户名能持有，且每次调用都要该用户批准。
+#   privileged_users:
+#     lht:
+#       operations: [chat_add_members, document_grant_member]
+#       # 租户身份能力也只能在这里逐条开启：
+#       # message_send_as_bot message_send_file_as_bot message_list_as_bot chat_create_as_bot
+
+# 会话中心:本机扫描目录(v3 起,这个键归它自己所有)
+# 用户名 → 该用户的会话可在本机哪个 home 下扫描(读其 ~/.claude ~/.codex)。
+# 信任边界由运维声明:只把某用户映射到真属于他的机器 home;
+# 未映射的用户回落到 bot 托管的用户目录(通常无会话,诚实返回空)。
+# 已注册在线端点(Runner)的用户优先走端点,这张表只是本机兜底。
+# session_hub:
+#   scan_homes:
+#     lht: /home/ubuntu
+#
+# 旧位置 `secretary.scan_homes` 仍然生效(逐用户回退,不会因为迁走一个人而丢掉其他人),
+# 启动时会打印一次弃用告警。秘书网络已于 2026-10-15 下线:`secretary` 块里只有
+# scan_homes 还被读取,其余旧键(group_delivery、model 等)照常加载但不再生效。
+# secretary:
+#   scan_homes:
+#     lht: /home/ubuntu
+
+# Runner 网关(笔记本前端头)
+# Web 运行面板:用户活跃/端点注册与健康检查/新端点接入教程
+# (含自包含 runner.js 下载)。auth_token 非空时所有请求需带 ?token= 或 Bearer。
+# dashboard:
+#   enabled: true
+#   port: 9820
+#   host: 127.0.0.1                                  # 对外用 TLS 反代时收回本地
+#   auth_token: "change-me"                          # 留空=不鉴权,此时强制只绑 127.0.0.1
+#   admins: [lht]                                    # 这些用户的个人 dt_ 密钥带管理权:
+#                                                    #   跨用户只读 + 在 /admin 授予能力位。
+#                                                    # 只能写在这里:能自己造管理员的面板,
+#                                                    # 等于一次会话被盗就永久失去主机所有权。
+#                                                    # 留空=没有账户是管理员,只有 auth_token 是。
+#                                                    # 管理权≠换身份:管理员写入仍只能写自己的
+#                                                    # 资源(代写=伪造署名)。
+#   runner_public_url: "wss://octopus.example.com/octopus-runner/v1"  # 反代后教程显示的接入地址；
+#                                                          # 强制 wss://,ws:// 仅在 hostname
+#                                                          # 为 127.0.0.1/::1/localhost 时放行;
+#                                                          # 非法/http(s)/非回环 ws 启动即失败。
+#                                                          # 留空则教程回退到 ws://<public_host>:<runner-port>。
+#   public_url: "https://octopus.example.com"             # GitHub OAuth 只在 https 下启用
+#   oauth_github:
+#     client_id: "..."
+#     client_secret: "..."                                # 只保存在 config.yaml
+#   registration: closed                                  # open|closed；默认 closed
+#
+# 对外暴露与 TLS 方案见 doc/deploy-dashboard-security.md
+#
+# ── 外部 App 宿主接入（external-app-host/v1，canonical block）───────────────
+#
+# 默认**关闭**。关闭时 `/api/app-external/*` 与 `/api/external/app/*` 全部 404,
+# 没有隐含的 localhost,也没有默认宿主。
+#
+# 它让**已登录用户本人**把自己已入座的某个共享 App 实例(例如一局棋)交给一个
+# 运行在**本机 loopback** 上的外部可信外壳(标准 DSH 部署就是这样一个进程)。
+# 交出去的是一枚**绑定死的、可撤销的、会过期的**凭据,只绑定
+# {真实用户名, App id, 共享实例 key, 当时的 active release digest, 目标宿主};
+# 每次调用都重新核对发布者信任、release digest、实例状态与成员席位。
+#
+# 三条不能松的边界:
+#   1. origin 必须是**精确的 loopback origin**(127.0.0.1 / localhost / [::1]),
+#      https 也一样 —— 远端 origin 意味着一枚长期 App 凭据离开本机,那是另一个
+#      信任问题,本版本直接在启动时拒绝,而不是在 review 时讨论。
+#   2. 不接受通配符、路径、userinfo、写出来的默认端口等任何「近似写法」;
+#      写错一个条目是**启动失败**,不是被悄悄跳过的一行。
+#   3. `authority` 分「人」和「agent」两种**不同的凭据、不同的操作**;agent 授权
+#      只能由用户在 Octopus 可信页面上单独授予,外部宿主无法索取,也无法自升。
+#
+# 允许的 origin 会被精确加入该 App View 的 `frame-ancestors`(不通配、不放宽
+# 其它 CSP),这样外部外壳可以直接嵌入 App 自己的不可变 View 并沿用既有
+# MessagePort 协议,而不是另写一套界面;凭据只留在宿主后端,不进 iframe。
+#
+# external_app_hosts:
+#   enabled: true
+#   hosts:
+#     - id: dsh-local                       # 用户在页面上按 id 选,不能自己填 origin
+#       label: "本机 DSH"
+#       origin: "http://127.0.0.1:9931"     # canonical exact origin;9931 永不公网 bind
+#       launch_path: /octopus/app-launch    # 宿主接收 launch fragment 的路径
+#   launch_ttl_seconds: 120                 # 一次性启动令牌存活(15..900)
+#   capability_ttl_seconds: 43200           # 绑定存活(300..2592000)
+#   max_bindings_per_user: 8                # 每个用户每个 App 的活跃绑定上限(1..64)
+#
+# 权限中心 `/permissions`(2026-07-31)没有配置项,这是有意的:它管的是**每个用户自己的**
+# 授权意图(会话中心能不能列/读/跟随/续跑我的设备),落在 bot.db 的 `grant_intents` 表,
+# 由本人在页面上勾选与撤销。运维不需要、也不应该替用户预设这些。
+#   · 首次使用会写一行 `source: "bootstrap"` 的授权,把「owner 本来就能读自己的会话」这条
+#     隐式访问变成**可见可撤销**的一行——它不扩大任何权限,也不冒充「用户点了同意」。
+#   · 续跑/恢复会话**永远逐次批准**(在 `/pending`),勾选只决定「能不能发起」。
+#   · 撤销是先落行再拆:返回时新判定已经拒绝,随后断开实时流、销毁池化 Context、释放租约。
+# `dashboard.admins` 与它是两件事:那个管「谁能用开发系统」(`/admin`),这个管「什么能碰我的设备」。
+
+# 会话+(Session Plus):隔离型 Agentic App 探针,默认关闭。
+# 打开它会给这个部署**新增一个浏览器 origin**:主站 https://bot.example.com 之外,
+# Agent View 从 https://app-<packageDigest 前 20 位>.apps.example.com 提供。
+# 那个 origin 上的代码不可信——它没有主站 Cookie、没有 CSRF、不能联网、读不到主站 DOM,
+# 只通过一条转交过去的 MessagePort 提议动作。契约(域名/Cookie/CSP/反代)见
+# doc/adr/0001-session-plus-trust-boundaries.md,反代示例见 doc/deploy/session-plus-proxy.example.conf。
+#
+# ⚠ 主机名前缀必须与**这次构建**的 package digest 一致:digest 变了就说明 Agent View 的
+#    代码变了,URL 必须跟着换,否则地址栏里的名字不再代表框里跑的东西。启动日志会打印
+#    本次构建应当使用的前缀;配错 = 拒绝启动(而不是安静地不生效)。
+# ⚠ 生产必须同时配 dashboard.public_url:主站 origin 是 frame-ancestors 的唯一来源,
+#    没有它就只能靠猜,所以直接拒绝。
+# session_plus:
+#   enabled: true
+#   # ── App origin:三种互斥形态,只选一种 ─────────────────────────────────
+#   # (a) 热更新形态。每个 release 自动得到自己的 app-<20hex> 主机名,换版本不用改反代。
+#   #     需要 DNS 的 *.apps.example.com 与受 ask 限制的 on-demand TLS
+#   #     (见 doc/deploy/agent-app-ondemand-tls.example.conf)。
+#   app_domain: "apps.example.com"
+#   app_scheme: https          # 默认 https;http 只允许本机名(开发路径)
+#   # app_public_port: 443     # 可选,反代不在 443/80 终止时写
+#   origin_ask_port: 9822      # 反代问「要不要给这个名字签证书」的回环端点;非回环地址被拒绝
+#   # origin_ask_host: 127.0.0.1
+#   #
+#   # (b) 钉住一版的形态。一个精确 origin,一个手写 site 块;换 release 会被**拒绝**并说明改法。
+#   # view_origin: "https://app-<本次构建的20位digest>.apps.example.com"
+#   # (c) 明确接受同源路径托管（包括裸 IP HTTPS）：删除上面的 app_domain、
+#   #     app_scheme、app_public_port、origin_ask_port，然后设置 shared_origin: true。
+#   #     地址来自 dashboard.public_url，App 路径为 /__octopus/apps/app-<20hex>/。
+#   #     仍保留 opaque iframe sandbox 和 MessagePort；见 doc/runbooks/mirror-migration.md。
+#   #
+#   view_port: 9821            # 本机监听端口,反代拨它;默认 9821
+#   view_host: 127.0.0.1       # 默认只绑回环
+#   max_hosted_apps: 12        # 全进程同时承载上限（含 Session Plus）；范围 1–64
+#   # M3 的部署期授权。键是现有用户；operations 就是下面六个 Gate 词元，不能写 UI 别名。
+#   # read 类只有同时出现在 auto_allow 里才可免逐次批准；start/append 永远不能写进 auto_allow。
+#   grants:
+#     alice:
+#       operations:
+#         - list_recent_sessions
+#         - search_sessions
+#         - read_session
+#         - list_session_workspaces
+#         - start_session
+#         - append_session
+#       auto_allow:
+#         - list_recent_sessions
+#         - search_sessions
+#         - read_session
+#         - list_session_workspaces
+#
+# 本机开发(无 DNS、无证书)用回环主机名——浏览器把 *.localhost 解析到本机,而且它是
+# **另一个 host** 而不是另一个端口(Cookie 不按端口隔离,换端口等于把主站会话交给它):
+#   view_origin: "http://app-<20位digest>.localhost:9821"
+# 此模式下主站 Cookie 没有 __Host- 前缀(该前缀要求 Secure,而 http 上 Secure Cookie
+# 永远不会被送回),页面会明确标出这是开发模式。
+
+# 用户设备上跑 packages/runner(常驻,WS 反连),会话中心与工单经它读写本机
+# Claude Code / Codex 会话。令牌在面板总览页签发,每设备一个,sha256 存库。
+# runner:
+#   enabled: true
+#   port: 9910
+#   host: 127.0.0.1        # 远端 Runner 先迁到 WSS，再把监听收回回环
+
+# openai.reasoning_effort: 思考深度(gpt-5.x 推理模型): minimal|low|medium|high
+
+# 知识助手(知识页的对话)使用的模型。键名沿用已下线(2026-10-15)的 HQ 工作台;
+# 旧的 chat_max_tool_turns / daily_refresh_hour_beijing 会被忽略。走上面 openai 的 endpoint。
+# hq:
+#   chat_model: "gpt-6-astra"        # 缺省即此
+#   chat_reasoning_effort: high      # minimal|low|medium|high,缺省 high
+
+# 自举开发流水线(doc/design-self-hosting.md):共享工单队列,并行开发、串行合入。
+# 合入默认不等待全量测试;每天北京时间 04:00 在独立 Runner 上跑一次完整 GitLab CI。
+# 红灯由同一修复 session 迭代,每次修复落地立即重跑全量 CI,直到绿灯收尾。
+# 合入不等于上线:部署是独立的显式操作(面板按钮或 scripts/ops/deploy.sh),
+# 何时由 agent 继续部署以 AGENTS.md「Change and delivery discipline」为准。
+# 注意:run_dir 必须 detached,不能 checkout base_branch。base_branch 可以由一个干净的
+# 主基线工作树持有;流水线会复用它做 ff-only 合入,否则才创建按分支隔离的 _base-* worktree。
+# selfhosting:
+#   # 独立控制面：CLI/登录位于用户的 Runner，服务只保存调度和工单数据。
+#   # 主人先在权限页为「工单 Runner」授权持续执行；没有许可就不会派发。
+#   # 工单执行必须配置 runner_tickets。Head 旧执行器已废弃并关闭生产调用，
+#   # 缺配置不会回退到本机 CLI；Runner 须支持 steer-only/v1 续发回执。
+#   runner_tickets:
+#     targets:
+#       alice:
+#         device: alice-laptop
+#         workspace_id: ws_000000000000000000000000
+#         instructions: |-
+#           服务端 source worktree: {worktree}；工单号 {ticket}。
+#           在这里填写该主人明确授权的远端管理和计算入口，不放凭据。
+#         # 可选：工单可用的精确工作区白名单(与会话/文件的工作区登记无关)。default: true
+#         # 标记新工单预选、且未指定工作区时使用的那个(每个主人至多一个;离线时也不改选);
+#         # 不标记时取第一个可用项(都不可用时取第一项),
+#         # 不配置时只提供 device/workspace_id 这一个根。共享池(shared_pool)要求主人配置了它。
+#         # workspaces:
+#         #   - { device: build-box, workspace_id: ws_000000000000000000000001, label: build, default: true }
+#         #   - { device: alice-laptop, workspace_id: ws_000000000000000000000000, label: laptop }
+#     # 仅在迁移前确认过历史实际归属时填写。它不授予续跑他人会话的权限。
+#     # legacy_host: { owner: alice, device: alice-laptop }
+#     # 可选：把主人的 Runner 作为所有开发者共用的工单 Agent 来源。每个 provider 都要显式列出：
+#     # Codex 用 codex_accounts 列出共享的账号，Claude 用 claude_devices 列出共享其 Claude Code
+#     # 登录的设备；未列出即不共享。split_only 要求模型在来源设备、全部工具在共享工作区执行。
+#     # shared_pool:
+#     #   owner: alice
+#     #   requesters: []
+#     #   all_developers: true
+#     #   source_devices: [alice-laptop]
+#     #   workspaces: [{ device: build-box, workspace_id: ws_000000000000000000000001 }]
+#     #   split_only: true
+#     #   codex_accounts: [{ device: alice-laptop, account: "@default" }]
+#     #   claude_devices: [alice-laptop]
+#   enabled: true
+#   repo_dir: /home/ubuntu/lht/octopus-run     # 同一共享 Git 仓库的任意 worktree;线上配置显式写出
+#   worktrees_dir: /home/ubuntu/lht/octopus-worktrees
+#   base_branch: v4       # 本地可部署水位;新开发都从这里 fork
+#   spec_concurrency: 2   # 并发 agent 轮次数(每轮一个 Claude/Codex CLI 进程,吃内存)
+#   codex_accounts:       # 可选:Codex 工单直连账号池;键只是不透明槽名,值是独立 CODEX_HOME
+#     account_a: /home/ubuntu/.codex-accounts/account-a
+#     account_b: /home/ubuntu/.codex-accounts/account-b
+#   codex_min_remaining_percent: 5  # 新会话只选长窗口仍有至少此额度、且 reset 最早的槽
+#                                    # 已绑定工单的恢复/重试永远沿用原槽;不经过 OMP 网关
+#   max_gate_attempts: 3  # 每轮 devpipe_submit 次数(缺省 3),超过等用户回复后继续
+#   land_gate: true       # 薄落地门禁(默认开):任何落地 ff 之前在 _land 暂存树上跑
+#                         # frozen-lockfile install + 增量 tsc(仅 packages/bot,不跑测试);
+#                         # 失败/超时=拒绝落地。false 关闭;OPS_LAND_LOCAL=1 回退路径天然绕过
+#   ci_roster_gate: true  # CI 修复票的失败清单门禁(默认开):自动开出的修复票带着这批红灯点名的
+#                         # 测试文件;落地前在 _land 暂存树上只重跑这几个文件,仍然红就拒绝合入。
+#                         # 这是薄门禁里唯一会跑 vitest 的一步,只针对这一条通道——修复票的验收标准
+#                         # 本来就是这份清单,而让它先合进去再等 20-45 分钟的批次告诉它对不对,
+#                         # 历史上产生过同一个失败连续七次落地。false 只关掉这一步,tsc 门禁照常
+#   ci_machine:           # 开发工单的 CI 工作机(可选)。设备 owner 名下的普通/修复工单拿到
+#     owner: lht             # 必填:该 Runner token 所属 bot 用户名。device 只在 owner 内唯一；
+#                            # 启动时按这个精确 owner/device 对校验，绝不按全局同名设备猜测。
+#     device: lht-val15-ci    # lht-val15 常驻 CI 容器的 machine_* 工具(exec/读/写),
+#     checkout_dir: /work/octopus  # **直接执行、不弹逐次批准卡**——这条通道按设计无人值守,
+#     gate: true          # 落地门禁(install/增量 tsc/点名与 diff 涉及的测试)也在这台机器的
+#                         # /work/land 工作树上跑(默认开,2026-08-21);Runner 不在线或中途失联时
+#                         # 自动回到本机 _land。false = 始终在本机跑门禁。
+#     sync_concurrency: 1 # 同一时间允许几张票在这台机器上做工作区同步(install + 测试前置构建)。
+#                         # 默认 1(2026-08-22):三票并发曾把 48 核打到负载 48,Runner 静默一分钟、
+#                         # sshd 密钥交换卡过 LoginGraceTime。落地门禁由合并锁串行,不计入。
+#     ssh_fallback: false # Runner 离线时是否改走经堡垒机的 ssh 同步脚本。默认关(2026-08-22):
+#                         # 离线时登记等待、Runner 回来即通知工单(resources/recovery.ts),
+#                         # 不再在机器最吃力的时候用串行 ssh 往返去刷它。
+#                         # 每票工作区同步同样走 Runner 通道(需要 dashboard.public_url),
+#                         # ops/ci-container/sync-workspace.sh 的 ssh 路径只是回退。
+#                         # 那里放一张批准卡不会增加监督,只会让修复停到有人发现为止。
+#                         # 授权派生自上面显式 `owner` 对他**自己注册的设备**
+#                         # (与用户自己的 chat agent 用的是同一个 MACHINE_AUTO_ALLOW),
+#                         # 按轮次签发、轮次结束即吊销,且只能触及这一台设备。每票使用
+#                         # /work/tickets/ticket-<id> 独立检出；其它 requester 不继承
+#                         # owner 的机器权限。容器用 ops/ci-container/install.sh 部署。
+#                         # 不配或 owner/device 对未登记 = 启动失败关闭；设备离线 = 等待/本机验证。
+#   knowledge_index:       # 缺省随 ci_machine 开启；只在该精确 owner/device 上生产 SHA 绑定索引。
+#     enabled: true        # false 显式关闭；无远端 LSP/VDB 查询回退。
+#     runner:              # 可选独立知识 provider；省略则继续使用 ci_machine。
+#       owner: lht         # 显式 owner；发现能力不自动授权或选择其他设备。
+#       device: knowledge-compute
+#       checkout_dir: /work/octopus
+#   dev_machines:         # 贡献者各自的开发机(可选,2026-08-20)。键是用户名;值与 ci_machine 同形。
+#     lilei:                # 贡献者用 ops/dev-container/install.sh 在自己电脑上起一个带 Runner 的容器,
+#       device: lilei-dev   # 用自己的 rt_ 设备令牌注册;他的工单 agent 拿到这台机器的 machine_* 工具,
+#       checkout_dir: /work/octopus  # 代码由流水线在每轮开始前以一次性 bundle URL 同步进容器
+#                         # (需要 dashboard.public_url),容器里不放任何仓库凭据。
+#                         # 与 ci_machine 一样只对设备 owner 生效;设备未登记或不在线 = 本机验证。
+#                         # 贡献者(只有 contribute 能力位)的 devpipe_submit 不合入基线:推到 GitLab
+#                         # contrib/<用户>/ticket-<id> 分支 → 完整 CI → MR → /tickets 评审队列审批
+#                         # → 批量合并工单受控合入。见 doc/runbooks/contributor-onboarding.md。
+#   dev_codex_runners:    # codex-runner 工单选项(#358,可选):该用户的哪台自有 Runner 设备
+#     lilei: macbookpro     # 承载他自己的 Codex 登录。缺省时自动挑该用户在线且 inventory 报告
+#                         # Codex 已登录的设备(按设备名排序取第一台)。模型选
+#                         # codex-runner-gpt-6-astra 的工单在该设备的隔离 split home 里跑
+#                         # Codex,shell/文件经隧道作用于 bot 主机的工单 worktree。
+#   build_warm: true      # 落地后构建预热(默认开):ff 之后在 _warm 暂存树上为刚落地的 sha
+#                         # 跑 install + pnpm -r build,填满共享构建缓存(tools/build-cache),
+#                         # 让随后的部署直接复用产物而不是让用户等构建。不持锁,失败只是回到
+#                         # 「部署时完整构建」。false 关闭
+#   turn_timeout_minutes: 0   # 单轮总时长上限(分钟);0/缺省=不限——健康的 agent 不因跑得久被杀
+#   turn_stall_minutes: 20    # transcript 无新输出判挂死并终止(分钟);0=禁用
+#   # ── 阶段2(自动部署)──
+#   run_dir: /home/ubuntu/lht/octopus-run   # supervisor 管理的运行树(repo 的 detached worktree);设置即启用部署服务
+#   stable_branch: v4-stable # GitLab CI 验证过的回滚锚
+#   deployers: []         # 允许触发上线的用户(除此之外也可在 /admin 授予 deploy 能力位)。
+#                         # 注意:空列表现在=没有人,不再是「所有个人身份」——
+#                         # 上线/落地权只能被授予,不能被默认继承(工单#15)
+#   gitlab_ci:             # 可选;不配置时 bot 不读 CI 结果,也绝不会回退为本机跑测试
+#     enabled: true        # 每天北京时间 04:00 跑完整扫描;修复落地会立即触发验证批次
+#     api_url: https://gitlab.example.com:1312/api/v4
+#     project: lvht/octopus
+#     token: glpat-...     # Project access token,需 api scope:读结果并触发批次
+#     ref: v4
+#     repair_requester: lht  # 必须是已注册 bot 用户;同一修复票/session 迭代到全量绿灯
+#     poll_seconds: 15
+#     debounce_seconds: 60  # 到点或修复落地后,tip 至少静止这么久才固定本轮 SHA
+# supervisor 常驻(环0,只依赖 bash/git/sqlite3):
+#   setsid nohup flock -n <dev>/supervisor.lock bash scripts/supervisord.sh >> <dev>/supervisor.log 2>&1 &
+# 逃生通知(可选):SUP_WEBHOOK_URL=<飞书自定义机器人 webhook> 双重失败时喊人
+
+# ── 运行入口 ────────────────────────────────────────────────
+# `packages/bot/src/bootstrap-v3.ts` 是唯一的组合根(v2 的 index.ts 已于 2026-10-15
+# 删除)。它不把 provider api_key 导出到 process.env。生产由 scripts/supervisord.sh 以
+#   node --max-old-space-size=768 --no-turbo-inline-js-wasm-calls --import tsx packages/bot/src/bootstrap-v3.ts
+# 运行;本地: CONFIG_PATH=./config.yaml DATA_DIR=/path/to/data pnpm dev。
+# dist/bootstrap-v3.js 不是可直接 `node` 运行的 standalone bundle(workspace 依赖保持
+# external),tsx 源码路径是唯一可执行入口。
+# 同机 canary 必须另设 HEALTH_FILE=/tmp/claude-bot-v3-canary-health，避免与线上健康门互相冒充。
+#
+# 分支语义:selfhosting.base_branch 缺省 v4、stable_branch 缺省 v4-stable;配成 v2 的
+# staging/stable 或 v3 的旧水位线会打印告警。
+#
+
+# ── App agents(Agentic App 声明的后端 agent;默认关闭)──────────────
+# app_agents:
+#   enabled: false
+#   # SEC-06:这台宿主是哪一类部署。**运维配置决定,应用/浏览器无法自我声明**。
+#   #   cloud-multi-user(缺省)= 多用户云宿主:普通 App 的 Agent 后端**不得**是
+#   #     claude-code/codex(完整开发者代理会把过大的权限域和宿主凭据带进应用 TCB)。
+#   #   local-owner = 单人本地信任域:保留 CLI adapter,但启动日志与权限中心都会明说
+#   #     「本部署不提供多用户文件隔离保证」。
+#   #   trusted-service = 只承载 owner-only 受信执行器,不承载普通 App Agent。
+#   deployment_profile: cloud-multi-user
+#   # models: [gpt-6-astra]   # 不写 = 不裁决模型,按 release 声明使用
+#   # default_model: gpt-6-astra
+#
+# 旧位置 v3_host.deployment_profile 仍被读取(与上面不一致则拒绝启动);v3_host 的
+# 其余键(v3 引擎 Host 已下线)照常加载、不再生效。

@@ -1,0 +1,32 @@
+title: 收藏夹
+# locals: client-local selection — which clip the viewer highlighted.
+# Defaults to the newest unread; clicking never touches the domain log.
+locals:
+  selected: { default_bind: view.latestId }
+layout:
+  - [stats, compose]
+  - [unread, readlist]
+  - [detail, ops]
+  - [chat]
+widths: [3, 3, 4, 3]
+slots:
+  stats: { widget: kv, bind: view.stats, props: { title: 概况 } }
+  compose: { widget: form, props: { action: add_clip } }
+  unread:
+    widget: list
+    bind: view.unread
+    props: { title: 未读（点击查看） }
+    on: { select: "local:selected" }
+  readlist:
+    widget: list
+    bind: view.read
+    props: { title: 已读（点击查看） }
+    on: { select: "local:selected" }
+  detail: { widget: markdown, bind: view.byId.$selected, props: { title: 正在看 } }
+  ops:
+    widget: actions
+    props:
+      items:
+        - { action: mark_read, label: ✓ 标已读, params: { id: "$selected" } }
+        - { action: drop_clip, label: 🗑 删除, params: { id: "$selected" }, confirm: "删除后不再显示（日志保留原始记录），确认？" }
+  chat: { widget: agent-chat, agent: keeper }

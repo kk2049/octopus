@@ -1,0 +1,118 @@
+/* Shared chat control chrome: every consumer of agent.chat gets this surface. */
+.av-panel[data-av-module^="agent.chat/"] {
+  --av-chat-material-strong: var(--av-session-material-strong-solid, light-dark(rgb(255 255 255 / 92%), rgb(29 29 31 / 94%)));
+  --av-chat-hairline: color-mix(in srgb, var(--av-fg) 14%, transparent);
+  --av-chat-control-fill: color-mix(in srgb, var(--av-fg) 6%, var(--av-surface));
+  --av-chat-inset: var(--av-session-chat-inset, 18px clamp(16px, 4.5vw, 64px) 8px);
+  --av-chat-turn-gap: var(--av-session-chat-turn-gap, 18px);
+  --av-chat-user-radius: var(--av-session-chat-user-radius, 19px 19px 6px 19px);
+  --av-chat-user-padding: var(--av-session-chat-user-padding, 10px 15px);
+  --av-chat-user-max-width: var(--av-session-chat-user-max-width, min(620px, 78%));
+}
+.av-panel[data-av-module^="agent.chat/"] button {
+  font: inherit;
+  min-height: var(--av-session-control-h, 32px);
+  padding: 5px 12px;
+  border: 1px solid var(--av-chat-hairline);
+  border-radius: var(--av-session-button-radius, 9px);
+  background: var(--av-chat-control-fill);
+  color: var(--av-fg);
+  cursor: pointer;
+  transition:
+    background-color var(--av-duration),
+    border-color var(--av-duration),
+    color var(--av-duration),
+    transform var(--av-duration);
+}
+
+.av-panel[data-av-module^="agent.chat/"] button.primary {
+  border-color: var(--av-accent);
+  background: var(--av-accent);
+  color: var(--av-accent-contrast);
+  font-weight: 650;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--av-accent) 25%, transparent);
+}
+.av-panel[data-av-module^="agent.chat/"] button:not(.primary):hover:not(:disabled) { background: color-mix(in srgb, var(--av-fg) 10%, var(--av-surface)); }
+.av-panel[data-av-module^="agent.chat/"] button:active:not(:disabled) { transform: scale(0.98); }
+.av-panel[data-av-module^="agent.chat/"] button:disabled { opacity: 0.5; cursor: default; }
+
+.av-panel[data-av-module^="agent.chat/"] .composer {
+  min-height: var(--av-session-composer-h, 122px);
+  padding-top: 10px;
+}
+
+html .av-panel[data-av-module^="agent.chat/"] .composer-input-shell .av-textarea.ant-input {
+  padding: 11px 13px;
+  border-color: var(--av-chat-hairline);
+  border-radius: var(--av-session-textarea-radius, 16px);
+  background: var(--av-chat-material-strong);
+  box-shadow:
+    inset 0 1px 1px color-mix(in srgb, var(--av-fg) 4%, transparent),
+    0 6px 20px color-mix(in srgb, var(--av-fg) 6%, transparent);
+}
+
+html .av-panel[data-av-module^="agent.chat/"] .composer-input-shell .av-textarea.ant-input:focus {
+  border-color: color-mix(in srgb, var(--av-accent) 66%, var(--av-chat-hairline));
+  box-shadow: var(--av-focus);
+}
+
+.av-panel[data-av-module^="agent.chat/"] .composer-entry > .primary {
+  min-width: 72px;
+  border-radius: var(--av-pill);
+}
+
+/* A persisted Dock split can make the chat group narrower than the frame.
+ * Anchor the desktop settings card to that group-sized composer instead of
+ * letting its viewport width extend underneath the neighbouring navigation
+ * renderer. The compact card remains anchored inside its input shell. */
+.av-panel[data-av-module^="agent.chat/"] .composer-entry {
+  position: relative;
+}
+
+.av-panel[data-av-module^="agent.chat/"] .composer-entry > .composer-options {
+  position: static;
+}
+
+.av-panel[data-av-module^="agent.chat/"] .composer-entry > .composer-options > .composer-options-card {
+  right: 0;
+  bottom: 44px;
+  width: min(420px, calc(100% - 24px));
+}
+
+.av-panel[data-av-module^="agent.chat/"] :is(.composer-options-card, .agent-interaction-card, .codex-release-dialog) {
+  border-color: var(--av-chat-hairline);
+  border-radius: var(--av-session-overlay-radius, 16px);
+  background: var(--av-chat-material-strong);
+  box-shadow: var(--av-shadow-sm);
+}
+
+
+@media (max-width: 720px) {
+  .av-panel[data-av-module^="agent.chat/"] { --av-chat-inset: 14px 12px 8px; }
+  .av-panel[data-av-module^="agent.chat/"] button { min-height: 44px; }
+  .av-panel[data-av-module^="agent.chat/"] .composer { min-height: 112px; }
+  .av-panel[data-av-module^="agent.chat/"] .composer-entry > .primary { min-width: 48px; }
+}
+@media (prefers-contrast: more) {
+  .av-panel[data-av-module^="agent.chat/"] { --av-chat-hairline: color-mix(in srgb, var(--av-fg) 44%, transparent); }
+}
+/* Keep asynchronous questions usable without displacing the transcript. */
+.async-questions { margin: 8px 0; }
+.async-questions-list { max-height: 36vh; overflow-y: auto; }
+
+/* The compact input is narrower than the viewport because Send sits beside it.
+ * Anchor this settings card to that input, so its left edge remains visible. */
+.composer-compact .composer-input-shell > .composer-options:has([data-codex-continuation]) {
+  position: static;
+}
+.composer-compact .composer-input-shell > .composer-options:has([data-codex-continuation]) > summary {
+  position: absolute;
+  right: var(--av-s1);
+  bottom: var(--av-s1);
+}
+.composer-compact .composer-input-shell > .composer-options:has([data-codex-continuation]) > .composer-options-card {
+  right: 0;
+  bottom: calc(100% + var(--av-s2));
+  width: min(var(--av-g340), 100%);
+  box-sizing: border-box;
+}

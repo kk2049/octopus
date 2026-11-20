@@ -1,0 +1,1006 @@
+.root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.cols {
+  flex: 1;
+  min-height: 0;
+}
+
+/*
+ * Both column classes go on `react-resizable-panels` Panels, which carry an
+ * inline `overflow: hidden` that beats any class rule. So the Panel classes
+ * keep only chrome, and scrolling lives on the inner wrappers below — the same
+ * pattern as the other full-height dashboard screens.
+ */
+.side {
+  border-right: 1px solid var(--line);
+  background: var(--chrome-solid);
+}
+
+@supports ((-webkit-backdrop-filter: blur(0)) or (backdrop-filter: blur(0))) {
+  .side {
+    background: var(--chrome-material);
+    -webkit-backdrop-filter: var(--chrome-filter);
+    backdrop-filter: var(--chrome-filter);
+  }
+}
+
+.sideScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.sidebarSection {
+  min-width: 0;
+  margin: 10px 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  font-size: var(--text-xs);
+}
+
+.sidebarSection > summary {
+  padding: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.sidebarSection > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 8px;
+}
+
+.sidebarSection > .deployBox {
+  margin: 0;
+  border: 0;
+  padding-top: 0;
+}
+
+.ticketSearch {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  padding: 0 10px 10px;
+}
+
+.ticketSearch label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.searchFilters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  gap: 8px;
+}
+
+/* Override the shared Select minimum only inside this resizable search card. */
+.ticketSearch .searchStatus {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.searchActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.main {
+  min-width: 0;
+}
+
+/* The scrolling body for full-pane content: composer forms, placeholders. */
+.mainScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 18px 40px;
+}
+
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: var(--card);
+}
+
+.chip b {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.warn {
+  border-color: #d97706;
+  color: #d97706;
+}
+
+.err {
+  border-color: var(--err);
+  color: var(--err);
+}
+
+.base {
+  color: var(--muted);
+}
+
+.deployBox {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: var(--text-sm);
+}
+
+.dhd {
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.dstat {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.drow {
+  display: flex;
+  gap: 6px;
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Ticket #38-1: after clicking 存活确认 or 立即回滚, replace the buttons
+   with this status line so a second click can't fire the same request. */
+.confirmAck {
+  margin-top: var(--space-2);
+  color: var(--ok);
+  font-weight: 500;
+}
+
+/* Ticket #38-2: stepper visualisation of the supervisor's real stages plus an
+   elapsed-time counter. Not literally a bar because we do not have percentage
+   information from the supervisor — but the current stage is highlighted, and
+   the counter makes "stuck" observable. */
+.progress {
+  margin-top: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: var(--bg);
+}
+
+.progressSteps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: var(--text-xs);
+}
+
+.progressStep {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+}
+
+.progressDot {
+  width: 14px;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.progressLabel {
+  font-weight: 500;
+}
+
+.progressHint {
+  color: var(--muted);
+  font-weight: 400;
+  margin-left: 4px;
+  font-size: 11px;
+}
+
+.ps-done {
+  color: var(--ok);
+}
+.ps-done .progressDot {
+  color: var(--ok);
+}
+
+.ps-current {
+  color: var(--accent);
+  font-weight: 600;
+}
+.ps-current .progressDot {
+  color: var(--accent);
+  animation: progressPulse 1.4s ease-in-out infinite;
+}
+
+.ps-future {
+  color: var(--muted);
+  opacity: 0.55;
+}
+
+.progressMeta {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.deployBox pre {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 6px var(--space-2);
+  font: 12px/1.6 var(--mono);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 180px;
+  overflow-y: auto;
+  margin: 6px 0 0;
+}
+
+.list {
+  margin-top: 10px;
+}
+
+.tk {
+  position: relative;
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: var(--space-2) 9px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+/* `UiButton` supplies Ant's compact 30 px default, but a ticket row has a
+ * title AND a status line. Let its content establish the block height. */
+.tk:global(.ant-btn) {
+  height: auto;
+  min-height: var(--list-row-min-height);
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.tk:hover {
+  background: var(--bg);
+}
+
+.active {
+  border-color: var(--accent);
+  background: var(--bg);
+}
+
+.glyph {
+  flex: none;
+  width: 20px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.g-run {
+  color: var(--accent);
+}
+.g-warn {
+  color: #d97706;
+}
+.g-err {
+  color: var(--err);
+}
+.g-ok {
+  color: var(--ok);
+}
+.g-mute {
+  color: var(--muted);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Ticket #192 cost strip. Tabular figures so the numbers line up column-wise
+ * down the list — that vertical alignment is what makes a growing ticket
+ * visible at a glance rather than something you have to read row by row.
+ */
+.cost {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.costPart {
+  white-space: nowrap;
+}
+
+/*
+ * A drawn separator rather than a "·" character: it never inherits the digit
+ * width, so it cannot push the strip past the row on a narrow sidebar.
+ */
+.costSep {
+  display: inline-block;
+  width: 1px;
+  height: 7px;
+  margin: 0 5px;
+  vertical-align: baseline;
+  background: currentColor;
+  opacity: 0.35;
+}
+
+.id {
+  color: var(--muted);
+  font-weight: 400;
+  margin-right: var(--space-1);
+}
+
+.dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.d-warn {
+  background: #d97706;
+}
+.d-err {
+  background: var(--err);
+}
+
+.st {
+  display: inline-block;
+  font-size: 11px;
+  padding: 0 7px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  margin-right: var(--space-1);
+}
+
+.dev-open {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.dev-landed,
+.dep-verified {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+.dep-pending,
+.dep-live_unverified {
+  color: #d97706;
+  border-color: #d97706;
+}
+.dep-reverted {
+  color: var(--err);
+  border-color: var(--err);
+}
+.kind-simple {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+.kind-complex {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+/* Ticket #38-5: discuss (讨论需求) tickets show a distinct badge so the
+   sidebar/detail views make it obvious this row is a chat, not a piece of
+   pending work waiting to be implemented. */
+.kind-discuss {
+  color: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.kind-cli {
+  color: #0f766e;
+  border-color: #0f766e;
+}
+
+.cliReport {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  margin-top: var(--space-2);
+  padding: 14px var(--space-4);
+  border: 1px solid color-mix(in srgb, #0f766e 45%, var(--line));
+  border-left: 3px solid #0f766e;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, #0f766e 5%, var(--card));
+}
+
+.cliReportHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--line);
+  color: #0f766e;
+}
+
+.cliReportHead span {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+/* Ticket #38-5: two "new" buttons instead of one — normal ticket and
+   discussion — laid out inline so the entry points stay peer-level. */
+.newButtons {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.newButtons button {
+  flex: 1;
+  min-width: 0;
+}
+
+/*
+ * The selected ticket is a fixed-height column: header, spec and conversation
+ * are bounded regions, the agent transcript takes the remaining height, and
+ * the composer is always reachable at the bottom. Each scrollable region owns
+ * its own overflow instead of the whole pane scrolling as one.
+ */
+.detail {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 18px 12px;
+}
+
+.thead,
+.spec {
+  flex: none;
+}
+
+.thead {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 10px;
+}
+
+.ticketSummary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.ttitle {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--section-title-size);
+  font-weight: var(--detail-title-weight);
+  line-height: var(--detail-title-leading);
+}
+
+.summaryBadges {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+
+.tmeta {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  margin-top: var(--space-1);
+  word-break: break-all;
+}
+
+.actions {
+  margin-top: var(--space-2);
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.spec {
+  margin: var(--space-2) 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.spec summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+/* A long spec scrolls inside its expander instead of eating the pane. */
+.specBody {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.liveOn {
+  color: var(--ok);
+}
+
+/* Connecting, reconnecting or stopped: never the "following" colour. */
+.liveOff {
+  color: var(--muted);
+}
+
+.transcriptArea {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sizing (flex: 1, overflow) comes from the shared chat scroller class. */
+.transcript {
+  padding: 6px 2px;
+}
+
+.placeholder {
+  color: var(--muted);
+  padding: 10px 2px;
+}
+
+/* `auto` pins the composer to the pane's bottom even when the regions above
+   are short (e.g. a placeholder instead of a transcript). */
+.sendBox {
+  flex: none;
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+/* Adapter class, not the bare element — see the note above `.newPane`. */
+.sendBox :global(textarea.ant-input) {
+  width: 100%;
+  min-height: 56px;
+  padding: var(--space-2) 10px;
+  border-radius: 8px;
+  background: var(--card);
+  resize: vertical;
+}
+
+/**
+ * The stop line (ticket #184). It sits inside the send box so the two share a
+ * border and a rhythm, and it renders only while a turn is running — a ticket
+ * with an idle agent pays no height for it.
+ */
+.turnStop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 6px;
+}
+
+.turnStopLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.turnStopAction {
+  flex: none;
+}
+
+/* What to do about an unknown outcome; the status line above is one line. */
+.executionHint {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+/**
+ * Ticket #190: the phone-only "end this ticket" button, beside 发送.
+ * It never competes with the primary action for width — see the narrow
+ * override in the phone block below.
+ */
+.closeAction {
+  flex: none;
+}
+
+.sendStatus {
+  margin-top: 6px;
+}
+
+.topRefresh {
+  font-size: 18px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.newPane {
+  max-width: 900px;
+}
+
+.newPane h2 {
+  font-size: var(--form-title-size);
+  margin: 0 0 2px;
+}
+
+.newSub {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  margin-bottom: var(--space-3);
+}
+
+.fld {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--muted);
+  margin: var(--space-3) 0 var(--space-1);
+  padding: 0;
+}
+
+/*
+ * Address the adapter class, never the bare element.
+ *
+ * Ticket #202: Ant v6 renders `.ant-select-input` inside every Select — a real
+ * `<input type="text">` positioned `absolute; inset: 0` across the whole
+ * trigger, kept transparent by Ant's own rule in `@layer antd`. A CSS Module is
+ * unlayered, so `.newPane input[type="text"] { background: var(--card) }` beat
+ * that rule and painted an opaque card-coloured panel over the chosen value.
+ * The model and effort pickers looked empty while their label stayed in the
+ * DOM at full opacity in the right colour — visible to `getComputedStyle`, to
+ * `toHaveTextContent`, and to anyone who selected the row and pasted it, but
+ * not to the eye. Three earlier fixes chased the text colour; the text was
+ * never the problem.
+ *
+ * `.ant-input` is carried only by UiInput/UiTextArea, which is what this panel
+ * actually means by "its text fields".
+ */
+.newPane :global(.ant-input) {
+  width: 100%;
+  border-radius: 8px;
+  background: var(--card);
+  padding: var(--space-2) 10px;
+}
+
+.newPane :global(textarea.ant-input) {
+  min-height: 40vh;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.newRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+}
+
+/*
+ * The 190px width this used to set has not applied since the Ant migration:
+ * a Select is no longer a `<select>` element. Removing the dead rule rather
+ * than reviving it under a new selector — the pickers have been sized by
+ * `ui-kit/primitives.module.css` for months and nobody has asked for wider.
+ */
+
+.kindpick {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: var(--space-1);
+  border: 0;
+  padding: 0;
+}
+
+.kindpick label {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+.newHint {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  margin-top: var(--space-1);
+}
+
+.hintErr {
+  color: #d33;
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .root {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .mainScroll {
+    padding: 8px 10px max(16px, env(safe-area-inset-bottom));
+  }
+
+  .detail {
+    min-width: 0;
+    padding: 6px 8px max(6px, env(safe-area-inset-bottom));
+  }
+
+  .thead {
+    padding-bottom: 3px;
+    margin-bottom: 2px;
+  }
+
+  .ticketSummary {
+    min-height: 34px;
+    gap: 4px;
+  }
+
+  .ttitle {
+    overflow: hidden;
+    font-size: var(--text-sm);
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .summaryBadges .st {
+    margin-right: 3px;
+    padding: 0 5px;
+    font-size: 10px;
+  }
+
+  .summaryBadges .st:last-child {
+    margin-right: 0;
+  }
+
+  .ticketInfo,
+  .spec {
+    display: none;
+  }
+
+  .sendBox {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+    padding-top: 6px;
+  }
+
+  .sendBox :global(textarea.ant-input) {
+    grid-column: 1;
+    min-height: 52px;
+    max-height: min(24dvh, 144px);
+    resize: none;
+  }
+
+  /* Its own row above the entry line: the text area keeps its column and its
+     height, so a running turn does not reshape the box on a phone. */
+  .turnStop {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  .openQuestion {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  /* The unknown-outcome note reads across the box, like the status line. */
+  .executionHint {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  .turnStopAction {
+    min-height: 32px;
+  }
+
+  .sendBox .row {
+    grid-column: 2;
+    align-self: end;
+    gap: 6px;
+    margin-top: 0;
+  }
+
+  .sendBox .row button {
+    min-width: 64px;
+  }
+
+  /* Secondary and destructive: it keeps a 44px-tall tap target but gives the
+     entry line back every pixel of width it does not need. */
+  .sendBox .row button.closeAction {
+    min-width: 0;
+    padding: 0 8px;
+    font-size: var(--text-xs);
+  }
+
+  .sendStatus {
+    grid-column: 1 / -1;
+    margin-top: 0;
+    font-size: var(--text-xs);
+    line-height: 1.3;
+  }
+
+  .transcript :global(.av-chat-windowbar) {
+    display: none;
+  }
+}
+
+.badfield {
+  border-color: #d33 !important;
+  outline: 1px solid #d33;
+}
+
+/* The agent's unanswered question, directly above the answer box (#201). */
+.openQuestion {
+  margin: 0 0 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--warn, #d79a2b);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--warn, #d79a2b) 10%, transparent);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/**
+ * Ticket #236: inline with the question's last line, never on its own row —
+ * the note is the thing being read, and the way out of it is a footnote to
+ * that sentence, not a second control competing with 发送.
+ */
+.openQuestion .dismissQuestion:global(.ant-btn) {
+  height: 24px;
+  margin-left: 8px;
+  padding-inline: var(--space-2);
+  font-size: var(--text-xs);
+  vertical-align: baseline;
+}
+
+/* ── Contributor review queue (2026-08-20) ── */
+.mqRow {
+  padding: 6px 0;
+  border-top: 1px solid var(--line, rgba(127, 127, 127, 0.25));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mqHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.mqTicket {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+.mqMeta,
+.mqStatus {
+  font-size: 12px;
+  opacity: 0.85;
+}
+.mqSummary {
+  font-size: 12px;
+  opacity: 0.75;
+  white-space: pre-wrap;
+  max-height: 4.5em;
+  overflow: hidden;
+}
+.laneNote {
+  margin: 6px 0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  background: rgba(127, 127, 127, 0.12);
+}
+
+.creditLedger {
+  margin: 6px 0 10px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  font-size: var(--text-xs);
+}
+
+.creditBalance {
+  color: var(--muted);
+}
+
+.creditBalance b,
+.creditEntries b {
+  color: var(--fg);
+}
+
+.creditEntries {
+  display: grid;
+  gap: 2px;
+  margin-top: 5px;
+  color: var(--muted);
+}

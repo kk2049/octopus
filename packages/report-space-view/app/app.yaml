@@ -1,0 +1,60 @@
+id: report-space
+schema: 3
+state:
+  scope: shared
+roles:
+  member: {max: 64}
+  observer: {max: 64, observer: true}
+actions:
+  submit_report:
+    binding: runtime
+    handler: submit_report
+    title: 发起汇报
+    description: 向当前共享汇报空间提交正文与最小披露的证据快照。
+    roles: [member]
+    params:
+      subject: {type: string, max: 200, required: true, description: 汇报标题}
+      recipient: {type: string, max: 120, required: false, description: 主要接收人或小组}
+      period: {type: string, max: 120, required: false, description: 汇报周期}
+      body: {type: string, max: 4096, required: true, description: Markdown 正文}
+      evidence: {type: string, max: 4096, required: false, description: Markdown 证据快照、文件名与必要摘录}
+  mark_seen:
+    binding: runtime
+    handler: mark_seen
+    title: 标记已阅
+    roles: [member]
+    params:
+      report_id: {type: string, max: 80, required: true, description: 报告 id}
+  comment_report:
+    binding: runtime
+    handler: comment_report
+    title: 讨论
+    roles: [member]
+    params:
+      report_id: {type: string, max: 80, required: true, description: 报告 id}
+      body: {type: string, max: 2000, required: true, description: 讨论内容}
+  record_decision:
+    binding: runtime
+    handler: record_decision
+    title: 记录结论
+    roles: [member]
+    params:
+      report_id: {type: string, max: 80, required: true, description: 报告 id}
+      decision: {type: string, max: 500, required: true, description: 决策或下一步}
+  close_report:
+    binding: runtime
+    handler: close_report
+    title: 关闭汇报
+    roles: [member]
+    params:
+      report_id: {type: string, max: 80, required: true, description: 报告 id}
+  retract_report:
+    binding: runtime
+    handler: retract_report
+    title: 撤回自己的汇报
+    roles: [member]
+    params:
+      report_id: {type: string, max: 80, required: true, description: 报告 id}
+      reason: {type: string, max: 500, required: true, description: 撤回原因}
+view:
+  page: pages/main.yaml

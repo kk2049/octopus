@@ -1,0 +1,56 @@
+# 汇报信箱 — engine app #2. The cross-user probe: deliveries carry sender
+# authorship into the recipient's log (a mailbox IS events authored by
+# others); recipient-side actions stay owner-only.
+app: reports
+title: 汇报信箱
+scope: per-user
+
+actions:
+  send_report:
+    title: 发汇报
+    predicate: owner
+    params:
+      to: { type: string, required: true, description: 收件人用户名 }
+      title: { type: string, required: true, description: 标题 }
+      body: { type: string, required: true, description: 正文（markdown） }
+  mark_read:
+    title: 标已读
+    predicate: owner
+    params:
+      id: { type: string, required: true, description: 汇报 id }
+  reply_report:
+    title: 回复
+    predicate: owner
+    params:
+      id: { type: string, required: true, description: 汇报 id }
+      text: { type: string, required: true, description: 回复内容 }
+
+agents:
+  mailer:
+    adapter: openai-loop
+    prompt: prompts/mailer.md
+
+# The lease shape, declared: an unread & unreplied report nags after 3 days.
+# The engine appends report_overdue as system:deadline; the fold stays pure.
+deadlines:
+  reply_nag:
+    start: report_received
+    cancel: [report_read, report_replied]
+    after_s: 259200
+    emit: report_overdue
+
+flows:
+  report:
+    states: [drafted, sent, received, read, replied, overdue]
+    transitions:
+      - { from: sent, to: received, via: send_report }
+      - { from: received, to: read, via: mark_read }
+      - { from: read, to: replied, via: reply_report }
+      - { from: received, to: overdue, via: "deadline:reply_nag" }
+
+pages:
+  main: pages/main.yaml
+  digest: pages/digest.yaml
+
+feishu:
+  cards: [digest]

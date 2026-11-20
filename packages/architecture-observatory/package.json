@@ -1,0 +1,33 @@
+{
+  "name": "@claude-bot/architecture-observatory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./code-index": "./src/code-index/index.ts"
+  },
+  "scripts": {
+    "analyze": "tsx src/analyzer/cli.ts --root ../.. --config architecture/atlas.json --out .generated/atlas.json",
+    "analyze:cached": "tsx src/analyzer/cli.ts --root ../.. --config architecture/atlas.json --out .generated/atlas.json --reuse",
+    "check": "tsx src/analyzer/cli.ts --root ../.. --config architecture/atlas.json --out .generated/atlas.json --check",
+    "build": "node ../../tools/build-cache/bin/octo-build.mjs --check-only -- 'tsc --noEmit -p tsconfig.json'",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "pnpm --dir ../.. exec vitest run --project node packages/architecture-observatory/src"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.11.0",
+    "@scip-code/scip": "0.9.0",
+    "@sourcegraph/scip-typescript": "0.4.0",
+    "better-sqlite3": "11.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/better-sqlite3": "^7.6.0",
+    "dependency-cruiser": "^18.1.0",
+    "tsx": "^4.19.0",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,127 @@
+/* Host palette stays authoritative; standalone previews also need opaque surfaces. */
+.rv-app { color: var(--fg, #304137); background: var(--bg, #f5f6f2); }
+.rv-app :is(.rv-project-header,.rv-outline,.rv-popover,.rv-related,.rv-window,.rv-zoom) { background: var(--card, #fffefb); color: var(--fg, #304137); border-color: var(--line, #e0e5da); }
+.rv-app :is(button,input,textarea,select) { background-color: var(--card, #fffefb); color: var(--fg, #304137); border-color: var(--line, #e0e5da); }
+.rv-app :is(.rv-window-header,.rv-task-context,.rv-adapter-source > div,.rv-adapter-text,.rv-provenance,.rv-adapter-metrics article,.rv-segment) { background: var(--tool-bg, #eef1e5); color: var(--fg, #304137); border-color: var(--line, #e0e5da); }
+.rv-app :is(.rv-adapter-header b,.rv-adapter-metrics strong,.rv-task-context header,.rv-task-context p,.rv-folder-lede,.rv-folder-toolbar,.rv-scope-title h1,.rv-empty h2) { color: var(--fg, #304137); }
+.rv-app :is(.rv-node > header,.rv-node > footer,.rv-breadcrumbs button,.rv-view-toolbar label,.rv-window-header button,.rv-task-context small,.rv-muted,.rv-source-context small,.rv-adapter-source dd,.rv-adapter-text,.rv-folder-window) { color: var(--muted, #71816a); }
+.rv-app .rv-node { background: var(--card, #fffefb); color: var(--fg, #304137); border-color: var(--line, #e0e5da); }
+.rv-app .rv-node:is(.yellow,.green,.folder,.goal,.review,.adapter) { background: color-mix(in srgb, var(--card, #fffefb) 94%, var(--accent, #567855)); border-color: color-mix(in srgb, var(--line, #e0e5da) 65%, var(--accent, #567855)); }
+.rv-app .rv-node.goal { background: color-mix(in srgb, var(--card, #fffefb) 90%, #b89538); }
+.rv-app .rv-node h3 { color: var(--fg, #304137); }
+.rv-app .rv-canvas { background-image: radial-gradient(var(--line, #e0e5da) .8px, transparent .8px); }
+.rv-app .rv-card-content { min-height: 0; flex: 1; overflow: hidden; font-size: 1em; color: var(--fg, #304137); cursor: text; }
+.rv-app .rv-card-summary { font-size: 1em; color: var(--muted, #71816a); margin: 0 0 .5em; line-height: 1.5; display: block; overflow: hidden; }
+.rv-app .rv-card-content > small { display: block; color: var(--muted, #71816a); font-size: .82em; margin: .3em 0; }
+.rv-app .rv-card-content :is(h1,h2,h3,h4) { font-size: 1.1em; min-height: 0; margin: .35em 0; line-height: 1.4; }
+.rv-app .rv-card-content :is(p,li,code,pre) { font-size: 1em; line-height: 1.5; }
+.rv-app .rv-card-content pre { padding: .35em .5em; max-height: 6em; }
+.rv-app .rv-card-content ul { padding-left: 1.3em; }
+.rv-app .rv-card-content > div[class*="prose"] { max-height: none; overflow: visible; }
+.rv-app .rv-child-preview { display: grid; gap: .32em; }
+.rv-app .rv-child-preview button { display: flex; gap: .5em; align-items: baseline; text-align: left; padding: .25em 0; border: 0; background: transparent; font-size: .96em; min-width: 0; }
+.rv-app .rv-child-preview b { flex: 1; font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.rv-app .rv-child-preview small { font-size: .78em; color: var(--muted, #71816a); white-space: nowrap; }
+.rv-app .rv-card-table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: .92em; }
+.rv-app .rv-card-table :is(th,td) { text-align: left; padding: .4em .25em; border-bottom: 1px solid var(--line, #e0e5da); overflow-wrap: anywhere; vertical-align: top; }
+.rv-app .rv-card-table th { color: var(--muted, #71816a); font-weight: 500; }
+.rv-app .rv-source-context { display: grid; gap: .25em; margin: .45em 0; font-size: .86em; }
+.rv-app .rv-source-context button { color: var(--accent, #567855); border: 0; background: transparent; padding: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-app .rv-source-context small { overflow: hidden; text-overflow: ellipsis; }
+.rv-app .rv-source-context .rv-limitation { color: var(--q-warning, #9b731e); }
+.rv-app .rv-file-excerpt { position: relative; }
+.rv-app .rv-file-excerpt img { display: block; width: 100%; height: 14em; object-fit: contain; background: #fff; border-radius: .3em; }
+.rv-app .rv-file-excerpt > small { display: block; font-size: .8em; color: var(--muted, #71816a); margin: .3em 0; }
+.rv-app .rv-file-excerpt > button { padding: .1em .3em; font-size: .8em; }
+/* Only the trailing refresh control floats over the excerpt; "载入原图" stays in
+   flow, so it is reachable while the image (height 0 until loaded) is absent. */
+.rv-app .rv-file-excerpt > button:last-child { position: absolute; right: 0; bottom: 0; }
+.rv-app .rv-file-excerpt [class*="prose"] { max-height: none; overflow: visible; }
+.rv-app .rv-tree-toggle { color: var(--accent, #567855); font-weight: 600; }
+.rv-app .rv-edges > g > path { stroke: var(--muted, #71816a); }
+.rv-app .rv-edge-label button { background: var(--bg, #f5f6f2); color: var(--muted, #71816a); border-color: var(--line, #e0e5da); }
+.rv-tree .rv-containment > foreignObject { display: none; }
+.rv-app .rv-node > footer { border-color: var(--line, #e0e5da); }
+.rv-app .rv-view-toolbar .rv-segment button[aria-pressed="true"] { background: var(--card, #fffefb); color: var(--fg, #304137); }
+.rv-app .rv-primary { color: #fff; background: var(--accent, #567855); border-color: var(--accent, #567855); }
+.rv-compact.rv-hierarchy .rv-node { height: auto !important; min-height: 212px; }
+.rv-compact.rv-hierarchy .rv-card-content { max-height: 240px; }
+
+/* Host fixed-pixel line heights must not consume the compact card body at zoom. */
+.rv-app .rv-node :is(header,footer,button,small,.rv-card-content,.rv-child-preview) { line-height: 1.35; }
+
+.rv-card-content .rv-source-context small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Host themes may set 40px minimum buttons. In zoomed cards that would consume
+   the preview and footer; leave canvas ports and full-size windows untouched. */
+.rv-app .rv-node :is(footer,.rv-card-content) button { min-height: 0; height: auto; }
+
+/* One editable canvas. More card area reveals more content at the same font size. */
+.rv-app .rv-node > header, .rv-app .rv-node > h3 { cursor: grab; user-select: none; }
+.rv-app .rv-node > footer { flex-wrap: wrap; padding-right: 1.2em; }
+.rv-app .rv-node > .rv-resize-card { position: absolute; right: 0; bottom: 0; width: 1.5em; height: 1.5em; min-width: 0; min-height: 0; padding: 0; border: 0; background: transparent; color: var(--muted, #71816a); cursor: nwse-resize; touch-action: none; line-height: 1; font-size: 1em; }
+.rv-app .rv-node > .rv-resize-card:hover, .rv-app .rv-node > .rv-resize-card:focus-visible { color: var(--accent, #567855); background: var(--tool-bg, #eef1e5); }
+.rv-app .rv-node.rv-role-goal { border-width: 2px; background: color-mix(in srgb, var(--card, #fffefb) 85%, #c2a03a); }
+.rv-app .rv-node.rv-role-goal > h3 { font-size: 1.35em; }
+.rv-app .rv-node.rv-role-target { border-top: 3px solid var(--accent, #567855); background: var(--card, #fffefb); }
+.rv-app .rv-node.rv-role-motivation { background: color-mix(in srgb, var(--card, #fffefb) 83%, #ddb958); border-radius: .3em; }
+.rv-app .rv-node .rv-success-criteria { margin: .5em 0 0; color: var(--muted, #71816a); font-size: .88em; }
+.rv-app .rv-containment > foreignObject { display: none; }
+
+/* Stable card footprint: preview and inline editor occupy the same bounds. */
+.rv-app .rv-card-preview-face { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: .45em; }
+.rv-app .rv-node [hidden] { display: none !important; }
+.rv-app .rv-card-preview-face > header { display: flex; align-items: center; gap: .4em; color: var(--muted, #71816a); font-size: .8em; cursor: grab; touch-action: none; user-select: none; }
+.rv-app .rv-card-preview-face .rv-phase { margin-left: auto; }
+.rv-app .rv-card-preview-face > h3 { font-size: 1.15em; line-height: 1.4; margin: 0; overflow-wrap: anywhere; cursor: text; }
+.rv-app .rv-card-preview-face > footer { display: flex; align-items: center; gap: .25em; margin-top: auto; padding-right: .7em; }
+.rv-app .rv-card-activity { flex: 1; color: var(--muted, #71816a); font-size: .8em; }
+.rv-app .rv-node svg { display: inline-block; width: 1.15em; height: 1.15em; vertical-align: middle; }
+.rv-app .rv-node .rv-icon-button, .rv-app .rv-edit-toolbar button { display: inline-flex; align-items: center; justify-content: center; min-width: 2.1em; min-height: 2.1em; padding: .35em; border: 0; background: transparent; color: var(--muted, #71816a); border-radius: .5em; font-size: 1em; }
+.rv-app .rv-icon-button:hover, .rv-app .rv-icon-button:focus-visible { background: var(--tool-bg, #eef1e5); color: var(--fg, #304137); }
+.rv-app .rv-child-counts { font-size: .85em; color: var(--muted, #71816a); line-height: 1.65; margin: .5em 0; }
+.rv-app .rv-card-menu { position: absolute; z-index: 6; right: 1em; bottom: 3.2em; display: grid; background: var(--card, #fffefb); border: 1px solid var(--line, #e0e5da); border-radius: .65em; padding: .35em; box-shadow: 0 4px 20px #0002; }
+.rv-app .rv-card-menu button { border: 0; background: transparent; text-align: left; font-size: .9em; }
+.rv-app .rv-node.editing { border-color: var(--accent, #567855); }
+.rv-app .rv-inline-editor { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: .35em; overflow: auto; }
+.rv-app .rv-edit-toolbar { display: flex; align-items: center; gap: .4em; }
+.rv-app .rv-edit-toolbar select { flex: 1; min-width: 0; font-size: .8em; border: 0; padding: .3em; height: auto; min-height: 0; background: transparent; }
+.rv-app .rv-inline-editor > input { width: 100%; min-height: 1.8em; height: auto; font-size: 1.12em; line-height: 1.4; font-weight: 600; padding: .15em .3em; }
+.rv-app .rv-inline-editor textarea { width: 100%; resize: none; padding: .35em; font-size: 1em; line-height: 1.5; background: transparent; min-height: 0; }
+.rv-app .rv-inline-summary { flex: 0 0 auto; color: var(--muted, #71816a); max-height: 50%; overflow: auto; }
+.rv-app .rv-inline-body { flex: 1 1 4em; min-height: 3em !important; overflow: auto; }
+.rv-app .rv-inline-save { font-size: .72em; color: var(--muted, #71816a); }
+.rv-app .rv-inline-error { font-size: .75em; margin: 0; }
+.rv-app .rv-node.rv-role-goal .rv-card-preview-face > h3 { font-size: 1.35em; }
+
+@media (pointer: coarse) { .rv-app .rv-node .rv-icon-button { min-width: 36px; min-height: 36px; } }
+
+.rv-app .rv-edit-toolbar .rv-card-drag { cursor: grab; touch-action: none; color: var(--muted, #71816a); }
+
+.rv-app .rv-external-reference { border-style: dashed; border-width: 2px; }
+.rv-app .rv-reference-badge { color: var(--accent, #567855); font-size: .68em; }
+.rv-app .rv-reference-edge path { stroke-dasharray: 6 5; }
+.rv-app .rv-selection-box { position: absolute; border: 1px solid var(--accent, #567855); background: color-mix(in srgb, var(--accent, #567855) 12%, transparent); pointer-events: none; z-index: 10; }
+.rv-app .rv-mode-select { cursor: crosshair; }
+.rv-app .rv-mode-select .rv-node { cursor: pointer; }
+.rv-app .rv-handle { border-radius: 50%; transform: none; width: 14px; height: 14px; min-width: 14px; min-height: 14px; padding: 0; touch-action: none; }
+.rv-app .rv-handle.top { top: -7px; left: calc(50% - 7px); }
+.rv-app .rv-handle.bottom { bottom: -7px; left: calc(50% - 7px); }
+.rv-app .rv-handle.left { left: -7px; top: calc(50% - 7px); }
+.rv-app .rv-handle.right { right: -7px; top: calc(50% - 7px); }
+.rv-app .rv-card-menu a { padding: .4em; color: var(--fg, #304137); font-size: .9em; }
+.rv-app .rv-view-toolbar { flex-wrap: wrap; justify-content: flex-end; }
+.rv-app .rv-view-toolbar [role=status] { font-size: 11px; color: var(--muted, #71816a); }
+.rv-app .rv-notice { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); z-index: 2000000040; background: var(--card, #fffefb); border: 1px solid var(--line, #e0e5da); border-radius: 8px; padding: 8px 12px; }
+.rv-app .rv-notice button { padding: 0 5px; margin-left: 10px; border: 0; }
+
+/* Whole titles and the editor toolbar keep a reliable drag target. */
+.rv-app .rv-card-preview-face > h3.rv-title-drag, .rv-app .rv-edit-toolbar.rv-title-drag { cursor: grab; touch-action: none; }
+.rv-app .rv-card-preview-face > h3.rv-title-drag:active, .rv-app .rv-edit-toolbar.rv-title-drag:active { cursor: grabbing; }
+.rv-app .rv-node.agent { border: 2px solid color-mix(in srgb, var(--accent, #3159c8) 50%, var(--line, #d4dded)); }
+.rv-app .rv-node.agent .rv-card-content, .rv-app .rv-agent-title { cursor: pointer; }
+.rv-app .rv-agent-title { display: flex; align-items: center; gap: .6em; }
+.rv-app .rv-agent-avatar { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 2.25em; height: 2.25em; border-radius: .65em; background: var(--accent, #3159c8); color: white; }
+.rv-app .rv-agent-avatar svg { width: 1.5em; height: 1.5em; }
+.rv-app .rv-node .rv-agent-chat { display: inline-flex; align-items: center; justify-content: center; gap: .4em; flex: 0 0 auto; min-height: 2.1em; padding: .3em .65em; font-size: 1em; border-radius: .5em; background: var(--accent, #3159c8); color: white; border: 0; cursor: pointer; }
+.rv-app .rv-operation-status { position: absolute; z-index: 30; bottom: 64px; left: 50%; transform: translateX(-50%); max-width: 80%; padding: 10px 16px; border: 1px solid var(--line, #d4dded); border-radius: 10px; background: var(--card, white); box-shadow: 0 4px 18px #182b3020; }

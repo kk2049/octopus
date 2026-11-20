@@ -1,0 +1,2665 @@
+{
+  "id": "research-v2",
+  "schema": 4,
+  "state": {
+    "scope": "shared"
+  },
+  "roles": {
+    "owner": {
+      "max": 1
+    },
+    "editor": {
+      "max": 64
+    },
+    "researcher": {
+      "max": 64
+    },
+    "viewer": {
+      "max": 64,
+      "observer": true
+    }
+  },
+  "actions": {
+    "workflow_read": {
+      "binding": "resource",
+      "title": "读取 Agent 草稿、活动、待审问题、规则与候选；不启动工作",
+      "description": "读取 Agent 草稿、活动、待审问题、规则与候选；不启动工作",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "source": {
+          "type": "string",
+          "max": 320,
+          "required": false,
+          "description": "可选来源 ref"
+        }
+      }
+    },
+    "workflow_trace": {
+      "binding": "resource",
+      "title": "按来源或对象双向查询已经生效的改动和建议",
+      "description": "按来源或对象双向查询已经生效的改动和建议",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "source": {
+          "type": "string",
+          "max": 320,
+          "required": false,
+          "description": "来源 ref、Agent 或 run"
+        },
+        "node": {
+          "type": "string",
+          "max": 320,
+          "required": false,
+          "description": "对象 ID/ref"
+        },
+        "after": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "改动游标"
+        }
+      }
+    },
+    "agent_run_continue": {
+      "binding": "resource",
+      "title": "向指定运行对应的原会话发送后续消息",
+      "description": "向指定运行对应的原会话发送后续消息",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "run": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "原运行 ID"
+        },
+        "prompt": {
+          "type": "string",
+          "max": 20000,
+          "required": true,
+          "description": "继续指令"
+        }
+      }
+    },
+    "agent_draft_save": {
+      "binding": "resource",
+      "title": "保存尚未运行的 Agent 上下文草稿",
+      "description": "保存尚未运行的 Agent 上下文草稿",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "draft": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "草稿 ID；新建时省略"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读取到的版本"
+        },
+        "data": {
+          "type": "string",
+          "max": 96000,
+          "required": true,
+          "description": "{title,agent,contexts:[节点ID/ref],prompt}"
+        }
+      }
+    },
+    "agent_draft_start": {
+      "binding": "resource",
+      "title": "明确启动已保存的 Agent 草稿；重复请求不会重复运行",
+      "description": "明确启动已保存的 Agent 草稿；重复请求不会重复运行",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "draft": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "草稿 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读取到的版本"
+        }
+      }
+    },
+    "agent_draft_continue": {
+      "binding": "resource",
+      "title": "向草稿对应的同一会话发送后续消息",
+      "description": "向草稿对应的同一会话发送后续消息",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "draft": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "草稿 ID"
+        },
+        "prompt": {
+          "type": "string",
+          "max": 20000,
+          "required": true,
+          "description": "继续指令"
+        }
+      }
+    },
+    "review_flag_open": {
+      "binding": "resource",
+      "title": "显式提出异步待审或待决策问题；不自动阻塞其他工作",
+      "description": "显式提出异步待审或待决策问题；不自动阻塞其他工作",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "data": {
+          "type": "string",
+          "max": 96000,
+          "required": true,
+          "description": "{kind:review|decision,title,background,options,related,sources,agent?,run?,affected}"
+        }
+      }
+    },
+    "review_flag_link": {
+      "binding": "resource",
+      "title": "把受此问题影响的后续成果显式关联到待审标记",
+      "description": "把受此问题影响的后续成果显式关联到待审标记",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "flag": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "待审问题 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读取到的版本"
+        },
+        "data": {
+          "type": "string",
+          "max": 96000,
+          "required": true,
+          "description": "{affected:对象ID/ref[]}"
+        }
+      }
+    },
+    "review_flag_save": {
+      "binding": "resource",
+      "title": "保存审查意见或答案；不唤醒 Agent",
+      "description": "保存审查意见或答案；不唤醒 Agent",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "flag": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "待审问题 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读取到的版本"
+        },
+        "data": {
+          "type": "string",
+          "max": 96000,
+          "required": true,
+          "description": "{answer,state:open|resolved,affected?:对象ID/ref[]}"
+        }
+      }
+    },
+    "review_flag_continue": {
+      "binding": "resource",
+      "title": "明确发送已保存结果并继续正确的原会话",
+      "description": "明确发送已保存结果并继续正确的原会话",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "flag": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "待审问题 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读取到的版本"
+        }
+      }
+    },
+    "rule_save": {
+      "binding": "resource",
+      "title": "维护自然语言规则、明确范围、阶段与可客观检查项",
+      "description": "维护自然语言规则、明确范围、阶段与可客观检查项",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "rule": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "规则 ID；新建时省略"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读取到的版本"
+        },
+        "data": {
+          "type": "string",
+          "max": 96000,
+          "required": true,
+          "description": "{title,instruction,motivation,enabled,scope,sources,stages,checks,conflicts,enforcement}"
+        }
+      }
+    },
+    "rule_check": {
+      "binding": "resource",
+      "title": "检查指定上下文的适用规则并显露缺口/冲突；不运行 Agent",
+      "description": "检查指定上下文的适用规则并显露缺口/冲突；不运行 Agent",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "data": {
+          "type": "string",
+          "max": 96000,
+          "required": true,
+          "description": "{agent?,contexts,stage:start|continue|completion}"
+        }
+      }
+    },
+    "candidates_save": {
+      "binding": "resource",
+      "title": "审阅、编辑、删除和确认候选事项；不会发布或运行",
+      "description": "审阅、编辑、删除和确认候选事项；不会发布或运行",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "batch": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "候选批次 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读取到的版本"
+        },
+        "data": {
+          "type": "string",
+          "max": 196608,
+          "required": true,
+          "description": "{items:候选完整列表}"
+        }
+      }
+    },
+    "candidates_publish": {
+      "binding": "resource",
+      "title": "明确发布已确认候选；publish_execute 另需明确执行范围与资源映射",
+      "description": "明确发布已确认候选；publish_execute 另需明确执行范围与资源映射",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "batch": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "候选批次 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读取到的版本"
+        },
+        "data": {
+          "type": "string",
+          "max": 96000,
+          "required": true,
+          "description": "{mode:publish|publish_execute,execution?:{scope,agents,parallelism,prompt?}}"
+        }
+      }
+    },
+    "workflow_execution_stop": {
+      "binding": "resource",
+      "title": "停止此批次继续派发；已运行任务仍由现有运行入口控制",
+      "description": "停止此批次继续派发；已运行任务仍由现有运行入口控制",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求 ID；重试沿用同一 ID"
+        },
+        "execution": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "执行 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读取到的版本"
+        }
+      }
+    },
+    "evidence_publish": {
+      "binding": "resource",
+      "title": "归档实验/调研/理论报告及证据关系；不会自动采纳",
+      "description": "归档实验/调研/理论报告及证据关系；不会自动采纳",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次唯一请求；重试沿用同一请求"
+        },
+        "data": {
+          "type": "string",
+          "max": 96000,
+          "required": true,
+          "description": "报告六部分、结论、研究类型、系列和已有证据节点引用"
+        }
+      }
+    },
+    "evidence_read": {
+      "binding": "resource",
+      "title": "同时读取当前报告、同系列最新报告和被采纳报告",
+      "description": "同时读取当前报告、同系列最新报告和被采纳报告",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "报告节点或报告 ID"
+        }
+      }
+    },
+    "evidence_list": {
+      "binding": "resource",
+      "title": "列出已归档报告；保留最新和采纳两个状态",
+      "description": "列出已归档报告；保留最新和采纳两个状态",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "after": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "报告分页游标"
+        }
+      }
+    },
+    "evidence_adopt": {
+      "binding": "resource",
+      "title": "明确采纳指定报告；不会改变最新结果",
+      "description": "明确采纳指定报告；不会改变最新结果",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次唯一请求；重试沿用同一请求"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "报告节点或报告 ID"
+        },
+        "expected": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "当前采纳报告 ID；尚未采纳传空字符串"
+        }
+      }
+    },
+    "cloud_document_bind": {
+      "binding": "resource",
+      "title": "将本人有权访问的真实云文档显式共享到项目材料",
+      "description": "将本人有权访问的真实云文档显式共享到项目材料",
+      "roles": [
+        "owner"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "唯一请求 ID；未知结果保留同一请求"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "云文档材料节点"
+        },
+        "data": {
+          "type": "string",
+          "max": 12000,
+          "required": true,
+          "description": "本任务文档地址、同步范围与策略"
+        }
+      }
+    },
+    "cloud_document_read": {
+      "binding": "resource",
+      "title": "以文档归属人的授权读取云文档和可同步文本块",
+      "description": "以文档归属人的授权读取云文档和可同步文本块",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "云文档材料节点"
+        }
+      }
+    },
+    "paper_sync_configure": {
+      "binding": "resource",
+      "title": "为具体论文任务设置本地Markdown、云端文本块与推进策略；没有全局默认",
+      "description": "为具体论文任务设置本地Markdown、云端文本块与推进策略；没有全局默认",
+      "roles": [
+        "owner"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "唯一请求 ID；未知结果保留同一请求"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "云文档材料节点"
+        },
+        "data": {
+          "type": "string",
+          "max": 12000,
+          "required": true,
+          "description": "本任务文档地址、同步范围与策略"
+        }
+      }
+    },
+    "paper_sync_check": {
+      "binding": "resource",
+      "title": "读取两边的当前内容，识别单边变化和冲突；不会写入",
+      "description": "读取两边的当前内容，识别单边变化和冲突；不会写入",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "云文档材料节点"
+        }
+      }
+    },
+    "paper_sync_run": {
+      "binding": "resource",
+      "title": "按本任务策略同步中文大纲；双边变化或未知结果留待处理",
+      "description": "按本任务策略同步中文大纲；双边变化或未知结果留待处理",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "唯一请求 ID；未知结果保留同一请求"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "云文档材料节点"
+        },
+        "direction": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "按配置auto或明确选择local_to_cloud/cloud_to_local",
+          "enum": [
+            "auto",
+            "local_to_cloud",
+            "cloud_to_local"
+          ]
+        },
+        "local_digest": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "审阅到的本地摘要"
+        },
+        "cloud_digest": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "审阅到的云端摘要"
+        }
+      }
+    },
+    "meeting_options": {
+      "binding": "resource",
+      "title": "读取录音转写能力与本人已授权的Codex来源；不会上传、启动或绑定",
+      "description": "读取录音转写能力与本人已授权的Codex来源；不会上传、启动或绑定",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 320,
+          "required": true,
+          "description": "会议录音节点ID/ref"
+        }
+      }
+    },
+    "source_summarize": {
+      "binding": "resource",
+      "title": "使用明确选择的Agent或Codex来源整理完整转写，生成待审纪要与任务建议；不会执行候选任务",
+      "description": "使用明确选择的Agent或Codex来源整理完整转写，生成待审纪要与任务建议；不会执行候选任务",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求ID；结果不明时沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 320,
+          "required": true,
+          "description": "会议录音节点ID/ref"
+        },
+        "version": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "source_read 返回的固定 sourceVersion"
+        },
+        "selection": {
+          "type": "string",
+          "max": 24000,
+          "required": true,
+          "description": "{kind:agent,agent} 或 {kind:codex,resource,account?,model?,effort?}"
+        }
+      }
+    },
+    "source_segments": {
+      "binding": "resource",
+      "title": "按页读取指定版本的全部来源片段；继续至next为空，不省略末尾",
+      "description": "按页读取指定版本的全部来源片段；继续至next为空，不省略末尾",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 320,
+          "required": true,
+          "description": "会议录音节点ID/ref"
+        },
+        "version": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "source_read 返回的固定 sourceVersion"
+        },
+        "after": {
+          "type": "string",
+          "max": 32,
+          "required": false,
+          "description": "上页返回的片段游标"
+        }
+      }
+    },
+    "source_summary_submit": {
+      "binding": "resource",
+      "title": "由本次被选中的整理Agent提交有来源依据的纪要与待审候选；不得发布或执行任务",
+      "description": "由本次被选中的整理Agent提交有来源依据的纪要与待审候选；不得发布或执行任务",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "稳定请求ID；结果不明时沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 320,
+          "required": true,
+          "description": "会议录音节点ID/ref"
+        },
+        "version": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "source_read 返回的固定 sourceVersion"
+        },
+        "attempt": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "本次整理标识"
+        },
+        "data": {
+          "type": "string",
+          "max": 196608,
+          "required": true,
+          "description": "{minutes:Markdown,candidates:[{title,summary,body,kind:task|goal|finding|note,evidence:[片段ID]}]}"
+        }
+      }
+    },
+    "graph_read": {
+      "binding": "resource",
+      "title": "读取可编辑的图 YAML 快照；保留 snapshot，修改后 graph_apply",
+      "description": "读取可编辑的图 YAML 快照；保留 snapshot，修改后 graph_apply",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "scope": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "可选节点 ID；导出它及相邻节点"
+        }
+      }
+    },
+    "graph_apply": {
+      "binding": "resource",
+      "title": "把 YAML 相对原快照的修改合入图 CRDT；返回有效值和冲突",
+      "description": "把 YAML 相对原快照的修改合入图 CRDT；返回有效值和冲突",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "yaml": {
+          "type": "string",
+          "max": 196608,
+          "required": true,
+          "description": "编辑后的完整 YAML，保留 snapshot；不包含坐标和资源正文"
+        }
+      }
+    },
+    "layout_read": {
+      "binding": "resource",
+      "title": "读取公共坐标和布局版本",
+      "description": "读取公共坐标和布局版本",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {}
+    },
+    "layout_patch": {
+      "binding": "resource",
+      "title": "异步修改位置/尺寸/固定标记和连接端口；返回并发覆盖信息",
+      "description": "异步修改位置/尺寸/固定标记和连接端口；返回并发覆盖信息",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "data": {
+          "type": "string",
+          "max": 96000,
+          "required": true,
+          "description": "{edits:节点 ID 到 {position?:{x,y},size?:{width,height},pinned?:boolean},base:这些节点开始操作时的布局,ports?:边ID到{sourceSide?,targetSide?},basePorts?:开始操作时的端口}"
+        }
+      }
+    },
+    "layout_arrange": {
+      "binding": "resource",
+      "title": "异步自动排版；保留固定节点并跳过基线后已改变的节点",
+      "description": "异步自动排版；保留固定节点并跳过基线后已改变的节点",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "data": {
+          "type": "string",
+          "max": 96000,
+          "required": true,
+          "description": "{nodes:节点 ID 数组,mode:tree 或 compact,base:这些节点开始排版时的布局}"
+        }
+      }
+    },
+    "layout_move": {
+      "binding": "resource",
+      "title": "一次提交节点位置与预览尺寸；过期时重新读取",
+      "description": "一次提交节点位置与预览尺寸；过期时重新读取",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "revision": {
+          "type": "string",
+          "max": 64,
+          "required": true,
+          "description": "layout_read 的 revision"
+        },
+        "positions": {
+          "type": "string",
+          "max": 96000,
+          "required": true,
+          "description": "节点 ID 到 {x,y,width?,height?,pinned?}；省略尺寸保留原值"
+        },
+        "lease": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "可选布局动作租约"
+        }
+      }
+    },
+    "layout_auto": {
+      "binding": "resource",
+      "title": "将指定节点按横向树或紧凑网格排到公共画布；保留固定位置和卡片尺寸",
+      "description": "将指定节点按横向树或紧凑网格排到公共画布；保留固定位置和卡片尺寸",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "revision": {
+          "type": "string",
+          "max": 64,
+          "required": true,
+          "description": "layout_read 的 revision"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "项目内的稳定对象 ID"
+        },
+        "nodes": {
+          "type": "string",
+          "max": 96000,
+          "required": false,
+          "description": "可选节点 ID 数组；仅调整这些节点"
+        },
+        "mode": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "默认 tree；compact 紧凑排列",
+          "enum": [
+            "tree",
+            "compact"
+          ]
+        },
+        "lease": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "可选布局动作租约"
+        }
+      }
+    },
+    "layout_lease": {
+      "binding": "resource",
+      "title": "获取或续期十秒布局动作租约；只在拖动和提交期间持有",
+      "description": "获取或续期十秒布局动作租约；只在拖动和提交期间持有",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "lease": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "续期时提供原租约"
+        }
+      }
+    },
+    "layout_release": {
+      "binding": "resource",
+      "title": "结束布局动作，释放自己的租约",
+      "description": "结束布局动作，释放自己的租约",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "lease": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "租约"
+        }
+      }
+    },
+    "ref_create": {
+      "binding": "resource",
+      "title": "登记独立资源并返回固定 ref；随后用 YAML 把它纳入图",
+      "description": "登记独立资源并返回固定 ref；随后用 YAML 把它纳入图",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "data": {
+          "type": "string",
+          "max": 24000,
+          "required": true,
+          "description": "内置资源的 type、title 和类型数据；坐标不在这里"
+        }
+      }
+    },
+    "ref_describe": {
+      "binding": "resource",
+      "title": "解析固定 ref；返回资源状态、文件和可调用工具",
+      "description": "解析固定 ref；返回资源状态、文件和可调用工具",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "ref": {
+          "type": "string",
+          "max": 320,
+          "required": true,
+          "description": "节点的 ref"
+        }
+      }
+    },
+    "document_write": {
+      "binding": "resource",
+      "title": "直接保存真实正文文件；备份旧版本，不修改图",
+      "description": "直接保存真实正文文件；备份旧版本，不修改图",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "text": {
+          "type": "string",
+          "max": 196608,
+          "required": false,
+          "description": "新的完整正文；stage=append 时为从 offset 起的一段"
+        },
+        "expected": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "可选正文版本；同步必须提供以免覆盖"
+        },
+        "stage": {
+          "type": "string",
+          "max": 10,
+          "required": false,
+          "description": "内容超过一次调用的 text 窗口时分段保存：begin 取得 upload，append 依次带 offset 与一段 text，commit 带 size 原子替换；整份一次给出时省略",
+          "enum": [
+            "begin",
+            "append",
+            "commit"
+          ]
+        },
+        "upload": {
+          "type": "string",
+          "max": 32,
+          "required": false,
+          "description": "stage=begin 回答里的 upload；append 与 commit 必填"
+        },
+        "offset": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "stage=append：这一段在新全文中的起始 UTF-8 字节，等于上一次回答的 size"
+        },
+        "size": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "stage=commit：新全文的 UTF-8 总字节数，等于最后一次 append 回答的 size"
+        }
+      }
+    },
+    "text_versions": {
+      "binding": "resource",
+      "title": "列出正文文件的保存历史",
+      "description": "列出正文文件的保存历史",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "after": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "分页游标"
+        }
+      }
+    },
+    "text_restore": {
+      "binding": "resource",
+      "title": "恢复真实文件的历史版本，保留恢复前内容",
+      "description": "恢复真实文件的历史版本，保留恢复前内容",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "历史版本 ID"
+        }
+      }
+    },
+    "canvas_read": {
+      "binding": "resource",
+      "title": "读取项目概览或指定节点；大项目按游标翻页",
+      "description": "读取项目概览或指定节点；大项目按游标翻页",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "after": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "分页游标"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "项目内的稳定对象 ID"
+        },
+        "active": {
+          "type": "string",
+          "max": 32,
+          "required": false,
+          "description": "仅当前图成员；省略时兼容包含归档记录的读取"
+        }
+      }
+    },
+    "canvas_layout_check": {
+      "binding": "resource",
+      "title": "检查指定层级的卡片重叠和关系交叉，返回有界 warnings",
+      "description": "检查指定层级的卡片重叠和关系交叉，返回有界 warnings",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "scope": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "文件夹 ID；省略为项目根层"
+        },
+        "relations": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "检查本层关系；none 仅检查卡片",
+          "enum": [
+            "none",
+            "scope"
+          ]
+        },
+        "layout": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "统一读取公共画布坐标与尺寸；兼容旧 layout 参数",
+          "enum": [
+            "tree",
+            "hierarchy",
+            "canvas"
+          ]
+        },
+        "expanded": {
+          "type": "string",
+          "max": 20000,
+          "required": false,
+          "description": "tree 展开的节点 ID JSON 数组；省略只展开根 GOAL"
+        }
+      }
+    },
+    "canvas_snapshot": {
+      "binding": "resource",
+      "title": "生成当前层级的安全 SVG 结构预览；不是浏览器页面截图",
+      "description": "生成当前层级的安全 SVG 结构预览；不是浏览器页面截图",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "scope": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "文件夹 ID；省略为项目根层"
+        },
+        "relations": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "省略或 scope 显示本层关系，none 隐藏关系",
+          "enum": [
+            "none",
+            "scope"
+          ]
+        },
+        "layout": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "统一读取公共画布坐标与尺寸；兼容旧 layout 参数",
+          "enum": [
+            "tree",
+            "hierarchy",
+            "canvas"
+          ]
+        },
+        "expanded": {
+          "type": "string",
+          "max": 20000,
+          "required": false,
+          "description": "tree 展开的节点 ID JSON 数组；省略只展开根 GOAL"
+        }
+      }
+    },
+    "canvas_changes": {
+      "binding": "resource",
+      "title": "读取项目语义变更",
+      "description": "读取项目语义变更",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "after": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "上次收到的变更序号"
+        }
+      }
+    },
+    "node_add": {
+      "binding": "resource",
+      "title": "新增节点，自动记录实际决策者",
+      "description": "新增节点，自动记录实际决策者",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "data": {
+          "type": "string",
+          "max": 24000,
+          "required": true,
+          "description": "节点类型、标题、摘要、阶段、初始坐标及类型数据"
+        }
+      }
+    },
+    "adapter_register": {
+      "binding": "resource",
+      "title": "登记一个可热插拔的细粒度投影适配器",
+      "description": "登记一个可热插拔的细粒度投影适配器",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "attach": {
+          "type": "string",
+          "max": 32,
+          "required": false,
+          "description": "是否立即添加到图；false 只登记资源并返回 ref"
+        },
+        "data": {
+          "type": "string",
+          "max": 20000,
+          "required": true,
+          "description": "适配器标题、监听资源、投影字段和受控入口"
+        }
+      }
+    },
+    "adapter_publish": {
+      "binding": "resource",
+      "title": "发布适配器读取到的一批结构化行",
+      "description": "发布适配器读取到的一批结构化行",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读到的对象版本；过期时拒绝覆盖"
+        },
+        "data": {
+          "type": "string",
+          "max": 24000,
+          "required": true,
+          "description": "来源版本、游标和 schema 约束下的标量行"
+        }
+      }
+    },
+    "adapter_control": {
+      "binding": "resource",
+      "title": "暂停、恢复或移除一个投影适配器",
+      "description": "暂停、恢复或移除一个投影适配器",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读到的对象版本；过期时拒绝覆盖"
+        },
+        "state": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "适配器生命周期",
+          "enum": [
+            "paused",
+            "registered",
+            "removed"
+          ]
+        }
+      }
+    },
+    "node_update": {
+      "binding": "resource",
+      "title": "修改图标签或资源描述；图修改合入共同的 CRDT",
+      "description": "修改图标签或资源描述；图修改合入共同的 CRDT",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读到的对象版本；过期时拒绝覆盖"
+        },
+        "snapshot": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "读取时的图快照"
+        },
+        "data": {
+          "type": "string",
+          "max": 24000,
+          "required": true,
+          "description": "需要修改的字段"
+        }
+      }
+    },
+    "node_archive": {
+      "binding": "resource",
+      "title": "从图中摘除节点，保留底层资源和运行",
+      "description": "从图中摘除节点，保留底层资源和运行",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读到的对象版本；过期时拒绝覆盖"
+        },
+        "snapshot": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "读取时的图快照"
+        }
+      }
+    },
+    "edge_add": {
+      "binding": "resource",
+      "title": "新增不执行动作的语义关系",
+      "description": "新增不执行动作的语义关系",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "snapshot": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "读取时的图快照"
+        },
+        "source": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "target": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "label": {
+          "type": "string",
+          "max": 120,
+          "required": true,
+          "description": "关系，例如 supports、contains、支持"
+        }
+      }
+    },
+    "edge_archive": {
+      "binding": "resource",
+      "title": "从图中摘除语义关系",
+      "description": "从图中摘除语义关系",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "edge": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读到的对象版本；过期时拒绝覆盖"
+        },
+        "snapshot": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "读取时的图快照"
+        }
+      }
+    },
+    "review_decide": {
+      "binding": "resource",
+      "title": "更新一个独立审查节点的结论",
+      "description": "更新一个独立审查节点的结论",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读到的对象版本；过期时拒绝覆盖"
+        },
+        "decision": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "审查结论",
+          "enum": [
+            "approved",
+            "changes_requested",
+            "pending"
+          ]
+        },
+        "targets": {
+          "type": "string",
+          "max": 20000,
+          "required": true,
+          "description": "审查时读取到的目标版本摘要"
+        }
+      }
+    },
+    "proposal_resolve": {
+      "binding": "resource",
+      "title": "确认或拒绝具体整理提案",
+      "description": "确认或拒绝具体整理提案",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "human_only": true,
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "proposal": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读到的对象版本；过期时拒绝覆盖"
+        },
+        "decision": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "处理决定",
+          "enum": [
+            "approve",
+            "reject"
+          ]
+        }
+      }
+    },
+    "document_read": {
+      "binding": "resource",
+      "title": "读取真实正文文件或公共布局及版本；正文可带 offset 分段读取任意大小，每段 256 KiB，按返回的 next 继续直到 null，各段 revision 相同",
+      "description": "读取真实正文文件或公共布局及版本；正文可带 offset 分段读取任意大小，每段 256 KiB，按返回的 next 继续直到 null，各段 revision 相同",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "field": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "协作字段",
+          "enum": [
+            "text",
+            "layout"
+          ]
+        },
+        "offset": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "可选：正文字节偏移，首段为 0，之后用返回的 next；省略时整份返回（超过 1 MiB 拒绝）"
+        }
+      }
+    },
+    "resources_list": {
+      "binding": "resource",
+      "title": "列出当前成员可以绑定到项目的运行资源",
+      "description": "列出当前成员可以绑定到项目的运行资源",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {}
+    },
+    "resource_bind": {
+      "binding": "resource",
+      "title": "将本人有权共享的资源显式绑定到节点",
+      "description": "将本人有权共享的资源显式绑定到节点",
+      "roles": [
+        "owner"
+      ],
+      "human_only": true,
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "data": {
+          "type": "string",
+          "max": 24000,
+          "required": true,
+          "description": "绑定种类、资源 ID、配置；不接受凭据"
+        }
+      }
+    },
+    "resource_read": {
+      "binding": "resource",
+      "title": "读取已绑定对象的历史、文件或媒体块",
+      "description": "读取已绑定对象的历史、文件或媒体块",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "cursor": {
+          "type": "string",
+          "max": 512,
+          "required": false,
+          "description": "分页或分块游标"
+        },
+        "version": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "固定资源版本"
+        }
+      }
+    },
+    "file_link": {
+      "binding": "resource",
+      "title": "登记绑定工作区中的真实文件并返回 ref；不会复制文件或自动加入图",
+      "description": "登记绑定工作区中的真实文件并返回 ref；不会复制文件或自动加入图",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "agent": {
+          "type": "string",
+          "max": 320,
+          "required": true,
+          "description": "已经绑定工作区的 Agent 节点或 ref"
+        },
+        "path": {
+          "type": "string",
+          "max": 2000,
+          "required": true,
+          "description": "工作区内的文件路径"
+        },
+        "title": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "文件显示名"
+        }
+      }
+    },
+    "file_write": {
+      "binding": "resource",
+      "title": "直接保存 ref 指向的真实文本文件；不会提交图结构",
+      "description": "直接保存 ref 指向的真实文本文件；不会提交图结构",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "text": {
+          "type": "string",
+          "max": 196608,
+          "required": false,
+          "description": "新的完整 UTF-8 文件内容；stage=append 时为从 offset 起的一段"
+        },
+        "expected": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "可选真实文件摘要；同步必须提供以免覆盖；stage=commit 必填（begin 回答的 digest）"
+        },
+        "stage": {
+          "type": "string",
+          "max": 10,
+          "required": false,
+          "description": "内容超过一次调用的 text 窗口时分段保存：begin 取得 upload，append 依次带 offset 与一段 text，commit 带 size 原子替换；整份一次给出时省略",
+          "enum": [
+            "begin",
+            "append",
+            "commit"
+          ]
+        },
+        "upload": {
+          "type": "string",
+          "max": 32,
+          "required": false,
+          "description": "stage=begin 回答里的 upload；append 与 commit 必填"
+        },
+        "offset": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "stage=append：这一段在新全文中的起始 UTF-8 字节，等于上一次回答的 size"
+        },
+        "size": {
+          "type": "string",
+          "max": 20,
+          "required": false,
+          "description": "stage=commit：新全文的 UTF-8 总字节数，等于最后一次 append 回答的 size"
+        }
+      }
+    },
+    "file_versions": {
+      "binding": "resource",
+      "title": "列出文件节点的历史版本",
+      "description": "列出文件节点的历史版本",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "after": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "版本分页游标"
+        }
+      }
+    },
+    "file_begin": {
+      "binding": "resource",
+      "title": "准备文件或会议音频的新完整版本",
+      "description": "准备文件或会议音频的新完整版本",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "data": {
+          "type": "string",
+          "max": 24000,
+          "required": true,
+          "description": "name、mime、bytes、sha256"
+        }
+      }
+    },
+    "file_chunk": {
+      "binding": "resource",
+      "title": "追加可续传的文件块",
+      "description": "追加可续传的文件块",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "upload": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "offset": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "字节偏移"
+        },
+        "data": {
+          "type": "string",
+          "max": 48000,
+          "required": true,
+          "description": "文件块 base64"
+        }
+      }
+    },
+    "file_commit": {
+      "binding": "resource",
+      "title": "提交已校验的完整文件版本并产生事件",
+      "description": "提交已校验的完整文件版本并产生事件",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "upload": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        }
+      }
+    },
+    "audio_transcribe": {
+      "binding": "resource",
+      "title": "用明确配置的 MOSS 转写设备处理音频、检查完整性并整理带来源的纪要",
+      "description": "用明确配置的 MOSS 转写设备处理音频、检查完整性并整理带来源的纪要",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 32,
+          "required": true,
+          "description": "读到的对象版本；过期时拒绝覆盖"
+        },
+        "summary": {
+          "type": "string",
+          "max": 24000,
+          "required": false,
+          "description": "可选纪要选择：{kind:none}仅转写；{kind:agent,agent}或{kind:codex,resource,account?,model?,effort?}完成转写后整理"
+        }
+      }
+    },
+    "agent_send": {
+      "binding": "resource",
+      "title": "向 Agent 的手动会话追加任务；沿用绑定资源",
+      "description": "向 Agent 的手动会话追加任务；沿用绑定资源",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "prompt": {
+          "type": "string",
+          "max": 24000,
+          "required": true,
+          "description": "任务或批注"
+        }
+      }
+    },
+    "agent_stop": {
+      "binding": "resource",
+      "title": "停止指定运行；关闭窗口不会停止运行",
+      "description": "停止指定运行；关闭窗口不会停止运行",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "run": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "项目内的稳定对象 ID"
+        }
+      }
+    },
+    "session_read": {
+      "binding": "resource",
+      "title": "读取所选 Agent 会话的完整历史窗口",
+      "description": "读取所选 Agent 会话的完整历史窗口",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "conversation": {
+          "type": "string",
+          "max": 240,
+          "required": true,
+          "description": "手动或监听会话 ID"
+        },
+        "offset": {
+          "type": "string",
+          "max": 32,
+          "required": false,
+          "description": "历史消息偏移"
+        }
+      }
+    },
+    "session_file_read": {
+      "binding": "resource",
+      "title": "读取 Agent 明确绑定工作区内的引用文件，逐块校验版本",
+      "description": "读取 Agent 明确绑定工作区内的引用文件，逐块校验版本",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "path": {
+          "type": "string",
+          "max": 2000,
+          "required": true,
+          "description": "工作区内文件路径"
+        },
+        "cursor": {
+          "type": "string",
+          "max": 32,
+          "required": false,
+          "description": "字节偏移"
+        },
+        "version": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "固定文件摘要"
+        }
+      }
+    },
+    "session_attach": {
+      "binding": "resource",
+      "title": "向绑定会话上传本人选择的附件块",
+      "description": "向绑定会话上传本人选择的附件块",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "name": {
+          "type": "string",
+          "max": 240,
+          "required": true,
+          "description": "文件名"
+        },
+        "media_type": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "文件 MIME"
+        },
+        "chunk_index": {
+          "type": "string",
+          "max": 16,
+          "required": true,
+          "description": "当前分块"
+        },
+        "chunk_count": {
+          "type": "string",
+          "max": 16,
+          "required": true,
+          "description": "总分块"
+        },
+        "upload_id": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "续传 ID"
+        },
+        "data": {
+          "type": "string",
+          "max": 48000,
+          "required": true,
+          "description": "文件块 base64"
+        }
+      }
+    },
+    "session_respond": {
+      "binding": "resource",
+      "title": "回答绑定会话当前的人类交互请求",
+      "description": "回答绑定会话当前的人类交互请求",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "human_only": true,
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "conversation": {
+          "type": "string",
+          "max": 240,
+          "required": true,
+          "description": "手动或监听会话 ID"
+        },
+        "interaction": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "response": {
+          "type": "string",
+          "max": 24000,
+          "required": true,
+          "description": "针对当前请求的一次性回答"
+        }
+      }
+    },
+    "source_list": {
+      "binding": "resource",
+      "title": "读取讨论来源与处理进度",
+      "description": "读取讨论来源与处理进度",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {}
+    },
+    "source_read": {
+      "binding": "resource",
+      "title": "读取指定来源的阶段、完整性与派生材料",
+      "description": "读取指定来源的阶段、完整性与派生材料",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "来源版本"
+        }
+      }
+    },
+    "source_retry": {
+      "binding": "resource",
+      "title": "明确重新处理失败的来源；录音还需转写权限",
+      "description": "明确重新处理失败的来源；录音还需转写权限",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "version": {
+          "type": "string",
+          "max": 100,
+          "required": false,
+          "description": "来源版本"
+        }
+      }
+    },
+    "discussion_create": {
+      "binding": "resource",
+      "title": "明确创建飞书讨论群并绑定到项目；未知结果不自动重发",
+      "description": "明确创建飞书讨论群并绑定到项目；未知结果不自动重发",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "title": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "群标题"
+        },
+        "agenda": {
+          "type": "string",
+          "max": 2000,
+          "required": false,
+          "description": "讨论议题"
+        }
+      }
+    },
+    "discussion_follow": {
+      "binding": "resource",
+      "title": "按本任务开启或关闭讨论群增量采集",
+      "description": "按本任务开启或关闭讨论群增量采集",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "data": {
+          "type": "string",
+          "max": 24000,
+          "required": true,
+          "description": "{enabled:boolean,cursor?:string}"
+        }
+      }
+    },
+    "discussion_sync": {
+      "binding": "resource",
+      "title": "立即采集绑定讨论群的新消息并整理为候选",
+      "description": "立即采集绑定讨论群的新消息并整理为候选",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        }
+      }
+    },
+    "discussion_capture": {
+      "binding": "resource",
+      "title": "将选定群消息区间固定为原始记录并创建可编辑纪要；不发送消息或启动 Agent",
+      "description": "将选定群消息区间固定为原始记录并创建可编辑纪要；不发送消息或启动 Agent",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "from": {
+          "type": "string",
+          "max": 200,
+          "required": true,
+          "description": "区间最早消息 ID"
+        },
+        "to": {
+          "type": "string",
+          "max": 200,
+          "required": true,
+          "description": "区间最新消息 ID"
+        },
+        "title": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "讨论标题"
+        }
+      }
+    },
+    "group_send": {
+      "binding": "resource",
+      "title": "向绑定群发送一条消息；未知结果不自动重试",
+      "description": "向绑定群发送一条消息；未知结果不自动重试",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "项目内的稳定对象 ID"
+        },
+        "text": {
+          "type": "string",
+          "max": 8000,
+          "required": true,
+          "description": "群消息正文"
+        }
+      }
+    },
+    "subscription_save": {
+      "binding": "resource",
+      "title": "配置事件插头；每条连接有独立持续会话",
+      "description": "配置事件插头；每条连接有独立持续会话",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher"
+      ],
+      "human_only": true,
+      "params": {
+        "request": {
+          "type": "string",
+          "max": 100,
+          "required": true,
+          "description": "本次操作的唯一请求 ID；重试必须沿用"
+        },
+        "data": {
+          "type": "string",
+          "max": 24000,
+          "required": true,
+          "description": "订阅 ID/版本、源、目标、事件、筛选、任务与启停"
+        }
+      }
+    },
+    "tools_search": {
+      "binding": "resource",
+      "title": "按节点、类型或用途检索项目工具",
+      "description": "按节点、类型或用途检索项目工具",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "query": {
+          "type": "string",
+          "max": 300,
+          "required": false,
+          "description": "检索词"
+        },
+        "node": {
+          "type": "string",
+          "max": 160,
+          "required": false,
+          "description": "项目内的稳定对象 ID"
+        }
+      }
+    },
+    "tools_describe": {
+      "binding": "resource",
+      "title": "读取一个工具的完整参数定义",
+      "description": "读取一个工具的完整参数定义",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "tool": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "工具名"
+        }
+      }
+    },
+    "tools_invoke": {
+      "binding": "resource",
+      "title": "调用已登记对象的工具；执行相同项目和资源权限",
+      "description": "调用已登记对象的工具；执行相同项目和资源权限",
+      "roles": [
+        "owner",
+        "editor",
+        "researcher",
+        "viewer"
+      ],
+      "params": {
+        "tool": {
+          "type": "string",
+          "max": 160,
+          "required": true,
+          "description": "工具名"
+        },
+        "params": {
+          "type": "string",
+          "max": 262144,
+          "required": true,
+          "description": "工具参数；被调用动作仍独立校验自己的长度上限"
+        }
+      }
+    }
+  },
+  "agents": {
+    "mcp": {
+      "adapter": "openai-loop",
+      "role": "researcher",
+      "prompt": "先用 graph_read 获取 YAML，保留 snapshot 并编辑后用 graph_apply 提交。ref_describe 发现资源工具；坐标用 layout_read、layout_patch（按字段异步合并）、layout_arrange（异步排版）；layout_move 保留严格版本检查。正文和插件内部文件独立编辑。重试沿用 request，读取冲突回执中的有效值。"
+    }
+  },
+  "view": {
+    "page": "pages/main.yaml"
+  }
+}

@@ -1,0 +1,137 @@
+.page {
+  composes: page from "../ui-kit/layout.module.css";
+  max-width: 1040px;
+  padding: 22px var(--space-4) 60px;
+}
+
+.head h2 {
+  margin: 0 0 var(--space-1);
+  font-size: 17px;
+}
+
+.muted {
+  composes: lead from "../ui-kit/layout.module.css";
+  margin: 6px 0 0;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  word-break: break-all;
+}
+
+.card {
+  margin-top: 22px;
+}
+
+.card h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-md);
+}
+
+.inline {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.inline dt {
+  color: var(--muted);
+}
+
+.inline dd {
+  margin: 0;
+}
+
+.list,
+.assets {
+  composes: dataTable from "../ui-kit/layout.module.css";
+  margin-top: 10px;
+  font-size: var(--text-sm);
+}
+
+.list th,
+.list td,
+.assets th,
+.assets td {
+  padding: var(--space-2) 10px;
+}
+
+.list th,
+.assets th {
+  font-size: var(--text-xs);
+}
+
+.activeRow {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.actions button {
+  margin-right: 6px;
+}
+
+.approval {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.approvalHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+
+.detail {
+  margin-top: var(--space-2);
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.detail dl {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: var(--text-xs);
+}
+
+.detail dt {
+  color: var(--muted);
+}
+
+.detail dd {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .inline,
+  .detail dl {
+    grid-template-columns: 1fr;
+  }
+
+  .list,
+  .assets {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    white-space: nowrap;
+  }
+}

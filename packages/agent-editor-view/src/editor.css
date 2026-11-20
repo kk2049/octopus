@@ -1,0 +1,47 @@
+/**
+ * The editor's own styling.
+ *
+ * Plain global CSS with contract-like class names, for the same reason every
+ * module package here uses them rather than CSS Modules: the browser boundary
+ * suite reads these names from OUTSIDE the frame to measure things only a
+ * browser can decide, so a hashed name would turn that suite into a batch of
+ * silent timeouts.
+ *
+ * The tokens (`--av-*`) come from the SDK's stylesheet, which `/ui` installs.
+ * Shared document chrome and CodeMirror styling live in `agent-text-view`.
+ * This file owns only editor-specific save feedback.
+ */
+
+.wsedit-save[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/*
+ * Every `--av-*` referenced below is defined in the SDK's `styles.css` for
+ * every theme (ticket #45), so no fallback literal is carried. Silently
+ * substituting a hard-coded colour when the token is missing would let a
+ * theme drift look identical to a broken theme file; making the reference
+ * bare turns any real breakage into an obvious unstyled swatch instead.
+ */
+.wsedit-save-state {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--av-line);
+  background: var(--av-tool-bg);
+}
+
+.wsedit-save-state[data-tone="ok"] {
+  border-color: var(--av-ok);
+}
+
+.wsedit-save-state[data-tone="warn"] {
+  border-color: var(--av-warn);
+}
+
+.wsedit-save-state[data-tone="error"] {
+  border-color: var(--av-error);
+}

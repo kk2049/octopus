@@ -1,0 +1,23 @@
+{
+  "name": "@claude-bot/v3-host",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ../../tools/build-cache/bin/octo-build.mjs -- 'tsup src/index.ts --format esm --clean'",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@claude-bot/convergence-gates": "workspace:*",
+    "@claude-bot/engine": "workspace:*",
+    "js-yaml": "^4.1.0",
+    "@claude-bot/capability-kernel": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.0",
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

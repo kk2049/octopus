@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>晨报样机 v5 · 2026-07-24</title>
+<style>
+  :root {
+    --fg:#1c1e21; --muted:#667; --line:#e3e5e8; --card:#fff; --bg:#f5f6f8; --accent:#2563eb;
+    --crit:#d03b3b; --warn:#eda100; --run:#2563eb; --done:#0ca30c; --idle:#9aa3ad;
+    --sel:rgba(37,99,235,.09); --band:rgba(37,99,235,.06); --recap:#f0f2f6;
+    --spark:#c3d6f5; --flash:rgba(250,204,21,.45); --mile:#7c6cd6; --future:#9aa3ad;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg:#e5e7eb; --muted:#9aa; --line:#333842; --card:#1b1e24; --bg:#12141a;
+      --run:#3987e5; --warn:#c98500; --sel:rgba(57,135,229,.16); --band:rgba(57,135,229,.10);
+      --recap:#22262e; --spark:#2c4568; --flash:rgba(250,204,21,.28); --mile:#9085e9; }
+  }
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body { margin:0; font:14px/1.6 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+         color:var(--fg); background:var(--bg); display:flex; flex-direction:column; }
+  a { color:var(--accent); }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.92em; }
+
+  .mockbar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:6px 14px;
+             background:var(--card); border-bottom:1px dashed var(--accent); font-size:12.5px; color:var(--muted); }
+  .mockbar b { color:var(--accent); }
+  .tt { margin-left:auto; display:flex; gap:6px; align-items:center; }
+  .tt button { font:inherit; font-size:12px; padding:2px 10px; border:1px solid var(--line);
+               background:var(--bg); color:var(--muted); border-radius:999px; cursor:pointer; }
+  .tt button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .shell { display:flex; gap:18px; align-items:center; padding:0 14px; height:38px; flex:none;
+           background:var(--card); border-bottom:1px solid var(--line); font-size:13px; }
+  .shell .brand { font-weight:600; }
+  .shell a { color:var(--muted); text-decoration:none; }
+  .shell a.active { color:var(--fg); font-weight:600; box-shadow:inset 0 -2px 0 var(--accent); }
+  .shell .who { margin-left:auto; color:var(--muted); font-size:12px; }
+
+  .app { flex:1; display:flex; min-height:0; }
+
+  /* ═══ 左栏:项目(一级) + 时间线(二级导航) ═══ */
+  .rail { width:262px; flex:none; border-right:1px solid var(--line); background:var(--card);
+          display:flex; flex-direction:column; min-height:0; }
+  .rail-head { padding:10px 14px 9px; border-bottom:1px solid var(--line); }
+  .rail-head .d { font-weight:600; font-size:13px; }
+  .rail-head .sum { font-size:12px; color:var(--muted); margin-top:1px; }
+  .rail-head .sum .live { color:var(--run); }
+  .rail-list { flex:1; overflow-y:auto; padding:4px 0 10px; }
+  .rail-foot { border-top:1px solid var(--line); padding:7px 14px; font-size:11.5px; color:var(--muted); }
+  .rail-foot a { color:var(--accent); text-decoration:none; }
+  .rail-sep { padding:9px 14px 3px; font-size:11px; color:var(--muted); }
+
+  .row { padding:6px 14px; cursor:pointer; border-left:2px solid transparent; }
+  .row:hover { background:var(--sel); }
+  .row.on { background:var(--sel); border-left-color:var(--accent); }
+  .row .l1 { display:flex; align-items:center; gap:7px; }
+  .row .nm { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12.5px;
+             overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .row .l2 { display:flex; gap:8px; margin-top:1px; padding-left:15px; font-size:11.5px; color:var(--muted); }
+  .row .l2 .ddl { margin-left:auto; flex:none; font-variant-numeric:tabular-nums; }
+  .row.calm .nm { color:var(--muted); }
+  .row.home .nm { font-family:inherit; font-size:13px; font-weight:600; }
+  .dot { width:8px; height:8px; border-radius:50%; flex:none; }
+  .dot.crit{background:var(--crit)} .dot.warn{background:var(--warn)} .dot.done{background:var(--done)}
+  .dot.idle{background:var(--idle)} .dot.run{background:var(--run); animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .new { width:6px; height:6px; border-radius:50%; background:var(--accent); flex:none; margin-left:auto; }
+
+  /* 二级:线性时间线 */
+  .tlnav { margin:3px 0 8px 27px; padding-left:15px; border-left:1.5px solid var(--line); }
+  .tlg { font-size:10.5px; color:var(--muted); letter-spacing:.08em; margin:6px 0 2px -15px;
+         padding-left:15px; display:flex; align-items:baseline; }
+  .tlg .more { margin-left:auto; padding-right:10px; color:var(--accent); cursor:pointer; letter-spacing:0; }
+  .tnode { position:relative; display:flex; gap:7px; align-items:baseline; cursor:pointer;
+           padding:2.5px 10px 2.5px 0; font-size:12px; line-height:1.5; }
+  .tnode:hover { background:var(--sel); }
+  .tnode .g { position:absolute; left:-21px; width:13px; text-align:center; font-size:9px;
+              background:var(--card); line-height:1.5; }
+  .tnode .dt { flex:none; color:var(--muted); font-size:11px; font-variant-numeric:tabular-nums; }
+  .tnode .x { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tnode.past .g { color:var(--muted); }
+  .tnode.mile .g { color:var(--mile); }
+  .tnode.now { padding:5px 10px 5px 0; }
+  .tnode.now .g { color:var(--run); font-size:12px; }
+  .tnode.now .x { color:var(--fg); font-weight:600; }
+  .tnode.now .sub { display:block; font-weight:400; color:var(--muted); font-size:11px; }
+  .tnode.fut { color:var(--future); } .tnode.fut .g { color:var(--future); }
+  .tnode.fut.ddl .g { color:var(--crit); }
+  .tnode.on { background:var(--sel); }
+  .tnode.on .x { color:var(--accent); font-weight:600; }
+  .tnode.on::after { content:""; position:absolute; left:-22.5px; top:0; bottom:0;
+                     border-left:2px solid var(--accent); }
+
+  /* ═══ 中栏 ═══ */
+  .pane { flex:1; overflow-y:auto; min-width:0; }
+  .doc { max-width:66ch; margin:0 auto; padding:24px 26px 70px; }
+  .band { background:var(--band); border:1px solid var(--line); border-radius:8px;
+          padding:8px 12px; font-size:12.5px; margin-bottom:20px; }
+  .band b { color:var(--accent); }
+  h1.t { font-size:18px; margin:0 0 3px; }
+  h1.t.mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  .sub { color:var(--muted); font-size:12.5px; margin-bottom:18px; }
+  .crumb { font-size:12px; color:var(--muted); margin-bottom:10px; }
+  .crumb a { text-decoration:none; }
+
+  .recap { background:var(--recap); border-radius:9px; padding:12px 14px; margin-bottom:22px; }
+  .recap .r { display:flex; gap:10px; font-size:14px; line-height:1.7; }
+  .recap .r + .r { margin-top:4px; }
+  .recap .k { flex:none; width:3.5em; color:var(--muted); font-size:12.5px; padding-top:2px; }
+  .recap.slim { padding:9px 13px; font-size:13px; }
+
+  .who-chip { display:inline-flex; align-items:center; gap:4px; border:1px solid var(--line);
+              background:var(--card); border-radius:999px; padding:1px 9px; font-size:12.5px;
+              margin-right:5px; cursor:pointer; color:var(--fg); }
+  .who-chip:hover { border-color:var(--accent); color:var(--accent); }
+  .who-chip .fs { color:#3370ff; font-weight:700; font-size:11px; }
+  .who-chip.ghost { border-style:dashed; color:var(--muted); }
+
+  /* 当前段 */
+  .seg-h { display:flex; align-items:baseline; gap:10px; margin-bottom:4px; }
+  .seg-h h2 { font-size:16px; margin:0; }
+  .seg-h .act { margin-left:auto; }
+  .btn { font:inherit; font-size:12.5px; padding:4px 12px; border:1px solid var(--line);
+         background:var(--card); color:var(--fg); border-radius:7px; cursor:pointer; }
+  .btn.p { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn:hover { border-color:var(--accent); }
+  .seg-meta { font-size:12.5px; color:var(--muted); margin-bottom:18px; }
+
+  .grp { margin-bottom:18px; }
+  .grp h3 { font-size:12px; color:var(--muted); font-weight:600; margin:0 0 6px;
+            display:flex; align-items:baseline; gap:7px; }
+  .grp h3 .c { color:var(--fg); }
+  .li { display:flex; gap:9px; padding:7px 11px; border:1px solid var(--line); border-radius:8px;
+        margin-bottom:6px; font-size:14px; line-height:1.65; }
+  .li .g { flex:none; font-size:12px; padding-top:2px; }
+  .li .body { flex:1; }
+  .li .meta { font-size:12px; color:var(--muted); margin-top:1px; }
+  .li .ax { margin-top:5px; display:flex; gap:6px; flex-wrap:wrap; }
+  .li .ax .btn { font-size:12px; padding:2px 9px; }
+  .li.block { border-color:var(--crit); }
+  .li.block .g { color:var(--crit); }
+  .li.verify { border-color:var(--warn); }
+  .li.verify .g { color:var(--warn); }
+  .li.run .g { color:var(--run); }
+  .li.todo { border-style:dashed; color:var(--muted); }
+
+  .opts { border:1px solid var(--line); border-radius:9px; overflow:hidden; margin-top:6px; }
+  .opt { padding:9px 13px; } .opt + .opt { border-top:1px solid var(--line); }
+  .opt .t { font-weight:600; font-size:14px; }
+  .opt .d { color:var(--muted); font-size:13px; }
+  .opt .rec { font-size:11.5px; color:var(--accent); border:1px solid var(--accent);
+              border-radius:999px; padding:0 7px; margin-left:6px; white-space:nowrap; }
+
+  .dr { display:flex; gap:10px; font-size:14px; line-height:1.75; margin-bottom:5px; }
+  .dr .dk { flex:none; width:3.4em; color:var(--muted); font-size:12.5px; padding-top:2px; }
+  .quote { border-left:2px solid var(--line); padding-left:11px; color:var(--muted); font-size:14px; }
+  .ev { color:var(--muted); text-decoration:none; border-bottom:1px dotted var(--muted); font-size:13px; }
+  .ev:hover { color:var(--accent); border-bottom-color:var(--accent); }
+  .tail { border-top:1px solid var(--line); margin-top:26px; padding-top:12px; font-size:12.5px; color:var(--muted); }
+  .tail summary { cursor:pointer; list-style:none; }
+  .tail details summary::before { content:"▸ "; }
+  .tail details[open] summary::before { content:"▾ "; }
+  .tail pre { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:var(--bg);
+              border:1px solid var(--line); border-radius:8px; padding:10px; overflow-x:auto; margin:8px 0; }
+  .tail .add{color:#0a7d0a} .tail .del{color:var(--crit)}
+
+  .keys { margin-bottom:26px; }
+  .keys .ki { display:flex; gap:9px; font-size:14.5px; line-height:1.7; margin-bottom:5px; }
+  .keys .n { flex:none; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .item { border-top:1px solid var(--line); padding:14px 0 4px; }
+  .item .ih { display:flex; align-items:baseline; gap:8px; margin-bottom:7px; cursor:pointer; }
+  .item .ih .nm { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:14px; font-weight:600; }
+  .item .ih .st { font-size:12px; color:var(--muted); margin-left:auto; flex:none; }
+  .item .ln { display:flex; gap:10px; font-size:14px; line-height:1.72; margin-bottom:3px; }
+  .item .ln .k { flex:none; width:4.2em; color:var(--muted); font-size:12.5px; padding-top:2px; }
+  .item.calm .nm { font-weight:400; color:var(--muted); }
+  .flash { animation:fl 1.6s ease-out; border-radius:3px; }
+  @keyframes fl { 0%,25%{background:var(--flash)} 100%{background:transparent} }
+
+  /* ═══ 右栏 ═══ */
+  .chat { width:340px; flex:none; border-left:1px solid var(--line); background:var(--card);
+          display:flex; flex-direction:column; min-height:0; }
+  .chat-head { padding:9px 14px; border-bottom:1px solid var(--line); }
+  .chat-head .t { font-size:13px; font-weight:600; display:flex; align-items:center; gap:7px; }
+  .chat-head .t .dot { background:var(--done); }
+  .chat-head .ctx { font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .chat-head .ctx code { color:var(--accent); }
+  .msgs { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:12px; }
+  .m { font-size:13.5px; line-height:1.68; }
+  .m.a .who { font-size:11px; color:var(--muted); display:block; margin-bottom:2px; }
+  .m.u { align-self:flex-end; max-width:86%; background:var(--sel); border-radius:11px 11px 3px 11px; padding:7px 11px; }
+  .m .flagged { background:var(--band); border-left:2px solid var(--accent); padding:7px 10px;
+                border-radius:0 6px 6px 0; margin-top:5px; }
+  .wrote { border:1px solid var(--line); border-radius:7px; padding:7px 10px; margin-top:6px;
+           font-size:12.5px; color:var(--muted); }
+  .wrote .h { color:var(--fg); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; padding:0 14px 8px; }
+  .chip { font:inherit; font-size:12px; padding:3px 10px; border:1px solid var(--line);
+          background:var(--bg); color:var(--accent); border-radius:999px; cursor:pointer; text-align:left; }
+  .chip:hover { border-color:var(--accent); }
+  .composer { border-top:1px solid var(--line); padding:9px 12px; display:flex; gap:8px; }
+  .composer input { flex:1; font:inherit; font-size:13px; padding:7px 10px; border:1px solid var(--line);
+                    border-radius:8px; background:var(--bg); color:var(--fg); }
+  .composer button { font:inherit; font-size:13px; padding:0 13px; border:none; border-radius:8px;
+                     background:var(--accent); color:#fff; cursor:pointer; }
+  .chat-toggle { display:none; }
+
+  #toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:30;
+           background:var(--fg); color:var(--bg); border-radius:8px; padding:8px 15px; font-size:13px;
+           opacity:0; pointer-events:none; transition:opacity .18s; max-width:80vw; text-align:center; }
+  #toast.show { opacity:.95; }
+
+  @media (max-width:1240px) {
+    .chat { position:fixed; right:0; top:0; bottom:0; z-index:25; transform:translateX(100%);
+            transition:transform .18s; box-shadow:-8px 0 24px rgba(0,0,0,.12); }
+    .chat.open { transform:none; }
+    .chat-toggle { display:block; position:fixed; right:16px; bottom:16px; z-index:24; border:none;
+                   background:var(--accent); color:#fff; border-radius:999px; padding:9px 16px;
+                   font:inherit; font-size:13px; cursor:pointer; box-shadow:0 3px 12px rgba(0,0,0,.18); }
+  }
+  @media (max-width:760px) {
+    .app { flex-direction:column; }
+    .rail { width:auto; border-right:none; border-bottom:1px solid var(--line); max-height:44vh; }
+    .doc { padding:18px 16px 60px; }
+    .chat { width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mockbar">
+  🎭 <b>静态样机 v5</b> · 数据虚构 · <a href="/v1.html">v1</a>
+  <span class="tt"><span>时间旅行:</span>
+    <button data-t="09:00" class="on" onclick="setTime('09:00')">09:00 晨读</button>
+    <button data-t="12:30" onclick="setTime('12:30')">12:30</button>
+    <button data-t="16:00" onclick="setTime('16:00')">16:00</button></span>
+</div>
+<div class="shell">
+  <span class="brand">octopus</span>
+  <a href="#" onclick="toast('壳层示意 — 正式版由 shell.ts 提供');return false">总览</a>
+  <a href="#" onclick="toast('壳层示意 — 正式版跳会话浏览器');return false">会话</a>
+  <a href="#" class="active">工作台</a>
+  <span class="who">lht · dt_••••</span>
+</div>
+
+<div class="app">
+  <nav class="rail">
+    <div class="rail-head"><div class="d">07-24 周五</div><div class="sum" id="rh-sum"></div></div>
+    <div class="rail-list" id="rail"></div>
+    <div class="rail-foot" id="rail-foot"></div>
+  </nav>
+  <main class="pane" id="pane"></main>
+  <aside class="chat" id="chat">
+    <div class="chat-head"><div class="t"><span class="dot"></span>秘书 · 会话保持中</div>
+      <div class="ctx" id="chat-ctx"></div></div>
+    <div class="msgs" id="msgs"></div>
+    <div class="chips" id="chips"></div>
+    <div class="composer">
+      <input id="inp" placeholder="纠正它、问它依据、改事实…" onkeydown="if(event.key==='Enter')send()">
+      <button onclick="send()">发送</button></div>
+  </aside>
+</div>
+<button class="chat-toggle" onclick="document.getElementById('chat').classList.toggle('open')">💬 秘书</button>
+<div id="toast"></div>
+
+<script>
+const PEOPLE = { you:{n:'你',oid:null}, chen:{n:'Prof. Chen',oid:'ou_9f2c…a41'}, li:{n:'小李',oid:'ou_3b7e…9d2'} };
+
+/* ═══════ 项目 ═══════
+   past: 已归档定住(旧→新)  now: 未闭环的当前段  future: 未来关键动作 */
+const P = {
+'diffusion-ablation': {
+  one:'做扩散模型结构消融的系统研究,目标 ICML\'27 投稿。',
+  focus:'搞清楚哪些结构组件真正贡献了性能 —— 现在实验做完了,卡在数据可信度上。',
+  people:['you'], kind:'ICML 投稿', ddl:'07-29', ddlDays:5, start:'07-05',
+  acc:'71.3 → 69.2',
+  past:[
+    {d:'07-05',t:'m',x:'项目启动,目标 ICML\'27',why:'确定选题与 ddl。',data:'ICML 投稿截止 07-29。',when:'07-05 20:00 · mbp-office · 会话「开题」'},
+    {d:'07-08',t:'d',x:'主干模型定为 DiT-B/2',why:'算力预算下能跑完全部 12 组消融的最大模型。',data:'B/2 单组约 6 小时,B/4 需 22 小时,ddl 内跑不完。',when:'07-08 09:15 · mbp-office · 会话「选型」'},
+    {d:'07-10',t:'d',x:'合并三个 shard 数据集 ← 后来查出是泄漏来源',why:'单 shard 样本量不足以支撑消融的统计显著性。',data:'合并后 128k 样本;当时未做跨 shard 去重 —— 正是 07-23 查出的 12 条重复的来源。',when:'07-10 14:20 · aws-dev · 会话「数据准备」',commit:'merge_shards.py'},
+    {d:'07-12',t:'m',x:'基线复现达标(acc 71.3)',why:'与原论文的 71.5 差 0.2,进入可比区间,消融才有意义。',data:'三次独立重跑:71.1 / 71.3 / 71.4。',when:'07-12 19:47 · aws-dev · 会话「基线复现」',commit:'c04a8e1'},
+    {d:'07-15',t:'d',x:'数据增强只用 flip,不做 color jitter',why:'扩散模型对颜色分布敏感,jitter 会污染消融的因果解释。',data:'预实验:加 jitter 后基线波动从 0.3 涨到 1.1 点。',when:'07-15 11:30 · mbp-office · 会话「增强策略」'},
+    {d:'07-19',t:'m',x:'消融流水线跑通,可批量出结果',why:'每组消融从手工三步变成一条命令。',data:'首批 exp-030~036 七组一次跑完,无人工介入。',when:'07-19 22:15 · aws-dev · 会话「pipeline 收尾」',commit:'7b2e0d4'},
+    {d:'07-21',t:'d',x:'放弃 cosine 调度对比',why:'与消融主线无关,属于可有可无的补充实验。',data:'预跑两组差异 <0.2 点,没有结论价值。',when:'07-21 15:08 · mbp-office · 会话「实验计划裁剪」'},
+    {d:'07-23',t:'d',x:'batch size 固定 256,不再扫参',why:'显存打满时 256 是最大稳定值;继续扫参的边际收益低于 ddl 压力。',data:'exp-037~040 四组对比,256 与 512 相差 0.3 点,在噪声范围内。',when:'07-23 10:42 · mbp-office · 会话「参数扫描收尾」',commit:'a91c3f2'},
+  ],
+  now:{ title:'消融结果反常 → 数据可信度排查', from:'07-23 10:42(上一个定点之后)',
+    run:[{x:'<code>fix/dedup</code> 分支排查泄漏范围',m:'agent · aws-dev · 已跑 6 小时,未回报'}],
+    verify:[{x:'exp-041~043 消融结果已出(acc <span class="accspot">71.3 → 69.2</span>)',m:'agent 称跑完,但因泄漏疑云你尚未采信 —— 采信与否取决于下面那条裁决'}],
+    block:[{x:'eval split 12 条样本 md5 命中训练集',m:'需要你裁决处理方式,agent 无法自行决定',
+      dec:{opts:[{t:'回滚数据管线,重建 split',d:'约两天;干净,结论经得起审稿',rec:true},
+                 {t:'仅去重后继续',d:'半天;快,但审稿人可能挑数据处理'}],
+           why:'agent 倾向前者:离 ddl 还有 5 天,两天成本吃得下;后者若被挑,补救窗口就没有了。'}}],
+    todo:[{x:'重跑 exp-038 之前的 6 个结论',m:'取决于上面的裁决;若选回滚则必做'}],
+    think:'「反常先怀疑数据,别急着改模型」— 07-23 会话中推断',
+    ev:'3 场会话 · mbp-office / aws-dev' },
+  future:[
+    {d:'今天',t:'a',x:'裁决数据泄漏处理方式',why:'两条路都要 ≥1 天执行期,今天不定周末就来不及。',dep:'无 —— 只等你'},
+    {d:'+2天',t:'a',x:'重跑受影响的 6 组实验',why:'若选回滚,exp-038 之前的结论全部需要重跑。',dep:'取决于裁决结果'},
+    {d:'+3天',t:'a',x:'补齐 §4 消融分析与图表',why:'结果确认后才能定稿分析章节。',dep:'重跑完成'},
+    {d:'07-29',t:'ddl',x:'ICML 投稿截止',why:'硬 ddl,不可移动。',dep:'以上全部'},
+  ],
+  strip:[3,5,2,0,4,6,3,2,5,4,1,6,8,3],
+},
+'survey-agents': {
+  one:'写 Agent memory 机制的综述,投 CSUR。',
+  focus:'把 2020 以来的 memory 机制归成一套分类框架 —— 现在卡在 2025 后的文献缺口。',
+  people:['you','chen'], kind:'综述', ddl:'08-01', ddlDays:8, start:'07-02',
+  past:[
+    {d:'07-02',t:'m',x:'与 Chen 敲定合作分工',why:'你写方法与分类,Chen 写评测与展望。',data:'—',when:'07-02 14:00 · 飞书会话记录'},
+    {d:'07-09',t:'d',x:'范围限定在 2020 年后的工作',why:'2020 前的 memory 机制与 LLM agent 语境差异过大。',data:'预筛 180 篇,2020 后占 143 篇。',when:'07-09 10:20 · mbp-lht · 会话「范围界定」'},
+    {d:'07-14',t:'m',x:'完成 §1-§3 初稿',why:'引言、背景、分类总览成型。',data:'约 4200 词。',when:'07-14 23:10 · mbp-lht · 会话「初稿冲刺」'},
+    {d:'07-18',t:'d',x:'章节结构定为 7 节,不再调整',why:'与 Chen 对齐后锁定,避免边写边改。',data:'CSUR 同类综述平均 6-8 节。',when:'07-18 16:02 · mbp-lht · 会话「结构评审」'},
+    {d:'07-21',t:'d',x:'先补文献再动笔,避免结构返工',why:'§4 的分类框架依赖 2025 后的进展,缺了会导致整节重写。',data:'2025 后 memory-sharing 只找到 2 篇,预计还缺 3 篇。',when:'07-21 21:33 · mbp-lht · 会话「§4.2 写作」'},
+  ],
+  now:{ title:'§4.2 写作停摆,等文献补齐', from:'07-21 21:33(已 3 天无推进)',
+    run:[], verify:[],
+    block:[{x:'缺 3 篇 2025 年后的 memory-sharing 文献',m:'不需要你裁决 —— 缺的是时间。检索本身可以交给 agent'}],
+    todo:[{x:'补齐 3 篇文献并读完',m:'预计 2 小时,可委派 agent 先做初筛'},
+          {x:'续写 §4.2 至节末',m:'预计 2 小时,需要你本人'}],
+    think:'「先补文献再动笔,避免结构返工」— 07-21',
+    ev:'最后 1 场会话 · mbp-lht' },
+  future:[
+    {d:'本周末',t:'a',x:'四小时写作块:补文献 + 写完 §4',why:'ddl 前唯一能塞进去的整块时间。',dep:'diffusion 的裁决先落地'},
+    {d:'+5天',t:'a',x:'写完 §5-§7',why:'剩余三节,Chen 负责 §6 评测。',dep:'§4 完成'},
+    {d:'08-01',t:'ddl',x:'与 Chen 约定的初稿日',why:'非硬 ddl,但拖了会挤压对方时间。',dep:'以上全部'},
+  ],
+  strip:[2,4,3,5,1,2,4,3,2,1,3,0,0,0],
+},
+'rlhf-env': {
+  one:'搭 RLHF 实验环境:可复现 docker + gym 封装。',
+  focus:'让实验能一键复现 —— agent 称已经做完了,等你验收。',
+  people:['you'], kind:'基建', ddl:null, ddlDays:null, start:'07-16',
+  past:[
+    {d:'07-18',t:'d',x:'gym wrapper 用 gymnasium 新 API',why:'旧 gym 已停止维护,新项目不背历史包袱。',data:'—',when:'07-18 09:05 · aws-dev · 会话「wrapper 设计」'},
+    {d:'07-20',t:'m',x:'镜像首次构建成功',why:'可复现环境的第一块地基。',data:'镜像 4.2G,构建 11 分钟。',when:'07-20 18:22 · aws-dev · 会话「docker 构建」'},
+    {d:'07-22',t:'d',x:'环境走 docker 而非 conda',why:'conda 在两台机器上 CUDA 版本解不一致,复现失败两次。',data:'mbp-office 解到 cu118,aws-dev 解到 cu121。',when:'07-22 13:40 · aws-dev · 会话「环境选型」',commit:'e5f1a09'},
+  ],
+  now:{ title:'环境交付,待你验收', from:'07-22 13:40',
+    run:[{x:'2 个 flaky 超时测试重试中',m:'agent · aws-dev · 重试队列,预计 20 分钟内出结果'}],
+    verify:[{x:'docker 环境搭建完成,CUDA 对齐',m:'agent 称完成 · 你还没跑过一次'},
+            {x:'gym wrapper 测试 8/10 通过',m:'agent 称完成 · 剩 2 个 flaky 它认为与代码无关'}],
+    block:[], todo:[{x:'在你自己机器上跑一次复现验证',m:'15 分钟,验收的最后一步'}],
+    think:'(无需你介入,agent 自主推进中)', ev:'2 场会话 · aws-dev' },
+  future:[
+    {d:'验收后',t:'a',x:'接入第一个 RLHF 实验',why:'环境的存在价值要靠真实实验证明。',dep:'验收通过'},
+    {d:'—',t:'a',x:'写一页复现文档',why:'给未来的自己和合作者。',dep:'—'},
+  ],
+  strip:[0,0,1,2,3,2,4,3,5,4,6,5,7,6],
+},
+'nsf-proposal': {
+  one:'NSF 联合申请,你负责 AI 方法章节。',
+  focus:'把方法章节写到能过初审 —— 现在等合作者的预算部分。',
+  people:['you','chen'], kind:'申请书', ddl:'09-15', ddlDays:52, start:'07-05',
+  past:[
+    {d:'07-05',t:'m',x:'确认与 Chen 联合申请',why:'分工:你 AI 方法,Chen 预算与管理。',data:'—',when:'07-05 15:20 · 飞书会话记录'},
+    {d:'07-16',t:'d',x:'申请方向定为 agent memory',why:'与 survey 主题共享文献基础,边际成本低。',data:'—',when:'07-16 11:00 · mbp-office · 会话「方向讨论」'},
+    {d:'07-22',t:'m',x:'方法章节初稿发给 Chen',why:'等预算部分回填后即可合稿。',data:'6 页,含 3 个 aim。',when:'07-22 17:30 · mbp-office · 会话「proposal 方法章」'},
+  ],
+  now:{ title:'等 Prof. Chen 的预算部分', from:'07-22 17:30(已 2 天)',
+    run:[], verify:[],
+    block:[{x:'预算章节未回,合稿无法开始',m:'外部依赖 —— 你能做的只有催',ping:'chen'}],
+    todo:[], think:'(等外部,无需你动作)', ev:'最后 1 场会话 · mbp-office' },
+  future:[
+    {d:'收到后',t:'a',x:'合稿并统一体例',why:'两人分写,格式与术语要拉齐。',dep:'Chen 的预算章节'},
+    {d:'+2周',t:'a',x:'系内预评审',why:'过一轮内部意见再提交。',dep:'合稿完成'},
+    {d:'09-15',t:'ddl',x:'NSF 提交截止',why:'硬 ddl。',dep:'以上全部'},
+  ],
+  strip:[1,0,2,1,0,0,1,0,0,1,2,0,0,0],
+}};
+const ORDER = ['diffusion-ablation','survey-agents','rlhf-env','nsf-proposal'];
+
+const LIVE = {
+ '09:00':{clock:'09:12',sum:'2 项等你 · 1 个 agent 在跑',since:null,rows:{
+   'diffusion-ablation':{s:'crit',v:'等你裁决'},'survey-agents':{s:'warn',v:'停滞 3 天'},
+   'rlhf-env':{s:'run',v:'agent 在跑 · 40 分'},'nsf-proposal':{s:'idle',v:'等外部 · 2 天'}}},
+ '12:30':{clock:'12:34',sum:'2 项等你 · 1 个 agent 在跑',
+   since:'自你 09:12 看过之后:<b>rlhf-env</b> 新增 2 场会话,测试已 10/10 全绿 —— 它的当前段现在只差你验收。',rows:{
+   'diffusion-ablation':{s:'crit',v:'等你裁决'},'survey-agents':{s:'warn',v:'停滞 3 天'},
+   'rlhf-env':{s:'run',v:'待你验收 · 10/10',n:true},'nsf-proposal':{s:'idle',v:'等外部 · 2 天'}}},
+ '16:00':{clock:'16:07',sum:'1 项等你 · 1 个 agent 在跑',
+   since:'自你 12:34 看过之后:<b>survey-agents</b> 你在 14:50 开始写作(3 场会话,§4.2 完成);<b>rlhf-env</b> 已收尾停机。',rows:{
+   'diffusion-ablation':{s:'crit',v:'等你裁决 · 已 7 小时'},'survey-agents':{s:'run',v:'你在写 · 1h17m',n:true},
+   'rlhf-env':{s:'done',v:'完成 · 待验收',n:true},'nsf-proposal':{s:'idle',v:'等外部 · 2 天'}}}};
+
+function openCount(k){ const n=P[k].now; return n.run.length+n.verify.length+n.block.length+n.todo.length; }
+
+function briefItems(){ return [
+ {k:'diffusion-ablation',lines:[
+   ['当前段','消融结果反常 → 数据可信度排查(起于 07-23)。acc <span class="accspot">'+P['diffusion-ablation'].acc+'</span>,eval split 查出 <b>12 条与训练集重复</b>。'],
+   ['卡住','12 条重复怎么处理,需要你裁决:回滚重建 split(两天,稳) <b>还是</b> 仅去重继续(半天,可能被审稿挑)。'],
+   ['为什么急','两条路都要 ≥1 天执行期,ddl 只剩 '+P['diffusion-ablation'].ddlDays+' 天。']]},
+ {k:'survey-agents',lines:[
+   ['当前段','§4.2 写作停摆,已 3 天无推进。缺 3 篇 2025 后的 memory-sharing 文献。'],
+   ['卡住','不需要裁决,缺的是时间 —— 排一个四小时写作块。'],
+   ['为什么急','ddl '+P['survey-agents'].ddlDays+' 天,按剩余量,'+(P['survey-agents'].ddlDays<=8?'周日':'下周中')+'起压力会反超上面那个。']]},
+ {k:'rlhf-env',calm:true,lines:[
+   ['当前段','环境交付,<b>待你验收</b> —— agent 称 docker 与 wrapper 已完成(8/10),2 个 flaky 重试中。'],
+   ['卡住','无。验收要你花 15 分钟在自己机器上跑一次复现。']]},
+ {k:'nsf-proposal',calm:true,lines:[
+   ['当前段','方法章初稿 07-22 已发出,等 '+chip('chen')+' 的预算部分,已 2 天。'],
+   ['卡住','外部依赖,你能做的只有'+chip('chen',' 催一下')+'。']]},
+];}
+function keyPoints(){ return [
+ '<b>diffusion-ablation</b> 的当前段卡在数据泄漏裁决 —— 今天不定,周末就来不及。',
+ '<b>survey-agents</b> 当前段停摆 3 天,ddl '+P['survey-agents'].ddlDays+' 天,需要你排一个写作块。',
+ '<b>rlhf-env</b> agent 说做完了但你没验收 —— 15 分钟能闭环,闭环后它就归档了。'];}
+const ADVICE='先定 diffusion 的裁决,它锁死本周其余排布:选回滚,周末就没有写作块了;选去重,才可能给 survey-agents 排出周六上午。';
+
+/* ═══════ 状态 ═══════ */
+let ST={time:'09:00',view:'brief',proj:null,node:null};   // node: {g:'past'|'now'|'future', i}
+let CHAT=[], PASTALL=new Set();
+
+/* ═══════ 飞书 ═══════ */
+function chip(id,label){ const p=PEOPLE[id];
+  if(!p.oid) return '<span class="who-chip">'+p.n+'</span>';
+  return `<span class="who-chip" onclick="event.stopPropagation();feishu('${id}')"><span class="fs">飞</span>${p.n}${label||''}</span>`; }
+function feishu(id){ toast(`正式版在此打开飞书会话:applink.feishu.cn/client/chat/open?openId=${PEOPLE[id].oid} —— open_id 是 bot 绑定身份时就存下的`); }
+function askPing(id){ const p=PEOPLE[id];
+  push('u',`帮我催一下 ${p.n}`);
+  setTimeout(()=>push('a',`拟了一条,你过目 —— 我以 bot 身份发到你和 ${p.n} 的飞书会话,还是你自己发?
+    <div class="wrote"><span class="h">草稿</span>「Chen 老师好,NSF 方法章节初稿 07-22 发您了,预算部分您看什么时候方便过一版?ddl 09-15,不急但想先排个时间。」</div>
+    <div style="margin-top:6px"><span class="who-chip" onclick="toast('样机未接线;正式版由 bot 发出,并会二次确认')">秘书代发</span>
+    <span class="who-chip ghost" onclick="feishu('${id}')">我自己发 · 打开飞书</span></div>`),420); }
+
+/* ═══════ 左栏 ═══════ */
+function renderRail(){
+  const L=LIVE[ST.time];
+  document.getElementById('rh-sum').innerHTML=L.clock+' · '+L.sum.replace(/(\d+ 个 agent 在跑)/,'<span class="live">$1</span>');
+  const act=ORDER.filter(k=>['crit','warn'].includes(L.rows[k].s)), rest=ORDER.filter(k=>!act.includes(k));
+  const block=k=>{
+    const r=L.rows[k],p=P[k],on=ST.proj===k;
+    let h=`<div class="row${['crit','warn'].includes(r.s)?'':' calm'}${on&&!ST.node?' on':''}" onclick="openNow('${k}')">
+      <div class="l1"><span class="dot ${r.s}"></span><span class="nm">${k}</span>${r.n?'<span class="new"></span>':''}</div>
+      <div class="l2"><span>${r.v}</span><span class="ddl" data-ddl="${k}">${p.ddlDays!=null?p.ddlDays+'d':'—'}</span></div></div>`;
+    if(!on) return h;
+    const all=PASTALL.has(k), past=all?p.past:p.past.slice(-3), hidden=p.past.length-past.length;
+    h+=`<div class="tlnav">
+      <div class="tlg">过去${p.past.length>3?`<span class="more" onclick="event.stopPropagation();PASTALL.${all?'delete':'add'}('${k}');renderRail()">${
+        all?'收起 ▴':'+'+hidden+' 条更早 ▾'}</span>`:''}</div>
+      ${past.map((e)=>{ const i=p.past.indexOf(e), sel=ST.node&&ST.node.g==='past'&&ST.node.i===i;
+        return `<div class="tnode ${e.t==='m'?'mile':'past'}${sel?' on':''}" onclick="openNode('${k}','past',${i})">
+          <span class="g">${e.t==='m'?'✦':'●'}</span><span class="dt">${e.d}</span><span class="x">${e.x}</span></div>`;}).join('')}
+      <div class="tlg">现在</div>
+      <div class="tnode now${ST.node&&ST.node.g==='now'?' on':''}" onclick="openNow('${k}')">
+        <span class="g">◉</span><span class="x">${p.now.title}<span class="sub">${openCount(k)} 项未闭环</span></span></div>
+      <div class="tlg">未来</div>
+      ${p.future.map((e,i)=>{ const sel=ST.node&&ST.node.g==='future'&&ST.node.i===i;
+        return `<div class="tnode fut${e.t==='ddl'?' ddl':''}${sel?' on':''}" onclick="openNode('${k}','future',${i})">
+          <span class="g">${e.t==='ddl'?'◇':'○'}</span><span class="dt">${e.d}</span><span class="x">${e.x}</span></div>`;}).join('')}
+    </div>`;
+    return h;
+  };
+  document.getElementById('rail').innerHTML=
+    `<div class="row home${ST.view==='brief'?' on':''}" onclick="showBrief()">
+       <div class="l1"><span class="nm">📋 今日简报</span></div>
+       <div class="l2"><span>07-24 · 昨夜消化 9 场</span></div></div>
+     <div class="rail-sep">要你介入</div>${act.map(block).join('')}
+     <div class="rail-sep">自行推进</div>${rest.map(block).join('')}`;
+  document.getElementById('rail-foot').innerHTML=
+    `文字消化 02:30 · <a href="#" onclick="toast('样机未接线;正式版立即重跑夜间流水线');return false">重新消化</a>`;
+}
+
+/* ═══════ 中栏 ═══════ */
+function bandHtml(){ const s=LIVE[ST.time].since; return s?`<div class="band">${s}</div>`:''; }
+function recapFull(k){ const p=P[k];
+  return `<div class="recap">
+    <div class="r"><span class="k">一句话</span><span>${p.one}</span></div>
+    <div class="r"><span class="k">主攻</span><span>${p.focus}</span></div>
+    <div class="r"><span class="k">人</span><span data-people="${k}">${p.people.map(id=>chip(id)).join('')}${
+      p.people.includes('chen')?'<span class="who-chip ghost" onclick="askPing(\'chen\')">让秘书催一下</span>':''}</span></div>
+    <div class="r"><span class="k">周期</span><span>${p.start} 起 · ${p.ddl?'ddl '+p.ddl+'(还剩 '+p.ddlDays+' 天)':'无 ddl'}</span></div></div>`; }
+function projHead(k){ const p=P[k],L=LIVE[ST.time].rows[k],mx=Math.max(...p.strip,1);
+  return `<h1 class="t mono">${k}</h1><div class="sub">${p.kind} · ${p.ddl?'ddl '+p.ddl:'无 ddl'} · ${L.v}
+    <span class="strip" title="近 14 天会话数(活动量,非进展)">${p.strip.map((v,i)=>
+      `<i class="${i===13&&L.s==='run'?'now':''}" style="height:${Math.max(2,v/mx*16)}px"></i>`).join('')}</span></div>`; }
+
+function showBrief(){
+  ST.view='brief'; ST.proj=null; ST.node=null;
+  document.getElementById('pane').innerHTML=`<div class="doc">
+    ${bandHtml()}
+    <h1 class="t">今日简报 · 07-24 周五</h1>
+    <div class="sub">昨夜 02:30 消化 9 场会话 · 2 台设备 · mbp-lht 离线未纳入</div>
+    <div class="keys">${keyPoints().map((t,i)=>`<div class="ki"><span class="n">${i+1}.</span><span>${t}</span></div>`).join('')}</div>
+    ${briefItems().map(it=>`<div class="item${it.calm?' calm':''}">
+      <div class="ih" onclick="if(!event.target.closest('.who-chip'))openNow('${it.k}')">
+        <span class="dot ${LIVE[ST.time].rows[it.k].s}"></span><span class="nm">${it.k}</span>
+        <span class="st">${LIVE[ST.time].rows[it.k].v}${P[it.k].ddlDays!=null?' · ddl '+P[it.k].ddlDays+'天':''}</span></div>
+      ${it.lines.map(([k,v])=>`<div class="ln"><span class="k">${k}</span><span>${v}</span></div>`).join('')}
+    </div>`).join('')}
+    <div class="grp" style="margin-top:26px"><h3>跨项目</h3><p style="font-size:14.5px;line-height:1.78;margin:0">${ADVICE}</p></div>
+    <div class="tail"><details><summary>昨夜 agent 改了 3 处状态 · a3f92c1</summary>
+      <pre><span class="del">- 阶段: 实验中</span>
+<span class="add">+ 阶段: 分析中</span>
+<span class="add">+ 卡点: eval split 疑似数据泄漏(12 条 md5 命中)</span>
+<span class="del">- 进度: gym wrapper 测试 6/10</span>
+<span class="add">+ 进度: gym wrapper 测试 8/10</span></pre>
+      <a href="#" onclick="toast('样机未接线;正式版 git revert 这次提交');return false">整体回滚</a></details>
+      <div style="margin-top:8px">本页由 <code>hq/daily/2026-07-24.md</code> 渲染 · CLI 里 <code>cat</code> 是同一份</div></div>
+  </div>`;
+  renderRail(); syncChat(); document.getElementById('pane').scrollTop=0;
+}
+
+function openNow(k){
+  ST.view='project'; ST.proj=k; ST.node={g:'now'};
+  const p=P[k], n=p.now, last=p.past[p.past.length-1];
+  const li=(cls,g,it,extra='')=>`<div class="li ${cls}"><span class="g">${g}</span><div class="body">
+      <div>${it.x}</div><div class="meta">${it.m}</div>${extra}</div></div>`;
+  const decBlock = it => it.dec ? `<div class="opts">${it.dec.opts.map(o=>`<div class="opt">
+      <div class="t">${o.t}${o.rec?'<span class="rec">agent 倾向</span>':''}</div><div class="d">${o.d}</div></div>`).join('')}</div>
+      <div class="meta" style="margin-top:6px">${it.dec.why}</div>
+      <div class="ax"><button class="btn p" onclick="toast('样机未接线;正式版记录裁决并把这段推进到下一步')">选第一条</button>
+        <button class="btn" onclick="toast('样机未接线')">选第二条</button>
+        <button class="btn" onclick="toast('样机未接线;正式版让 agent 补充材料再定')">让 agent 再查查</button></div>` : '';
+  const pingBlock = it => it.ping ? `<div class="ax"><button class="btn" onclick="askPing('${it.ping}')">让秘书催一下</button>
+      <button class="btn" onclick="feishu('${it.ping}')">打开飞书</button></div>` : '';
+  const sec=(title,arr,cls,g,ex)=> arr.length?`<div class="grp"><h3>${title} <span class="c">${arr.length}</span></h3>
+      ${arr.map(it=>li(cls,g,it,ex?ex(it):'')).join('')}</div>`:'';
+
+  document.getElementById('pane').innerHTML=`<div class="doc">
+    ${bandHtml()}
+    ${projHead(k)}
+    ${recapFull(k)}
+    <div class="crumb">时间线 · 上一个定点 <a href="#" onclick="openNode('${k}','past',${p.past.length-1});return false">${last.d} ${last.x}</a> 之后 ——</div>
+    <div class="seg-h"><h2>${n.title}</h2>
+      <span class="act"><button class="btn p" onclick="closeSeg('${k}')">这段闭环了 · 归档</button></span></div>
+    <div class="seg-meta">起于 ${n.from} · ${openCount(k)} 项未闭环 · 归档后它会变成时间线上的一个定点</div>
+    ${sec('卡住 · 等你',n.block,'block','⛔',it=>decBlock(it)+pingBlock(it))}
+    ${sec('进行中',n.run,'run','⏳')}
+    ${sec('agent 称已完成 · 待你验收',n.verify,'verify','✓?',()=>`<div class="ax">
+        <button class="btn" onclick="toast('样机未接线;正式版标记为已验收,并入下次归档')">我验收了</button>
+        <button class="btn" onclick="toast('样机未接线;正式版把它退回给 agent 并附上你的理由')">不对,退回</button></div>`)}
+    ${sec('还没开始',n.todo,'todo','○')}
+    <div class="grp"><h3>你上次的想法</h3><p class="quote" style="margin:0">${n.think}</p></div>
+    <div class="tail">这一段的依据:<a class="ev" href="#" onclick="toast('样机未接线;正式版深链到会话浏览器');return false">${n.ev} ↗</a>
+      · 源文件 <code>hq/projects/${k}/state.md</code></div>
+  </div>`;
+  renderRail(); syncChat(); document.getElementById('pane').scrollTop=0;
+}
+
+function openNode(k,g,i){
+  ST.view='project'; ST.proj=k; ST.node={g,i};
+  const p=P[k], e=(g==='past'?p.past:p.future)[i];
+  const body = g==='past'
+    ? `<div class="dr"><span class="dk">为什么</span><span>${e.why}</span></div>
+       <div class="dr"><span class="dk">依据</span><span>${e.data}</span></div>
+       <div class="dr"><span class="dk">何时</span><span>${e.when}
+         <a class="ev" href="#" onclick="toast('样机未接线;正式版深链到这场 agent 会话的这一段');return false">打开会话 ↗</a></span></div>
+       ${e.commit?`<div class="dr"><span class="dk">提交</span><span><code>${e.commit}</code>
+         <a class="ev" href="#" onclick="toast('样机未接线;正式版跳 git 提交');return false">↗</a></span></div>`:''}`
+    : `<div class="dr"><span class="dk">为什么</span><span>${e.why}</span></div>
+       <div class="dr"><span class="dk">前置</span><span>${e.dep}</span></div>
+       <div class="dr"><span class="dk">时间</span><span>${e.d}</span></div>`;
+  document.getElementById('pane').innerHTML=`<div class="doc">
+    ${bandHtml()}
+    ${projHead(k)}
+    <div class="recap slim"><div class="r"><span class="k">一句话</span><span>${p.one}</span></div></div>
+    <div class="crumb"><a href="#" onclick="openNow('${k}');return false">← 回到当前段</a> · 时间线 ${g==='past'?'过去':'未来'}</div>
+    <div class="seg-h"><h2>${g==='past'?(e.t==='m'?'✦ ':'● '):(e.t==='ddl'?'◇ ':'○ ')}${e.x}</h2></div>
+    <div class="seg-meta">${g==='past'?'已归档 · 定住不再改':'计划中 · 未发生'}</div>
+    ${body}
+    <div class="tail">${g==='past'
+      ? '这是时间线上的一个定点。若发现记错了,在右边告诉秘书,它会追加一条「事实变更」而不是抹掉原记录。'
+      : '未来项是简化规划,不是承诺。落地时它会成为「当前段」,闭环后归档成定点。'}</div>
+  </div>`;
+  renderRail(); syncChat(); document.getElementById('pane').scrollTop=0;
+}
+
+/* 闭环归档:当前段并入时间线,成为新的定点 */
+function closeSeg(k){
+  const p=P[k], n=p.now, open=openCount(k);
+  if(open>0 && !confirm(`${k} 还有 ${open} 项未闭环(卡住 ${n.block.length} · 进行中 ${n.run.length} · 待验收 ${n.verify.length} · 未开始 ${n.todo.length})。\n\n仍然归档?正式版会把未闭环的项转成新一段的起点。`)) return;
+  p.past.push({d:'07-24',t:'m',x:n.title+'(你已验收)',
+    why:'你在 07-24 确认这一段闭环,agent 的交付被采信。',
+    data:[...n.verify,...n.run].map(x=>x.x.replace(/<[^>]+>/g,'')).join(' · ')||'—',
+    when:'07-24 · 秘书会话(本次对话)'});
+  p.now={title:'(新一段尚未开始)',from:'07-24 归档之后',run:[],verify:[],block:[],todo:[],
+    think:'(等下一次推进)',ev:'—'};
+  push('a',`<code>${k}</code> 的当前段已归档成时间线定点(07-24)。<br>
+    未闭环的项我没丢 —— 正式版会把它们转成新一段的起点。<br>
+    这条归档同时写进了 <code>state.md</code>。`);
+  openNow(k);
+  document.querySelectorAll('.tnode.mile').forEach(e=>e.classList.add('flash'));
+}
+
+/* ═══════ 右栏 ═══════ */
+function syncChat(){
+  document.getElementById('chat-ctx').innerHTML = ST.view==='brief'
+    ? '上下文:<code>今日简报</code> · 昨夜消化这一页的那个会话'
+    : '上下文:<code>'+ST.proj+'</code> · '+(ST.node.g==='now'?'当前段':(ST.node.g==='past'?'过去定点':'未来项'));
+  renderChips();
+}
+const SCRIPTS={
+ acc:{u:'exp-043 的 acc 是 69.8 不是 69.2,你读错列了',
+  a:`对不住 —— 我从 <code>exp-043/eval.log</code> 第 3 列读的,那列是 EMA 权重的结果,不是最终验证集。已改正。<br>
+     差值从 -2.1 修正为 <b>-1.5</b>。<b>不影响</b>「疑似泄漏」的判断:那条来自 md5 比对,与这个数无关。`,
+  wrote:'当前段 1 处 · 今日简报 1 处',act:()=>{ P['diffusion-ablation'].acc='71.3 → 69.8';
+    refresh(); document.querySelectorAll('.accspot').forEach(e=>e.classList.add('flash')); }},
+ ddl:{u:'survey 的 ddl 推到 8/3 了',
+  a:`已更新 <code>survey-agents</code>:ddl <b>08-01 → 08-03</b>,时间线的未来项跟着挪了。<br>
+     重算压力排序:它不再在周日反超 diffusion,建议改排<b>下周一</b>的写作块。`,
+  wrote:'state.md 1 处 · 未来项 1 条 · 今日简报 2 处',act:()=>{
+    P['survey-agents'].ddl='08-03'; P['survey-agents'].ddlDays=10;
+    const f=P['survey-agents'].future; f[f.length-1].d='08-03'; f[f.length-1].x='与 Chen 约定的初稿日(已从 08-01 推迟)';
+    refresh(); document.querySelectorAll('[data-ddl="survey-agents"]').forEach(e=>e.classList.add('flash')); }},
+ people:{u:'survey 的合作者换成小李了,Chen 不参与了',
+  a:`记下了,<code>survey-agents</code> 的人改成 <b>你 + 小李</b>。<br>
+     07-02 那条「与 Chen 敲定合作分工」是历史事实,我不动它 —— 而是在时间线上追加了一条事实变更。<br>
+     顺带:<code>nsf-proposal</code> 等的还是 Prof. Chen —— 那条要不要一起改?`,
+  wrote:'state.md「人」字段 · 时间线 +1 条',act:()=>{
+    P['survey-agents'].people=['you','li'];
+    P['survey-agents'].past.push({d:'07-24',t:'d',x:'合作者 Prof. Chen → 小李',
+      why:'你在 07-24 的秘书对话中告知,未说明原因。',
+      data:'影响:§5-§6 评测章节的分工待重新确认。',when:'07-24 · 秘书会话(本次对话)'});
+    refresh(); document.querySelectorAll('[data-people="survey-agents"]').forEach(e=>e.classList.add('flash')); }},
+ verify:{u:'rlhf 那段我在自己机器上跑过了,没问题',
+  a:`那我把 <code>rlhf-env</code> 的两项待验收标记为已采信。<br>
+     这一段现在只剩 2 个 flaky 在重试 —— 你要现在就归档,还是等它们绿了?<br>
+     <div style="margin-top:6px"><span class="who-chip" onclick="closeSeg('rlhf-env')">现在归档</span>
+     <span class="who-chip ghost" onclick="toast('样机未接线;正式版等 flaky 出结果后提醒你')">等测试绿了</span></div>`,
+  wrote:'当前段 2 项标记已验收',act:()=>{ if(ST.proj!=='rlhf-env') openNow('rlhf-env'); }},
+ ev:{u:'那 12 条重复到底怎么查出来的?',
+  a:`07-23 16:40 那场会话(mbp-office):对 val 全量算 md5,与 train 的哈希集合求交,命中 12 条。<br>
+     又回溯文件时间戳,指向 07-10 的 <code>merge_shards.py</code> —— 时间线上 07-10 那条我标注了这个关联。<br>
+     <a class="ev" href="#" onclick="toast('样机未接线;正式版跳会话原文这一段');return false">看那段原文 ↗</a>`,wrote:null,act:null},
+ ping:{u:'帮我催一下 Chen 的预算部分',a:null,wrote:null,act:()=>askPing('chen')},
+};
+function chipsFor(){
+  if(ST.view==='brief') return ['ddl','verify','ping'];
+  if(ST.proj==='diffusion-ablation') return ['acc','ev'];
+  if(ST.proj==='survey-agents') return ['ddl','people'];
+  if(ST.proj==='rlhf-env') return ['verify','ev'];
+  return ['ping','ev'];
+}
+function renderChips(){ document.getElementById('chips').innerHTML=
+  chipsFor().map(k=>`<button class="chip" onclick="run('${k}')">${SCRIPTS[k].u}</button>`).join(''); }
+function push(r,html){ CHAT.push({r,html}); paint(); }
+function paint(){ document.getElementById('msgs').innerHTML=CHAT.map(m=>m.r==='u'
+   ?`<div class="m u">${m.html}</div>`:`<div class="m a"><span class="who">秘书</span>${m.html}</div>`).join('');
+  const el=document.getElementById('msgs'); el.scrollTop=el.scrollHeight; }
+function run(k){ const s=SCRIPTS[k];
+  if(!s.a){ s.act(); return; }
+  push('u',s.u);
+  setTimeout(()=>{ let h=s.a;
+    if(s.wrote) h+=`<div class="wrote"><span class="h">✎ 已写入</span> ${s.wrote} ·
+      <a href="#" onclick="toast('样机未接线;正式版撤销这次改动');return false">撤销</a></div>`;
+    push('a',h); if(s.act) s.act(); },420); }
+function send(){ const i=document.getElementById('inp'),v=i.value.trim(); if(!v) return;
+  i.value=''; push('u',v.replace(/</g,'&lt;'));
+  setTimeout(()=>push('a','🎭 样机里我只会演几段固定对话 —— 点下面的气泡试试。正式版这里是昨夜消化这一页的那个 agent,会话还活着,能读 <code>hq/</code> 下的文件和它引用过的会话原文。'),420); }
+
+function refresh(){ ST.view==='brief'?showBrief():(ST.node.g==='now'?openNow(ST.proj):openNode(ST.proj,ST.node.g,ST.node.i)); }
+function setTime(t){ ST.time=t;
+  document.querySelectorAll('.tt button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); refresh(); }
+let tid; function toast(m){ const t=document.getElementById('toast'); t.textContent='🎭 '+m;
+  t.classList.add('show'); clearTimeout(tid); tid=setTimeout(()=>t.classList.remove('show'),3600); }
+document.addEventListener('keydown',e=>{
+  if(document.activeElement.id==='inp') return;
+  if(e.key==='Escape') showBrief();
+  if(e.key==='j'||e.key==='k'){ const i=ST.proj?ORDER.indexOf(ST.proj):-1;
+    openNow(ORDER[e.key==='j'?Math.min(i+1,ORDER.length-1):Math.max(i-1,0)]); }
+});
+
+showBrief();
+push('a',`昨夜 02:30 消化完 9 场会话,这一页是我写的。有一处我<b>不太确定</b>,先说在前面:
+  <div class="flagged">exp-043 的 acc 我是从 <code>eval.log</code> 第 3 列读的 —— 如果那列不是验证集,这个 -2.1 就是错的,告诉我一声我改。</div>
+  另外 mbp-lht 昨夜离线,它上面的会话没纳入。`);
+</script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+{
+  "name": "@claude-bot/runner",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Laptop-resident runner: dials into the octopus bot and serves local Claude Code / Codex session investigation + explicit session copy.",
+  "main": "dist/index.js",
+  "bin": {
+    "claude-bot-runner": "dist/index.js"
+  },
+  "exports": {
+    "./capability-protocol": {"types":"./dist/capability-protocol.d.ts","default":"./dist/capability-protocol.js"},
+    ".": "./dist/index.js",
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "default": "./dist/core.js"
+    },
+    "./limits": {
+      "types": "./dist/limits.d.ts",
+      "default": "./dist/limits.js"
+    },
+    "./session-attachments": {
+      "types": "./dist/session-attachments.d.ts",
+      "default": "./dist/session-attachments.js"
+    },
+    "./directories": {
+      "types": "./dist/directories.d.ts",
+      "default": "./dist/directories.js"
+    },
+    "./workspaces": {
+      "types": "./dist/workspaces.d.ts",
+      "default": "./dist/workspaces.js"
+    },
+    "./file-transfer": {
+      "types": "./dist/file-transfer.d.ts",
+      "default": "./dist/file-transfer.js"
+    },
+    "./workspace-files": {
+      "types": "./dist/workspace-files.d.ts",
+      "default": "./dist/workspace-files.js"
+    },
+    "./codex-app-server": {
+      "types": "./dist/codex-app-server.d.ts",
+      "default": "./dist/codex-app-server.js"
+    },
+    "./codex-exec-relay": {
+      "types": "./dist/codex-exec-relay.d.ts",
+      "default": "./dist/codex-exec-relay.js"
+    },
+    "./codex-agent-relay": {
+      "types": "./dist/codex-agent-relay.d.ts",
+      "default": "./dist/codex-agent-relay.js"
+    },
+    "./codex-account-routing": {
+      "types": "./dist/codex-account-routing.d.ts",
+      "default": "./dist/codex-account-routing.js"
+    },
+    "./omp-rpc": {
+      "types": "./dist/omp-rpc.d.ts",
+      "default": "./dist/omp-rpc.js"
+    },
+    "./claude-quota": {
+      "types": "./dist/claude-quota.d.ts",
+      "default": "./dist/claude-quota.js"
+    },
+    "./inventory": {
+      "types": "./dist/inventory.d.ts",
+      "default": "./dist/inventory.js"
+    },
+    "./session-projection": {
+      "types": "./dist/session-projection.d.ts",
+      "default": "./dist/session-projection.js"
+    },
+    "./gateway-protocol": {
+      "types": "./dist/gateway-protocol.d.ts",
+      "default": "./dist/gateway-protocol.js"
+    },
+    "./system-status": {
+      "types": "./dist/system-status.d.ts",
+      "default": "./dist/system-status.js"
+    },
+    "./workspace-jobs": {
+      "types": "./dist/workspace-jobs.d.ts",
+      "default": "./dist/workspace-jobs.js"
+    },
+    "./workspace-development-protocol": {
+      "types": "./dist/workspace-development-protocol.d.ts",
+      "default": "./dist/workspace-development-protocol.js"
+    },
+    "./workspace-development": {
+      "types": "./dist/workspace-development.d.ts",
+      "default": "./dist/workspace-development.js"
+    },
+    "./managed-execution": {
+      "types": "./dist/managed-execution.d.ts",
+      "default": "./dist/managed-execution.js"
+    },
+    "./meeting-transcription-protocol": {
+      "types": "./dist/meeting-transcription-protocol.d.ts",
+      "default": "./dist/meeting-transcription-protocol.js"
+    },
+    "./meeting-transcription-worker": {
+      "types": "./dist/meeting-transcription-worker.d.ts",
+      "default": "./dist/meeting-transcription-worker.js"
+    },
+    "./meeting-transcription": {
+      "types": "./dist/meeting-transcription.d.ts",
+      "default": "./dist/meeting-transcription.js"
+    },
+    "./meeting-transcription-integrity": {
+      "types": "./dist/meeting-transcription-integrity.d.ts",
+      "default": "./dist/meeting-transcription-integrity.js"
+    },
+    "./guest-sessions": {
+      "types": "./dist/guest-sessions.d.ts",
+      "default": "./dist/guest-sessions.js"
+    },
+    "./guest-console": {
+      "types": "./dist/guest-console.d.ts",
+      "default": "./dist/guest-console.js"
+    },
+    "./guest-terminal": {
+      "types": "./dist/guest-terminal.d.ts",
+      "default": "./dist/guest-terminal.js"
+    }
+  },
+  "scripts": {
+    "build": "node ../../tools/build-cache/bin/octo-build.mjs -- 'tsup'",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.76",
+    "@claude-bot/agent-sessions-contract": "workspace:*",
+    "@claude-bot/plugin-sessions": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0"
+  }
+}

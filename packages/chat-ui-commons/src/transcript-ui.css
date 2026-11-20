@@ -1,0 +1,573 @@
+/**
+ * The visual baseline for the host-neutral chat surface.
+ *
+ * Both the trusted Dashboard and isolated Agentic Apps may import this sheet.
+ * The DOM and behaviour were already shared; keeping the structural styling
+ * here as well prevents the two hosts from growing lookalike-but-different
+ * copies. Hosts still own their palette through either `--av-*` (Agent View)
+ * or the Dashboard tokens used as fallbacks below.
+ */
+
+.av-chat-scroller-shell {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.av-chat-content {
+  min-height: 100%;
+}
+
+/* "显示完整内容" under a page-capped field: one bounded window per click. */
+.av-chat-full-field {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 4px;
+  color: var(--av-chat-muted);
+  font-size: 12px;
+}
+
+.av-chat-full-field button {
+  font: inherit;
+  color: var(--av-chat-accent);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.av-chat-full-field button:disabled {
+  color: var(--av-chat-muted);
+  cursor: wait;
+}
+
+.av-chat-response-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+  color: var(--av-chat-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Outrank host chat/theme button defaults without changing other controls. */
+.av-chat-transcript .av-chat-response-actions button.av-chat-copy-response {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.av-chat-transcript .av-chat-response-actions button.av-chat-copy-response:hover:not(:disabled),
+.av-chat-transcript .av-chat-response-actions button.av-chat-copy-response:focus-visible {
+  color: var(--av-chat-accent);
+  background: color-mix(in srgb, var(--av-chat-muted) 10%, transparent);
+}
+
+.av-chat-transcript .av-chat-response-actions button.av-chat-copy-response:focus-visible {
+  outline: 2px solid var(--av-chat-accent);
+  outline-offset: 2px;
+}
+
+.av-chat-transcript .av-chat-response-actions button.av-chat-copy-response:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+@media (max-width: 720px), (pointer: coarse) {
+  .av-chat-transcript .av-chat-response-actions button.av-chat-copy-response {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+.av-chat-latest {
+  position: absolute;
+  right: 18px;
+  bottom: 12px;
+  z-index: 2;
+  padding: 6px 12px;
+  border: 1px solid var(--av-chat-line, var(--av-line, var(--line)));
+  border-radius: 999px;
+  background: var(--av-chat-surface, var(--av-surface, var(--card)));
+  box-shadow: var(--av-shadow-sm, 0 4px 12px rgb(0 0 0 / 12%));
+  color: var(--av-chat-accent, var(--av-accent, var(--accent)));
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.av-chat-latest:hover {
+  border-color: var(--av-chat-accent, var(--av-accent, var(--accent)));
+}
+
+.av-chat-transcript {
+  --av-chat-muted: var(--av-muted, var(--muted));
+  --av-chat-line: var(--av-line, var(--line));
+  --av-chat-surface: var(--av-surface, var(--card));
+  --av-chat-tool-bg: var(--av-tool-bg, var(--tool-bg));
+  --av-chat-user-bg: var(--av-user-bg, var(--user-bg));
+  --av-chat-accent: var(--av-accent, var(--accent));
+  --av-chat-error: var(--av-error, var(--err));
+  --av-chat-think: var(--av-think, var(--think));
+  --av-chat-mono: var(
+    --av-mono,
+    var(--mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace)
+  );
+
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  /* Theme-owned insets style the stream without imposing a content-width cap.
+   * Other themes retain the historical 4px scrollbar clearance as fallback. */
+  padding: var(--av-chat-inset, 0 4px 0 0);
+}
+
+/* This is the first row IN the scrollable stream, not a sticky overlay. It is
+ * therefore visible at the top and naturally leaves the viewport while the
+ * reader follows the conversation. */
+.av-chat-windowbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--av-chat-line);
+  background: var(--av-chat-surface);
+  color: var(--av-chat-muted);
+  font-size: 11.5px;
+}
+
+.av-chat-windowbar span { flex: 1; }
+.av-chat-windowbar button { padding: 2px 8px; font-size: 11.5px; }
+
+.av-chat-hint { color: var(--av-chat-muted); font-size: 12px; }
+
+.av-chat-turn {
+  margin: var(--av-chat-turn-gap, 14px) 0;
+  max-width: 100%;
+  /* The App tail is bounded, while the trusted Dashboard virtualizes long
+   * logs. This lets the browser also skip layout/paint for off-screen rows in
+   * the non-virtualized path without creating a second JS windowing system. */
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 48px;
+}
+.av-chat-role { margin-bottom: 3px; color: var(--av-chat-muted); font-size: 11px; }
+.av-chat-pending { opacity: 0.7; }
+
+.av-chat-user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* Virtual/static row wrappers must span the turn. Otherwise the flex item
+ * shrink-wraps first, and the bubble's percentage limit shrinks it again. */
+.av-chat-user > .av-chat-rows {
+  width: 100%;
+  min-width: 0;
+}
+
+.av-chat-user .av-chat-user-body {
+  box-sizing: border-box;
+  margin-inline-start: auto;
+  width: fit-content;
+  max-width: var(--av-chat-user-max-width, 100%);
+  padding: var(--av-chat-user-padding, 9px 13px);
+  border-radius: var(--av-chat-user-radius, 12px);
+  background: var(--av-chat-user-bg);
+  font: var(--av-chat-user-font, inherit);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.av-chat-assistant .av-chat-assistant-body {
+  font: var(--av-chat-prose-font, inherit);
+  word-break: break-word;
+}
+.av-chat-operation-meta {
+  margin-top: 3px;
+  color: var(--av-chat-muted);
+  font-size: 11.5px;
+  word-break: break-word;
+}
+.av-chat-bilingual {
+  display: grid;
+  width: min(100%, 760px);
+  gap: 8px;
+}
+
+.av-chat-user .av-chat-bilingual {
+  justify-items: end;
+}
+
+.av-chat-language {
+  width: 100%;
+  min-width: 0;
+}
+
+.av-chat-language-label {
+  margin: 0 4px 3px;
+  color: var(--av-chat-muted);
+  font: 10px/1.3 var(--av-chat-mono);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.av-chat-language-english {
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, var(--av-chat-line) 72%, transparent);
+  color: color-mix(in srgb, currentColor 78%, var(--av-chat-muted));
+}
+
+.av-chat-user .av-chat-language .av-chat-user-body {
+  width: 100%;
+}
+
+.av-chat-translation-error {
+  margin-top: 5px;
+  color: var(--av-chat-error);
+  font-size: 11.5px;
+}
+
+
+details.av-chat-thinking {
+  margin: 5px 0;
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 28px;
+}
+details.av-chat-thinking > summary {
+  cursor: pointer;
+  color: var(--av-chat-think);
+  font-size: 12px;
+  user-select: none;
+}
+
+details.av-chat-thinking .av-chat-thinking-text {
+  margin-top: 4px;
+  padding-left: 10px;
+  border-left: 2px solid var(--av-chat-line);
+  color: var(--av-chat-think);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+details.av-chat-work {
+  margin: 6px 0;
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 28px;
+}
+details.av-chat-work > summary {
+  padding: 2px 0;
+  cursor: pointer;
+  color: var(--av-chat-muted);
+  font-size: 12px;
+  user-select: none;
+}
+
+.av-chat-work-thinking {
+  margin: 7px 5px;
+  padding: 3px 8px 4px 10px;
+  border-left: 2px solid color-mix(in srgb, var(--av-chat-think) 50%, var(--av-chat-line));
+}
+
+.av-chat-work-thinking .av-chat-thinking-text {
+  color: var(--av-chat-think);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+details.av-chat-card {
+  margin: 5px 0;
+  overflow: hidden;
+  border: 1px solid var(--av-chat-card-border, var(--av-chat-line));
+  border-radius: var(--av-chat-tool-radius, 9px);
+}
+
+details.av-chat-card > summary.av-chat-card-head {
+  padding: 5px 10px;
+  overflow: hidden;
+  background: var(--av-chat-tool-bg);
+  font: 12px/1.7 var(--av-chat-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+details.av-chat-card > .av-chat-card-detail { padding: 6px 10px; }
+
+details.av-chat-todo-card > summary.av-chat-card-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.av-chat-todo-title {
+  min-width: max-content;
+}
+
+.av-chat-todo-progress {
+  width: min(112px, 24vw);
+  height: 7px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--av-chat-accent) 14%, var(--av-chat-tool-bg));
+}
+
+.av-chat-todo-progress::-webkit-progress-bar {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--av-chat-accent) 14%, var(--av-chat-tool-bg));
+}
+
+.av-chat-todo-progress::-webkit-progress-value {
+  border-radius: 999px;
+  background: var(--av-chat-accent);
+}
+
+.av-chat-todo-progress::-moz-progress-bar {
+  border-radius: 999px;
+  background: var(--av-chat-accent);
+}
+
+.av-chat-todo-count {
+  overflow: hidden;
+  color: var(--av-chat-muted);
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+}
+
+.av-chat-todo-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 7px;
+  color: var(--av-chat-muted);
+  font-size: 11px;
+}
+
+.av-chat-todo-overview strong {
+  color: var(--av-chat-accent);
+}
+
+.av-chat-todo-list {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.av-chat-todo-list > li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) max-content;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 5px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.av-chat-todo-icon {
+  color: var(--av-chat-muted);
+  font-family: var(--av-chat-mono);
+  text-align: center;
+}
+
+.av-chat-todo-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.av-chat-todo-state {
+  color: var(--av-chat-muted);
+  font-size: 10.5px;
+}
+
+.av-chat-todo-done {
+  color: var(--av-chat-muted);
+}
+
+.av-chat-todo-done .av-chat-todo-icon {
+  color: var(--av-chat-accent);
+}
+
+.av-chat-todo-done .av-chat-todo-text {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.av-chat-todo-in-progress {
+  background: color-mix(in srgb, var(--av-chat-accent) 8%, transparent);
+}
+
+.av-chat-todo-in-progress .av-chat-todo-icon,
+.av-chat-todo-in-progress .av-chat-todo-state {
+  color: var(--av-chat-accent);
+}
+
+.av-chat-todo-blocked .av-chat-todo-icon,
+.av-chat-todo-blocked .av-chat-todo-state {
+  color: var(--av-chat-error);
+}
+
+.av-chat-todo-raw {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--av-chat-line);
+}
+
+.av-chat-todo-raw > summary {
+  color: var(--av-chat-muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+/* The files a tool call named, at the TOP of its detail card: one tap on a
+   phone, and no scrolling past a JSON blob on a desk. It wraps rather than
+   scrolls — a path that runs off the edge is a path nobody can read — and it
+   is a strip, not a list, so a call touching one file costs one line. */
+.av-chat-file-refs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--av-chat-line);
+}
+
+.av-chat-file-refs > button {
+  max-width: 100%;
+  font: 12px/1.6 var(--av-chat-mono);
+  text-align: start;
+  word-break: break-all;
+}
+
+@media (max-width: 720px) {
+  .av-chat-file-refs > button { min-height: 30px; }
+}
+details.av-chat-card.av-chat-card-error { border-color: var(--av-chat-error); }
+details.av-chat-card.av-chat-card-error > summary.av-chat-card-head { color: var(--av-chat-error); }
+details.av-chat-card.av-chat-card-live { border-color: var(--av-chat-accent); }
+details.av-chat-card.av-chat-card-live > summary.av-chat-card-head { color: var(--av-chat-accent); }
+
+.av-chat-card-detail pre {
+  margin: 6px 0;
+  padding: 8px 10px;
+  overflow-x: auto;
+  border: 1px solid var(--av-chat-line);
+  border-radius: 8px;
+  background: var(--av-chat-tool-bg);
+  font: 12px/1.6 var(--av-chat-mono);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.av-chat-label { margin-top: 4px; color: var(--av-chat-muted); font-size: 11px; }
+.av-chat-label.av-chat-label-running {
+  color: var(--av-chat-accent);
+  background: linear-gradient(
+    90deg,
+    var(--av-chat-accent) 0%,
+    var(--av-chat-accent) 40%,
+    color-mix(in srgb, var(--av-chat-accent) 28%, transparent) 50%,
+    var(--av-chat-accent) 60%,
+    var(--av-chat-accent) 100%
+  );
+  background-position: 100% 0;
+  background-size: 250% 100%;
+  background-clip: text;
+  color: transparent;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: av-chat-status-shimmer 1.8s linear infinite;
+}
+.av-chat-muted { color: var(--av-chat-muted); }
+.av-chat-error { color: var(--av-chat-error); }
+
+@keyframes av-chat-status-shimmer {
+  to { background-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .av-chat-label.av-chat-label-running {
+    background: none;
+    color: var(--av-chat-accent);
+    -webkit-text-fill-color: currentColor;
+    animation: none;
+  }
+}
+
+/* Local-echo send bubbles: pending phases breathe, settled refusals explain. */
+.ev-send-pending {
+  color: var(--av-muted, var(--muted));
+  animation: ev-send-breathe 1.6s ease-in-out infinite;
+}
+
+.ev-send-refused {
+  color: var(--av-danger, #b91c1c);
+}
+
+.ev-send-confirmed {
+  color: var(--av-muted, var(--muted));
+}
+
+.ev-send-uncertain {
+  color: var(--av-chat-muted, var(--av-muted, var(--muted)));
+}
+
+.ev-send-details {
+  margin-top: var(--av-s1, 4px);
+}
+
+.ev-send-details > summary {
+  width: fit-content;
+  cursor: pointer;
+}
+
+.ev-send-note {
+  margin-top: var(--av-s1, 4px);
+  font-size: var(--av-font-sm, 12px);
+  word-break: break-word;
+}
+
+.ev-send-note .ev-send-dismiss {
+  margin-left: var(--av-s2, 8px);
+  font-size: var(--av-font-xs, 11px);
+  padding: 0 var(--av-g6, 6px);
+  cursor: pointer;
+}
+
+@keyframes ev-send-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ev-send-pending { animation: none; }
+}

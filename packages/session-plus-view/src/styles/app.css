@@ -1,0 +1,410 @@
+/*
+ * The App's theme: document chrome and the shared element defaults the modules
+ * render into. Workbench geometry belongs to the reusable docking adapter.
+ *
+ * What is NOT here any more lives in `@claude-bot/agent-sessions-view`'s own
+ * stylesheet — every `.sess`, `.dhead`, `.ev-*`, `.command-pane` rule travels
+ * with the module that emits the class name, so a second App gets a working
+ * transcript without copying this file.
+ *
+ * Ordinary global CSS on purpose. Several class names below are a CONTRACT: the
+ * real-browser boundary suite reads them from outside the frame. A CSS-Modules
+ * hash would make those elements unaddressable and turn that suite into a batch
+ * of silent timeouts.
+ *
+ * The App derives a quiet, Apple-inspired material layer from the SDK's
+ * `--av-*` tokens. The outer theme still owns the accent and semantic colours;
+ * this sheet only owns the Session Plus hierarchy, density and chrome. Dark
+ * mode follows the host scheme; increased contrast and motion follow the OS.
+ */
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font: var(--av-session-body-font, 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif);
+  letter-spacing: -0.005em;
+  color: var(--av-fg);
+  background:
+    radial-gradient(
+      circle at 86% -16%,
+      color-mix(in srgb, var(--av-accent) 12%, transparent) 0,
+      transparent 38%
+    ),
+    var(--av-canvas);
+}
+
+#root {
+  height: 100%;
+  min-height: 0;
+}
+
+/* Build scoping maps :root to this App's surface, including its portals. */
+:root {
+  --av-dock-material-filter: none;
+  --av-overlay-filter: none;
+}
+
+.session-plus-app {
+  --sp-material: var(--av-session-material-solid, light-dark(rgb(255 255 255 / 78%), rgb(29 29 31 / 82%)));
+  --sp-material-strong: var(--av-session-material-strong-solid, light-dark(rgb(255 255 255 / 92%), rgb(29 29 31 / 94%)));
+  --sp-control-fill: color-mix(in srgb, var(--av-fg) 6%, var(--av-surface));
+  --sp-hairline: color-mix(in srgb, var(--av-fg) 14%, transparent);
+  --sp-selection: color-mix(in srgb, var(--av-accent) 14%, var(--av-surface));
+  --sp-shadow-window: var(--av-session-window-shadow, 0 24px 64px light-dark(rgb(30 42 58 / 14%), rgb(0 0 0 / 42%)), 0 2px 10px light-dark(rgb(30 42 58 / 7%), rgb(0 0 0 / 24%)));
+  --av-rs: var(--av-session-rs, 9px);
+  --av-rm: var(--av-session-rm, 14px);
+  --av-shadow-sm: var(--av-session-shadow, 0 12px 36px light-dark(rgb(30 42 58 / 13%), rgb(0 0 0 / 42%)), 0 2px 8px light-dark(rgb(30 42 58 / 6%), rgb(0 0 0 / 24%)));
+  --av-focus: 0 0 0 3px color-mix(in srgb, var(--av-accent) 32%, transparent);
+  --av-duration: var(--av-session-duration, 140ms);
+  --av-chat-inset: var(--av-session-chat-inset, 18px clamp(16px, 4.5vw, 64px) 8px);
+  --av-chat-turn-gap: var(--av-session-chat-turn-gap, 18px);
+  --av-chat-user-radius: var(--av-session-chat-user-radius, 19px 19px 6px 19px);
+  --av-chat-user-padding: var(--av-session-chat-user-padding, 10px 15px);
+  --av-chat-user-max-width: var(--av-session-chat-user-max-width, min(620px, 78%));
+
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--av-session-app-gap, 10px);
+  padding: var(--av-session-app-padding, 12px 14px 14px);
+}
+
+.banner {
+  margin: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--av-fg) 14%, transparent);
+  border-radius: 14px;
+  padding: 11px 13px;
+  color: var(--av-muted);
+  font-size: 12px;
+  background: light-dark(rgb(255 255 255 / 90%), rgb(29 29 31 / 92%));
+  box-shadow: 0 12px 36px light-dark(rgb(30 42 58 / 10%), rgb(0 0 0 / 35%));
+}
+
+
+.cols { flex: 1; min-height: 0; }
+
+/* ── Apple-inspired App chrome ─────────────────────────────────────────────
+ *
+ * Navigation and controls are the material layer; transcripts and documents
+ * remain stable content surfaces. Chrome keeps the theme colours without
+ * backdrop blur so typing and Dock resizing take priority over glass effects.
+ */
+
+.session-plus-app .av-dock-workspace {
+  background: transparent;
+}
+
+.session-plus-app .av-dock-host {
+  border-color: var(--sp-hairline);
+  border-radius: var(--av-session-window-radius, 18px);
+  background: var(--sp-material-strong);
+  box-shadow: var(--sp-shadow-window);
+}
+
+.session-plus-app .dockview-theme-octopus {
+  --dv-background-color: transparent;
+  --dv-tabs-and-actions-container-height: 38px;
+  --dv-tabs-and-actions-container-background-color: var(--sp-material);
+  --dv-tab-margin: 5px 3px;
+  --dv-tab-border-radius: var(--av-session-tab-radius, 9px);
+  --dv-separator-border: var(--sp-hairline);
+  --dv-paneview-header-border-color: var(--sp-hairline);
+  --dv-sash-color: color-mix(in srgb, var(--av-fg) 9%, transparent);
+}
+
+.session-plus-app .dockview-theme-octopus .dv-dockview {
+  background: transparent;
+}
+
+.session-plus-app .dockview-theme-octopus .dv-groupview {
+  border-color: var(--sp-hairline);
+  border-radius: var(--av-session-group-radius, 14px);
+  background: var(--av-surface);
+}
+
+.session-plus-app .dockview-theme-octopus .dv-tabs-and-actions-container {
+  border-bottom-color: var(--sp-hairline);
+  background: var(--sp-material);
+}
+
+.session-plus-app .dockview-theme-octopus .dv-tab {
+  border-radius: var(--av-session-tab-radius, 9px);
+}
+
+.session-plus-app .dockview-theme-octopus .dv-tab.dv-active-tab {
+  background: var(--sp-selection);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--av-accent) 18%, transparent);
+}
+
+.session-plus-app .dockview-theme-octopus .dv-tab.dv-inactive-tab:hover {
+  background: var(--sp-control-fill);
+}
+
+.session-plus-app :is(.av-dock-document, .av-dock-flow) {
+  background: var(--av-surface);
+}
+
+.session-plus-app [data-av-dock-flow="navigation"] {
+  background: var(--sp-material);
+}
+
+/* Solid chrome also overrides the shared Dock SDK material rule. Scoped to
+ * this App: other compositions retain their own material policy. */
+:is(.av-dock-host, .av-dock-mobile-bar,
+  [data-av-dock-flow="navigation"], .dv-tabs-and-actions-container,
+  .composer-options-card, .agent-interaction-card, .codex-release-dialog, .directory-sessions-popover) {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html[data-av-theme="apple"] :is(.av-dock-host, [data-av-dock-flow="navigation"],
+    .dv-tabs-and-actions-container, .composer-options-card, .agent-interaction-card,
+    .codex-release-dialog, .directory-sessions-popover) {
+    background: var(--av-material-solid);
+  }
+}
+
+/* The navigator (activity bar + one view) fills the whole navigation flow. */
+@media (min-width: 721px) {
+  [data-av-dock-flow="navigation"] {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  [data-av-dock-flow="navigation"] > .av-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  [data-av-dock-flow="navigation"] .navigator {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+/* ── shared element defaults ─────────────────────────────────────────────── */
+
+h2 {
+  margin: 0 0 6px;
+  font-size: var(--av-session-heading-size, 13px);
+  letter-spacing: 0.01em;
+  color: var(--av-muted);
+  font-weight: 650;
+}
+
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+
+button {
+  font: inherit;
+  min-height: var(--av-session-control-h, 32px);
+  padding: 5px 12px;
+  border: 1px solid var(--sp-hairline, var(--av-line));
+  border-radius: var(--av-session-button-radius, 9px);
+  background: var(--sp-control-fill, var(--av-surface));
+  color: var(--av-fg);
+  cursor: pointer;
+  transition:
+    background-color var(--av-duration),
+    border-color var(--av-duration),
+    color var(--av-duration),
+    transform var(--av-duration);
+}
+
+button.primary {
+  border-color: var(--av-accent);
+  background: var(--av-accent);
+  color: var(--av-accent-contrast);
+  font-weight: 650;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--av-accent) 25%, transparent);
+}
+button:not(.primary):hover:not(:disabled) { background: color-mix(in srgb, var(--av-fg) 10%, var(--av-surface)); }
+button:active:not(:disabled) { transform: scale(0.98); }
+button:disabled { opacity: 0.5; cursor: default; }
+
+textarea {
+  font: inherit;
+  width: 100%;
+  min-height: var(--av-session-textarea-h, 52px);
+  padding: 7px 9px;
+  border: 1px solid var(--sp-hairline, var(--av-line));
+  border-radius: var(--av-session-textarea-radius, 12px);
+  background: var(--sp-control-fill, var(--av-canvas));
+  color: var(--av-fg);
+  resize: vertical;
+}
+
+.session-plus-app :is(.tools input, .field input, .field select) {
+  min-height: var(--av-session-field-h, 34px);
+  border-color: var(--sp-hairline);
+  border-radius: var(--av-session-field-radius, 10px);
+  background: var(--sp-control-fill);
+  box-shadow: inset 0 1px 1px color-mix(in srgb, var(--av-fg) 4%, transparent);
+}
+
+.session-plus-app :is(.tools input, .field input, .field select, textarea):focus-visible {
+  border-color: color-mix(in srgb, var(--av-accent) 66%, var(--sp-hairline));
+  outline: none;
+  box-shadow: var(--av-focus);
+}
+
+.session-plus-app :is(.sess, .results .hit, .recent-index-toggle, .dhead, .wsrow-main) {
+  transition: background-color var(--av-duration), box-shadow var(--av-duration), color var(--av-duration);
+}
+
+.session-plus-app :is(.sess:hover, .results .hit:hover, .recent-index-toggle:hover, .dhead:hover) {
+  background: var(--sp-control-fill);
+}
+
+.session-plus-app .sess.on {
+  border-color: transparent;
+  background: var(--sp-selection);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--av-accent) 20%, transparent);
+}
+
+.session-plus-app .wsrow[aria-selected="true"] > .wsrow-main {
+  background: var(--sp-selection);
+}
+
+.session-plus-app .detailhead {
+  min-height: var(--av-session-detail-head-h, 44px);
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 0 3px 10px;
+  border-bottom: 1px solid var(--sp-hairline);
+}
+
+.session-plus-app .detailhead .title {
+  font-size: var(--av-session-detail-title-size, 16px);
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.session-plus-app .av-chat-content {
+  width: min(100%, 900px);
+  margin-inline: auto;
+}
+
+.session-plus-app .av-chat-user .av-chat-user-body {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--av-accent) 8%, transparent);
+}
+
+.session-plus-app details.av-chat-card {
+  border-color: var(--sp-hairline);
+  border-radius: 11px;
+}
+
+.session-plus-app .av-dock-mobile-bar {
+  border-bottom-color: var(--sp-hairline);
+  background: var(--sp-material);
+}
+
+.session-plus-app .av-dock-mobile-bar button[aria-selected="true"] {
+  border-color: transparent;
+  background: var(--sp-selection);
+  color: var(--av-accent);
+}
+
+@media (prefers-contrast: more) {
+  .session-plus-app {
+    --sp-hairline: color-mix(in srgb, var(--av-fg) 44%, transparent);
+    --sp-control-fill: color-mix(in srgb, var(--av-fg) 11%, var(--av-surface));
+  }
+}
+
+@media (max-width: 720px) {
+  .session-plus-app {
+    --av-chat-inset: 14px 12px 8px;
+    gap: 0;
+    padding: 0;
+  }
+
+  .session-plus-app .av-dock-host {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .session-plus-app .dockview-theme-octopus .dv-groupview {
+    border: 0;
+    border-radius: 0;
+  }
+
+  .session-plus-app :is(
+    button,
+    .field input,
+    .field select,
+    .av-dock-mobile-bar button,
+    .wsrow-main,
+    .wsrow-main > button,
+    .dhead,
+    .recent-index-toggle
+  ) {
+    min-height: 44px;
+  }
+
+  .session-plus-app .composer {
+    min-height: 112px;
+  }
+
+  .session-plus-app .composer-entry > .primary {
+    min-width: 48px;
+  }
+
+  .session-plus-app .av-chat-user .av-chat-user-body {
+    max-width: 88%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .session-plus-app button {
+    transition: none;
+  }
+
+  .session-plus-app button:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Keep the search field distinct from the tinted search surface in every theme. */
+.session-plus-app .searchpane .tools input { background: var(--av-surface); }
+
+html .session-plus-app {
+  --sp-hairline: color-mix(in srgb, var(--av-fg) 22%, var(--av-surface));
+}
+
+html .session-plus-app .av-panel[data-av-module^="agent.chat/"] {
+  --av-chat-hairline: var(--sp-hairline);
+}
+
+/* The rectangular fade behind the rounded DeepSeek composer exposed a
+ * second background at its corners. Let the document surface show through. */
+html[data-av-theme="deepseek"] .session-plus-app .command-pane {
+  background: transparent;
+}
+
+html .session-plus-app .composer {
+  border-color: var(--sp-hairline);
+  background-clip: padding-box;
+}
+
+/* Selected rows/tabs previously relied on an inset shadow for their edge. */
+html .session-plus-app :is(.sess.on, .dv-tab.dv-active-tab) {
+  border-color: var(--av-accent);
+}
+
+@media (prefers-contrast: more) {
+  html .session-plus-app {
+    --sp-hairline: color-mix(in srgb, var(--av-fg) 44%, var(--av-surface));
+  }
+}

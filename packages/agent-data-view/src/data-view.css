@@ -1,0 +1,508 @@
+/*
+ * The data modules' own stylesheet.
+ *
+ * It travels with the modules that emit these class names, so an App that
+ * registers them gets a working list, facts table and form without copying a
+ * theme. Everything colour- or spacing-shaped comes from the SDK's `--av-*`
+ * tokens, so dark mode and reduced motion arrive without a second theme.
+ *
+ * Ordinary global CSS on purpose: class names here are a contract that a
+ * real-browser suite can read from outside the frame, and a CSS-Modules hash
+ * would make those elements unaddressable.
+ */
+
+.dv-list,
+.dv-detail,
+.dv-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: var(--av-s2);
+  padding: var(--av-s2) var(--av-s3);
+  overflow: auto;
+}
+
+/* ── compact action launcher ─────────────────────────────────────────────── */
+
+.dv-action-launcher {
+  display: flex;
+  align-items: center;
+  gap: var(--av-s3);
+  min-width: 0;
+  min-height: 0;
+  padding: var(--av-s1) var(--av-s2);
+  overflow: auto hidden;
+}
+
+.dv-action-head {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.dv-action-head small {
+  color: var(--av-muted);
+  font-size: var(--av-xs);
+}
+
+.dv-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dv-action-buttons button {
+  flex: none;
+  min-height: 32px;
+  padding: 4px 11px;
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rs);
+  color: var(--av-fg);
+  background: var(--av-surface);
+  font: inherit;
+  font-size: var(--av-sm);
+  cursor: pointer;
+}
+
+.dv-action-buttons button.primary {
+  border-color: transparent;
+  color: var(--av-accent-contrast);
+  background: var(--av-accent);
+}
+
+.dv-action-dialog {
+  width: min(680px, calc(100vw - 32px));
+  max-height: min(78vh, 760px);
+  box-sizing: border-box;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rm);
+  color: var(--av-fg);
+  background: var(--av-surface);
+  box-shadow: var(--av-shadow-sm);
+}
+
+.dv-action-dialog::backdrop {
+  background: rgb(12 18 28 / 42%);
+  backdrop-filter: blur(2px);
+}
+
+.dv-action-dialog .dv-form {
+  padding: var(--av-s4);
+  overflow: visible;
+}
+
+.dv-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--av-s2);
+  font-size: var(--av-sm);
+}
+
+.dv-head b {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dv-count {
+  color: var(--av-muted);
+  font-size: var(--av-xs);
+}
+
+.dv-note {
+  margin: 0;
+  color: var(--av-muted);
+  font-size: var(--av-xs);
+  line-height: 1.7;
+}
+
+.dv-note code {
+  font-size: var(--av-xs);
+  background: var(--av-tool-bg);
+  border-radius: var(--av-rs);
+  padding: 0 4px;
+}
+
+/* ── list ────────────────────────────────────────────────────────────────── */
+
+.dv-rows {
+  /* Rows take their own height inside the scrolling list, so the paging
+     control after them stays after the last loaded row. */
+  flex: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+}
+
+.dv-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--av-s2);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--av-rs);
+  padding: 5px 8px;
+  cursor: pointer;
+}
+
+.dv-row:hover {
+  background: var(--av-tool-bg);
+}
+
+.dv-row:focus-visible {
+  outline: none;
+  box-shadow: var(--av-focus);
+}
+
+.dv-row[aria-current="true"] {
+  background: var(--av-user-bg);
+  border-color: var(--av-line);
+}
+
+.dv-row-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dv-row-sub {
+  color: var(--av-muted);
+  font-size: var(--av-xs);
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── detail ──────────────────────────────────────────────────────────────── */
+
+.dv-record-actions {
+  flex: none;
+  flex-wrap: wrap;
+  padding: 2px 0 4px;
+  border-bottom: 1px solid var(--av-line);
+}
+
+.dv-facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(80px, max-content) 1fr;
+  gap: 3px var(--av-s3);
+  font-size: var(--av-sm);
+}
+
+/* The `stats` variant: the same facts, as a band of figure cards. */
+
+.dv-facts--stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--av-s2);
+}
+
+.dv-facts--stats .dv-fact {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 1px;
+  min-width: 72px;
+  padding: 6px 10px;
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rm);
+  background: var(--av-surface);
+}
+
+.dv-facts--stats .dv-fact dt {
+  font-size: var(--av-xs);
+}
+
+.dv-facts--stats .dv-fact dd {
+  font-size: var(--av-lg);
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.dv-fact {
+  display: contents;
+}
+
+.dv-fact dt {
+  color: var(--av-muted);
+}
+
+.dv-fact dd {
+  margin: 0;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.dv-body {
+  font-size: var(--av-sm);
+}
+
+/* ── sections ────────────────────────────────────────────────────────────── */
+
+.dv-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--av-s1);
+  padding-top: var(--av-s2);
+  border-top: 1px solid var(--av-line);
+}
+
+.dv-section-title {
+  margin: 0;
+  font-size: var(--av-xs);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  color: var(--av-muted);
+  text-transform: uppercase;
+}
+
+/* ── thread ──────────────────────────────────────────────────────────────── */
+
+.dv-thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--av-s1);
+  padding-top: var(--av-s2);
+  border-top: 1px solid var(--av-line);
+}
+
+.dv-thread-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--av-s2);
+  font-size: var(--av-xs);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  color: var(--av-muted);
+  text-transform: uppercase;
+}
+
+.dv-thread-entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dv-thread-entry {
+  position: relative;
+  padding: 4px 0 6px 16px;
+}
+
+.dv-thread-entry::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 12px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--av-line);
+}
+
+.dv-thread-entry[data-tone="ok"]::before { background: var(--av-ok); }
+.dv-thread-entry[data-tone="warn"]::before { background: var(--av-warn); }
+.dv-thread-entry[data-tone="error"]::before { background: var(--av-error); }
+.dv-thread-entry[data-tone="info"]::before { background: var(--av-info); }
+
+.dv-thread-entry:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 21px;
+  bottom: -6px;
+  width: 1px;
+  background: var(--av-line);
+}
+
+.dv-thread-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--av-s2);
+  font-size: var(--av-xs);
+}
+
+.dv-thread-by {
+  font-weight: 600;
+}
+
+.dv-thread-at {
+  color: var(--av-muted);
+}
+
+.dv-thread-text {
+  font-size: var(--av-sm);
+}
+
+.dv-thread-text > :first-child { margin-top: 2px; }
+.dv-thread-text > :last-child { margin-bottom: 0; }
+
+/* ── list notice ─────────────────────────────────────────────────────────── */
+
+.dv-list-notice {
+  flex: none;
+}
+
+/* ── context-injected parameter ──────────────────────────────────────────── */
+
+.dv-context {
+  display: flex;
+  align-items: center;
+  gap: var(--av-s2);
+  padding: 5px 8px;
+  border: 1px dashed var(--av-line);
+  border-radius: var(--av-rs);
+  background: var(--av-tool-bg);
+  font-size: var(--av-xs);
+}
+
+.dv-context-label {
+  color: var(--av-muted);
+}
+
+.dv-context-value {
+  font-size: var(--av-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dv-close {
+  font: inherit;
+  font-size: var(--av-xs);
+  padding: 2px 8px;
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rs);
+  background: var(--av-surface);
+  color: var(--av-muted);
+  cursor: pointer;
+}
+
+/* ── form ────────────────────────────────────────────────────────────────── */
+
+.dv-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--av-s2);
+}
+
+.dv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dv-field label {
+  font-size: var(--av-xs);
+  color: var(--av-muted);
+}
+
+.dv-field input[type="text"],
+.dv-field input[type="number"],
+.dv-field textarea,
+.dv-field select {
+  font: inherit;
+  font-size: var(--av-sm);
+  color: var(--av-fg);
+  background: var(--av-surface);
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rs);
+  padding: 5px 8px;
+  min-width: 0;
+}
+
+.dv-field input[type="checkbox"] {
+  align-self: flex-start;
+}
+
+.dv-field[data-dv-invalid] input,
+.dv-field[data-dv-invalid] textarea,
+.dv-field[data-dv-invalid] select {
+  border-color: var(--av-error);
+}
+
+.dv-hint {
+  color: var(--av-muted);
+  font-size: var(--av-xs);
+}
+
+.dv-form-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--av-s2);
+}
+
+.dv-form-notice > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.dv-notice-dismiss {
+  flex: none;
+  padding: 3px 8px;
+  font: inherit;
+  font-size: var(--av-xs);
+  color: var(--av-error);
+  background: var(--av-surface);
+  border: 1px solid var(--av-error);
+  border-radius: var(--av-rs);
+  cursor: pointer;
+}
+
+.dv-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--av-s2);
+}
+
+.dv-actions .primary {
+  font: inherit;
+  font-size: var(--av-sm);
+  padding: 5px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--av-rs);
+  background: var(--av-accent);
+  color: var(--av-accent-contrast);
+  cursor: pointer;
+}
+
+.dv-actions .primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.dv-submit-spin {
+  margin-right: 6px;
+  border-color: var(--av-accent-contrast);
+  border-top-color: transparent;
+  vertical-align: -2px;
+}
+
+/* "已显示 N / M 条" plus the button that reveals the next page. */
+.dv-more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}

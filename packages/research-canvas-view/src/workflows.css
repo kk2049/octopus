@@ -1,0 +1,22 @@
+.rv-workflows { width: 360px; max-width: 100%; min-width: 270px; overflow: auto; padding: 12px; background: var(--rv-panel, #fff); border-inline-end: 1px solid #d8dee8; color: inherit; }
+.rv-workflow-tabs { display: flex; flex-wrap: wrap; gap: 4px; position: sticky; top: 0; background: inherit; z-index: 2; padding-bottom: 8px; }
+.rv-workflow-tabs button[aria-pressed="true"] { background: #e5edff; color: #204887; border-color: #829ecc; }
+.rv-workflows button, .rv-workflow-editor button { cursor: pointer; padding: 5px 8px; margin: 2px; border: 1px solid #cbd3df; border-radius: 5px; background: inherit; color: inherit; }
+.rv-workflows button:disabled, .rv-workflow-editor button:disabled { opacity: .5; cursor: default; }
+.rv-workflows label, .rv-workflow-editor label { display: block; margin: 8px 0; font-size: 13px; }
+.rv-workflows input:not([type="checkbox"]), .rv-workflows textarea, .rv-workflows select, .rv-workflow-editor input:not([type="checkbox"]), .rv-workflow-editor textarea, .rv-workflow-editor select { box-sizing: border-box; max-width: 100%; width: 100%; margin-top: 4px; padding: 6px; border: 1px solid #cbd3df; border-radius: 4px; background: inherit; color: inherit; font: inherit; }
+.rv-workflows textarea, .rv-workflow-editor textarea { min-height: 80px; resize: vertical; }
+.rv-workflow-editor { border-block-start: 1px solid #d8dee8; margin-top: 12px; padding-top: 10px; }
+.rv-workflow-editor fieldset { padding: 6px; border: 1px solid #e0e5ec; }
+.rv-workflow-list { display: grid; gap: 6px; margin-top: 8px; max-height: 36vh; overflow: auto; }
+.rv-workflow-row { display: flex; flex-direction: column; align-items: stretch; text-align: start; background: #f5f7fb; border-radius: 5px; padding: 7px; }
+.rv-workflow-row strong, .rv-workflow-row span { display: block; overflow-wrap: anywhere; }
+.rv-workflow-row span { font-size: 11px; color: #667386; margin-top: 4px; }
+.rv-workflow-conversation { min-height: 300px; overflow: hidden; margin-top: 10px; }
+.rv-workflow-conversation .rv-transcript { max-height: 50vh; overflow: auto; }
+.rv-workflow-pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.rv-workflow-trace, .rv-workflow-candidate { padding-block: 8px; border-block-end: 1px solid #e0e5ec; overflow-wrap: anywhere; }
+.rv-workflow-links { display: flex; flex-wrap: wrap; gap: 4px; }
+.rv-workflow-execution-row { padding: 6px; margin-block: 5px; background: #f5f7fb; }
+.rv-candidate-review { min-width: 0; }
+@media (max-width: 700px) { .rv-workflows { width: min(100%, 360px); min-width: 240px; } }

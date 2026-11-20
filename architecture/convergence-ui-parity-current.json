@@ -1,0 +1,9 @@
+{
+  "authenticatedOrigin": false,
+  "mobile": false,
+  "accessibility": false,
+  "draftPreservation": false,
+  "interactionCards": true,
+  "stableDeepLinks": false,
+  "imFallback": true
+}

@@ -1,0 +1,52 @@
+{
+  "name": "@claude-bot/session-plus-view",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/paths.ts",
+  "types": "src/paths.ts",
+  "exports": {
+    ".": {
+      "types": "./src/paths.ts",
+      "default": "./src/paths.ts"
+    },
+    "./plan": {
+      "types": "./src/plan.ts",
+      "default": "./src/plan.ts"
+    }
+  },
+  "scripts": {
+    "build": "node ../../tools/build-cache/bin/octo-build.mjs -- 'vite build'",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@claude-bot/agent-crdt-view": "workspace:*",
+    "@claude-bot/agent-module-contract": "workspace:*",
+    "@claude-bot/agent-sessions-contract": "workspace:*",
+    "@claude-bot/agent-sessions-view": "workspace:*",
+    "@claude-bot/agent-editor-view": "workspace:*",
+    "@claude-bot/agent-feishu-view": "workspace:*",
+    "@claude-bot/agent-file-preview": "workspace:*",
+    "@claude-bot/agent-view-react": "workspace:*",
+    "@claude-bot/agent-workspace-files-view": "workspace:*",
+    "@claude-bot/crdt-doc-contract": "workspace:*",
+    "@claude-bot/workspace-files-contract": "workspace:*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@claude-bot/agent-view-build": "workspace:*",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
+    "@vitejs/plugin-react": "^5.0.4",
+    "jsdom": "^27.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^7.1.9"
+  }
+}

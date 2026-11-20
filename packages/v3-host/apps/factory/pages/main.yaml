@@ -1,0 +1,10 @@
+title: 工厂审计与建筑师
+layout:
+  - [hint, stats, history]
+  - [chat]
+widths: [2, 3]
+slots:
+  hint: { widget: markdown, bind: view.hint }
+  stats: { widget: kv, bind: view.stats, props: { title: 概况 } }
+  history: { widget: list, bind: view.history, props: { title: 最近保存 } }
+  chat: { widget: agent-chat, agent: architect }

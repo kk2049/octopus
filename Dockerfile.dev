@@ -1,0 +1,19 @@
+# Octopus bot — development image (with SSH server)
+FROM claude-bot:latest
+
+RUN apt-get update && apt-get install -y \
+    openssh-server sudo vim curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /run/sshd
+
+# SSH setup
+RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config \
+    && echo "AuthorizedKeysFile /tmp/ssh_authorized_keys" >> /etc/ssh/sshd_config
+
+EXPOSE 22
+
+# Dev entrypoint: start SSH + Bot
+COPY entrypoint-dev.sh /entrypoint-dev.sh
+RUN chmod +x /entrypoint-dev.sh
+
+ENTRYPOINT ["/entrypoint-dev.sh"]

@@ -1,0 +1,33 @@
+{
+  "name": "@claude-bot/engine",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": { "types": "./src/index.ts", "default": "./src/index.ts" },
+    "./sandbox": { "types": "./src/sandbox.ts", "default": "./src/sandbox.ts" }
+  },
+  "scripts": {
+    "build": "node ../../tools/build-cache/bin/octo-build.mjs -- 'tsup src/index.ts src/sandbox.ts --format esm --dts --clean'"
+  },
+  "dependencies": {
+    "@claude-bot/capability-kernel": "workspace:*",
+    "@claude-bot/convergence-gates": "workspace:*",
+    "@claude-bot/web-trust": "workspace:*",
+    "@endo/module-source": "^1.4.1",
+    "@fastify/cookie": "^11.1.2",
+    "@fastify/cors": "^11.3.0",
+    "@fastify/helmet": "^13.1.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "fastify": "^5.11.0",
+    "js-yaml": "^4.1.0",
+    "ses": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.0",
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0"
+  }
+}

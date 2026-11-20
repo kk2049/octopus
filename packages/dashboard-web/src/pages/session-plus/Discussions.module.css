@@ -1,0 +1,13 @@
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 16px; }
+.layout { display: grid; grid-template-columns: minmax(150px, 24%) 1fr; gap: 20px; min-height: 320px; }
+.roster { display: flex; flex-direction: column; gap: 6px; }
+.roster button { text-align: start; background: var(--card); color: var(--text); padding: 10px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.roster button[aria-current='true'] { outline: 2px solid var(--accent); }
+.roster small { display: block; margin-top: 6px; }
+.detail { min-width: 0; }
+.form { display: grid; gap: 12px; margin: 16px 0; }
+.form label { display: grid; gap: 6px; }
+.form input, .form textarea { width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 6px; color: inherit; font: inherit; }
+.timeline { max-height: 360px; overflow: auto; overflow-wrap: anywhere; }
+.timeline p { white-space: pre-wrap; margin: 4px 0 16px; }
+@media (max-width: 700px) { .layout { grid-template-columns: 1fr; } .roster { max-height: 150px; overflow: auto; } }

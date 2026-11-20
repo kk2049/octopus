@@ -1,0 +1,38 @@
+title: 信箱
+# locals: the page's client-local state — which thread the viewer highlighted.
+# Defaults to the newest unread until the viewer clicks; clicking never
+# touches the domain log (selection is not a fact about the world).
+locals:
+  selected: { default_bind: view.latestId }
+layout:
+  - [stats, compose]
+  - [inbox, sentlist]
+  - [thread, ops, f_reply]
+  - [chat]
+widths: [3, 3, 4, 3]
+slots:
+  stats:
+    widget: section
+    props: { title: 概况 }
+    children:
+      - { widget: banner, bind: view.banner }
+      - { widget: kv, bind: view.stats }
+  compose: { widget: form, props: { action: send_report } }
+  inbox:
+    widget: list
+    bind: view.inbox
+    props: { title: 收件箱（点击查看） }
+    on: { select: "local:selected" }
+  sentlist:
+    widget: list
+    bind: view.sent
+    props: { title: 已发（点击查看） }
+    on: { select: "local:selected" }
+  thread: { widget: markdown, bind: view.threadsById.$selected, props: { title: 正在看 } }
+  ops:
+    widget: actions
+    props:
+      items:
+        - { action: mark_read, label: ✓ 标已读, params: { id: "$selected" } }
+  f_reply: { widget: form, props: { action: reply_report } }
+  chat: { widget: agent-chat, agent: mailer }

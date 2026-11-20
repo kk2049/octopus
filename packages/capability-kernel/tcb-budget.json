@@ -1,0 +1,17 @@
+{
+  "_": "TCB 预算。由 src/tcb-budget.test.ts 读取；改这个文件是一次刻意的人类动作，不要顺手改。",
+  "entries": ["core.ts", "gate.ts"],
+  "tolerance": 50,
+  "_tolerance": "总量比 baseline 涨过这个数，测试就把准入标准打到测试者面前（不失败、不阻塞）。",
+  "baseline": {
+    "core.ts": 230,
+    "gate.ts": 161,
+    "canonical.ts": 18,
+    "objects.ts": 144,
+    "types.ts": 152
+  },
+  "_baseline": "代码行（已剔注释与空行）。这五个文件是从 entries 出发、沿**值导入**（`import type` 不算）算出的传递闭包——换句话说，是授权判定真正会执行到的全部代码。新加文件躲不过去：闭包会把它算进来，未登记就报警。",
+  "critical": ["core.ts", "gate.ts", "canonical.ts"],
+  "_critical": "闭包里「错了就是跨账户」的那部分（409 行）。其余在闭包内但后果更窄：objects.ts 的参数 schema 错了是畸形调用打到 adapter，types.ts 大半是编译后不存在的类型声明——但 `ApprovalEvidence` 的铸造令牌在里面，那是关键的。",
+  "justifications": []
+}

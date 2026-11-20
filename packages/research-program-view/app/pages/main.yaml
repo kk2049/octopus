@@ -1,0 +1,11 @@
+layout: research-program
+sources: {}
+actions:
+  configure: configure_project
+  publish_agent: publish_agent_update
+  publish_message: publish_chat_message
+  publish_document: publish_document
+  lead_agent: set_lead_agent
+  lead_document: set_lead_document
+  archive: archive_project
+  reopen: reopen_project

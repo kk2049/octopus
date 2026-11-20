@@ -1,0 +1,100 @@
+/*
+ * The App's theme — the document, the title bar, and the one slot whose chrome
+ * this App overrides.
+ *
+ * Almost nothing, on purpose. Every module's own rules travel with the module
+ * (`agent-data-view`'s and `agent-deck-view`'s stylesheets), and the slot cards,
+ * the rail width and the splitter come from `@claude-bot/agent-view-react/shell`.
+ * What is left is what a second App would genuinely have to decide.
+ *
+ * Ordinary global CSS rather than CSS Modules, for the same reason every Agent
+ * View package uses it: class names here are addressable from OUTSIDE the frame,
+ * which is how a boundary suite measures the things only a browser can settle.
+ * A hashed name would turn such a suite into a batch of silent timeouts.
+ *
+ * Everything colour- and spacing-shaped comes from the SDK's `--av-*` tokens, so
+ * dark mode and reduced motion arrive without a second theme.
+ */
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font: 14px/1.6 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--av-fg);
+  background: var(--av-canvas);
+}
+
+#root {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 9px 11px;
+  box-sizing: border-box;
+}
+
+.showcase {
+  flex: 1;
+  min-height: 0;
+}
+
+.showcase-head {
+  flex: none;
+  min-height: 24px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 3px;
+}
+
+.showcase-sub {
+  color: var(--av-muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * The strip below the columns holds TWO panels — the compose form and the
+ * generated Typst — so it is a row, not the shell's single card.
+ *
+ * Height belongs to the slot rather than to whichever module lands in it, which
+ * is why the cap is here and not in a module: a module that sized its own slot
+ * would fight every other module that ever shared it.
+ */
+.showcase-foot {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  max-height: 30%;
+  min-height: 0;
+  margin-top: 8px;
+}
+
+.showcase-foot > .av-panel {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rm, 10px);
+  background: var(--av-surface);
+  padding: 10px 12px;
+}
+
+/* A strip with nothing visible in it is not a strip. */
+.showcase-foot:not(:has(> .av-panel:not([hidden]))) {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  #root { padding: 7px; }
+  .showcase-head { display: none; }
+  .showcase-foot { flex-direction: column; max-height: 40%; overflow: auto; }
+}

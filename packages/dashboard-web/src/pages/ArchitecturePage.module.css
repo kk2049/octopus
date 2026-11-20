@@ -1,0 +1,2026 @@
+/*
+ * /architecture — page layout plus the SVG chart styles for every cut.
+ *
+ * The sequential ramp for "churn depth" is one hue (the panel's blue), stepped
+ * from the documented light ramp; in dark mode the anchor flips so that
+ * near-zero recedes toward the dark surface instead of glowing.
+ */
+
+.page {
+  composes: page from "../ui-kit/layout.module.css";
+  max-width: 1440px;
+  padding: 22px var(--space-4) 60px;
+  /* Sequential ramp endpoints (steps 100→700 of the panel-blue ramp). */
+  --arch-seq-low: #cde2fb;
+  --arch-seq-high: #0d366b;
+}
+
+:global(html[data-color-scheme="dark"]) .page {
+  --arch-seq-low: #0d366b;
+  --arch-seq-high: #86b6ef;
+}
+
+.head h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.headRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.metaChips {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.chip {
+  display: inline-block;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.dirty {
+  display: inline-block;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid var(--q-warning);
+  color: var(--q-warning);
+}
+
+.grow {
+  flex: 1;
+}
+
+.refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.muted {
+  composes: lead from "../ui-kit/layout.module.css";
+  margin: 6px 0 0;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  word-break: break-all;
+}
+
+.tabs {
+  margin-top: var(--space-3);
+}
+
+.tabs :global(.ant-tabs-content-holder) {
+  display: none;
+}
+
+.body {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  margin-top: var(--space-3);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+}
+
+.rail {
+  width: 300px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 12px;
+}
+
+.emptyState {
+  margin: 80px auto;
+  max-width: 480px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.emptyTitle {
+  font-size: var(--text-lg);
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ── Cards ────────────────────────────────────────────────────────────────── */
+
+.card {
+  margin-top: var(--space-4);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px var(--space-4);
+}
+
+.card h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-md);
+}
+
+.subhead {
+  margin: var(--space-3) 0 var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.rowTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+/* ── Badges ───────────────────────────────────────────────────────────────── */
+
+.sev {
+  display: inline-block;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.sevErr {
+  border-color: var(--err);
+  color: var(--err);
+}
+
+.sevWarn {
+  border-color: var(--q-warning);
+  color: var(--q-warning);
+}
+
+.sevMuted {
+  color: var(--muted);
+}
+
+.stPass {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.stFail {
+  border-color: var(--err);
+  color: var(--err);
+  background: color-mix(in srgb, var(--err) 10%, transparent);
+}
+
+.stReview {
+  border-color: var(--q-warning);
+  color: var(--q-warning);
+}
+
+/* The three grades of assurance: solid / hollow / dashed. */
+.verify {
+  display: inline-block;
+  padding: 0 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.vSolid {
+  background: var(--ok);
+  border: 1px solid var(--ok);
+  color: var(--card);
+}
+
+.vHollow {
+  background: transparent;
+  border: 1px solid var(--ok);
+  color: var(--ok);
+}
+
+.vDecl {
+  background: transparent;
+  border: 1px dashed var(--line-strong);
+  color: var(--muted);
+}
+
+/* ── Copy & source refs ───────────────────────────────────────────────────── */
+
+.copy {
+  padding: 0 6px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+.srcRef {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* ── 审阅 ─────────────────────────────────────────────────────────────────── */
+
+.failCard {
+  margin-top: var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--err) 45%, transparent);
+  background: color-mix(in srgb, var(--err) 5%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 10px var(--space-3);
+}
+
+.failActions {
+  margin: var(--space-1) 0 var(--space-3);
+}
+
+.violations {
+  margin: var(--space-2) 0 0;
+  padding-left: 18px;
+  font-size: var(--text-sm);
+}
+
+.violation {
+  margin-bottom: var(--space-1);
+}
+
+.violation > span:first-child {
+  margin-right: var(--space-2);
+}
+
+.reviewList {
+  margin-top: var(--space-3);
+}
+
+.reviewRow {
+  border-top: 1px solid var(--line);
+  padding: 6px 0;
+  font-size: var(--text-sm);
+}
+
+.reviewRow summary {
+  cursor: pointer;
+  list-style-position: outside;
+}
+
+.reviewRow summary .rowTitle {
+  display: inline-flex;
+}
+
+.passStrip {
+  margin-top: var(--space-3);
+}
+
+.passBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.passItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 10px 2px 4px;
+  font-size: var(--text-xs);
+}
+
+.findingRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  border-top: 1px solid var(--line);
+  padding: 6px 0;
+  font-size: var(--text-sm);
+}
+
+.findingRow:first-of-type {
+  border-top: 0;
+}
+
+.findingMsg {
+  flex-shrink: 1;
+}
+
+.chipBtn {
+  padding: 0 8px;
+  font-size: 11px;
+  border-radius: 999px;
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: none;
+}
+
+/* ── 总览 (circle packing) ────────────────────────────────────────────────── */
+
+.overviewWrap {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.packCard {
+  flex: 1 1 480px;
+  min-width: 0;
+}
+
+.packHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.packHead h3 {
+  margin: 0;
+}
+
+.resetBtn {
+  font-size: var(--text-xs);
+  padding: 2px 10px;
+}
+
+.packSvg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-top: var(--space-2);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.trustCircle {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-dasharray: 5 4;
+}
+
+.zoneCircle {
+  fill: color-mix(in srgb, var(--fg) 3%, transparent);
+  stroke: var(--line-strong);
+}
+
+.tierLabel {
+  font-size: 12px;
+  fill: var(--muted);
+}
+
+.zoneLabel {
+  font-size: 11px;
+  fill: var(--muted);
+}
+
+.moduleDot {
+  cursor: pointer;
+  outline: none;
+}
+
+.moduleDot:focus-visible circle:first-of-type {
+  stroke: var(--accent);
+  stroke-width: 2.5px;
+}
+
+.moduleLabel {
+  font-size: 11px;
+  fill: var(--fg);
+  paint-order: stroke;
+  stroke: var(--card);
+  stroke-width: 3px;
+  pointer-events: none;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.legendSwatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid var(--line);
+}
+
+.legendCritical {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 2.5px solid var(--err);
+  margin-left: var(--space-2);
+}
+
+.hotspots {
+  flex: 0 1 320px;
+}
+
+.hotRow {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  padding: 8px 2px;
+  white-space: normal;
+  cursor: pointer;
+}
+
+.hotRow:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.hotName {
+  font-weight: 500;
+  font-size: var(--text-sm);
+}
+
+.hotPath {
+  color: var(--muted);
+}
+
+.hotBar {
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--fg) 7%, transparent);
+  overflow: hidden;
+}
+
+.hotBarFill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+/* ── 依赖 ─────────────────────────────────────────────────────────────────── */
+
+.depsModeBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+/* ── 依赖 · DSM 矩阵 ──────────────────────────────────────────────────────── */
+
+.dsmWrap {
+  overflow: auto;
+  max-height: 76vh;
+  margin-top: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.dsm {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 10px;
+}
+
+.dsm th {
+  font-weight: 400;
+}
+
+.dsmCorner {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  background: var(--card);
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-align: right;
+  vertical-align: bottom;
+  padding: 2px 6px;
+  border-right: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.dsmGroupCol {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--card);
+  height: 20px;
+  padding: 0;
+  color: var(--muted);
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+/* Absolutely positioned inside the sticky (thus positioned) th so a long zone
+ * label clips instead of widening the 13px module columns underneath. */
+.dsmGroupCol span {
+  position: absolute;
+  left: 4px;
+  right: 2px;
+  top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dsmColHead {
+  position: sticky;
+  top: 20px;
+  z-index: 3;
+  background: var(--card);
+  height: 96px;
+  width: 13px;
+  min-width: 13px;
+  max-width: 13px;
+  padding: 0;
+  vertical-align: bottom;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.dsmColHead span {
+  writing-mode: vertical-rl;
+  display: block;
+  margin: 0 auto;
+  max-height: 92px;
+  overflow: hidden;
+  line-height: 13px;
+  padding-bottom: 3px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.dsmGroupRowHead {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--card);
+  width: 20px;
+  min-width: 20px;
+  max-width: 20px;
+  padding: 0;
+  color: var(--muted);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.dsmGroupRowHead span {
+  position: absolute;
+  inset: 3px 0 3px 3px;
+  writing-mode: vertical-rl;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.dsmRowHead {
+  position: sticky;
+  left: 20px;
+  z-index: 2;
+  background: var(--card);
+  width: 132px;
+  min-width: 132px;
+  max-width: 132px;
+  height: 13px;
+  line-height: 13px;
+  padding: 0 6px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  color: var(--fg);
+  border-right: 1px solid var(--line-strong);
+}
+
+.dsmHeadHover {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.dsmHeadSel {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.dsmHeadFocus {
+  color: var(--accent);
+}
+
+.dsmCell {
+  width: 13px;
+  min-width: 13px;
+  max-width: 13px;
+  height: 13px;
+  padding: 0;
+  border-right: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+}
+
+.dsmCellHit {
+  cursor: pointer;
+}
+
+.dsmDiag {
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.dsmPicked {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.depsToolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.depsToolbar h3 {
+  margin: 0;
+}
+
+.depsSvgWrap {
+  overflow-x: auto;
+  margin-top: var(--space-3);
+}
+
+.edgeHit {
+  cursor: pointer;
+}
+
+.edgeLabel {
+  font-size: 10px;
+  fill: var(--muted);
+  paint-order: stroke;
+  stroke: var(--card);
+  stroke-width: 3px;
+  pointer-events: none;
+}
+
+.zoneBox {
+  fill: var(--bg);
+  stroke: var(--line-strong);
+}
+
+.zoneBoxFocus {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.zoneHead {
+  cursor: pointer;
+}
+
+.zoneBoxLabel {
+  font-size: 12px;
+  fill: var(--fg);
+}
+
+.moduleRow {
+  cursor: pointer;
+}
+
+.moduleRowBox {
+  fill: var(--card);
+  stroke: var(--line);
+}
+
+.moduleRowFocus {
+  fill: color-mix(in srgb, var(--accent) 14%, var(--card));
+  stroke: var(--accent);
+}
+
+.moduleRowSelected {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.moduleRowLabel {
+  font-size: 11px;
+  fill: var(--fg);
+  pointer-events: none;
+}
+
+.sampleBar {
+  margin-top: var(--space-3);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 10px var(--space-4);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.sampleBar .subhead {
+  margin-top: 0;
+}
+
+.sampleGroup {
+  border-top: 1px solid var(--line);
+  padding: 6px 0;
+}
+
+.sampleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 2px 0 2px 14px;
+}
+
+/* ── 模组拓扑 ────────────────────────────────────────────────────────────── */
+
+.moduleEcosystemHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.moduleEcosystemHead h3 {
+  margin-bottom: 0;
+}
+
+.moduleLegend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.moduleLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.moduleLegend i {
+  display: inline-block;
+  width: 15px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+.legendFrontend {
+  background: color-mix(in srgb, var(--accent) 12%, var(--card));
+  border: 1px solid var(--accent);
+}
+
+.legendBackend {
+  background: var(--card);
+  border: 1px solid var(--line-strong);
+}
+
+.legendContract {
+  background: color-mix(in srgb, var(--q-warning) 8%, var(--card));
+  border: 1px dashed var(--q-warning);
+}
+
+.legendPortEdge {
+  height: 0 !important;
+  border-top: 2px solid var(--accent);
+  border-radius: 0 !important;
+}
+
+.moduleDirection {
+  margin: var(--space-2) 0 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.moduleDirection code {
+  font-family: var(--mono);
+  color: var(--fg);
+}
+
+.moduleEcosystemGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--space-3);
+  align-items: start;
+  margin-top: var(--space-3);
+}
+
+.moduleSvgWrap {
+  overflow: auto;
+  max-height: 76vh;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 72%, var(--card));
+}
+
+.moduleSvgWrap svg {
+  display: block;
+}
+
+.moduleColumnTitle {
+  fill: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.frontendGroupBox {
+  fill: color-mix(in srgb, var(--accent) 4%, var(--card));
+  stroke: color-mix(in srgb, var(--accent) 38%, var(--line));
+}
+
+.frontendGroupTitle {
+  fill: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.moduleNode {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 120ms ease;
+}
+
+.moduleNode:focus-visible rect {
+  stroke: var(--accent);
+  stroke-width: 2.5px;
+}
+
+.frontendModuleBox {
+  fill: var(--card);
+  stroke: var(--line);
+}
+
+.frontendModuleTitle,
+.backendModuleTitle {
+  fill: var(--fg);
+  font-size: 12px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.frontendModuleId,
+.backendModuleMeta {
+  fill: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  pointer-events: none;
+}
+
+.backendModuleSummary {
+  fill: var(--fg);
+  font-size: 10px;
+  pointer-events: none;
+}
+
+.backendModuleBox {
+  fill: var(--card);
+  stroke: var(--line-strong);
+}
+
+.contractModuleBox {
+  fill: color-mix(in srgb, var(--q-warning) 5%, var(--card));
+  stroke: var(--q-warning);
+  stroke-dasharray: 5 3;
+}
+
+.moduleNodeSelected {
+  stroke: var(--accent);
+  stroke-width: 2.5px;
+}
+
+.moduleNodeCycle {
+  stroke: var(--err);
+  stroke-width: 2px;
+}
+
+.moduleEdge,
+.moduleEdgePort,
+.moduleEdgeCycle {
+  fill: none;
+  stroke-width: 1.35px;
+  opacity: 0.78;
+  transition: opacity 120ms ease, stroke-width 120ms ease;
+}
+
+.moduleEdge {
+  stroke: var(--line-strong);
+}
+
+.moduleEdgePort {
+  stroke: var(--accent);
+  stroke-width: 1.8px;
+}
+
+.moduleEdgeCycle {
+  stroke: var(--err);
+  stroke-width: 2.2px;
+}
+
+.moduleEdgeSelected {
+  opacity: 1;
+  stroke-width: 3px;
+}
+
+.moduleDim {
+  opacity: 0.16;
+}
+
+.moduleDetail {
+  margin-top: var(--space-3);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 10px var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.moduleDetail h4 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.moduleDetail p {
+  margin: 3px 0;
+}
+
+.moduleInspector {
+  position: sticky;
+  top: 12px;
+  min-height: 360px;
+  max-height: 76vh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  padding: 14px;
+  font-size: var(--text-sm);
+}
+
+.moduleInspector h4 {
+  margin: 2px 0 var(--space-2);
+  font-size: var(--text-md);
+  line-height: 1.35;
+}
+
+.moduleInspector > p:not(.moduleInspectorEyebrow) {
+  line-height: 1.55;
+}
+
+.moduleInspectorEyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.moduleKv {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 7px var(--space-2);
+  margin: var(--space-3) 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+}
+
+.moduleKv dt {
+  color: var(--muted);
+}
+
+.moduleKv dd {
+  margin: 0;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.moduleKv dd code + code::before {
+  content: "、";
+  color: var(--muted);
+}
+
+.moduleDetailSection {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+}
+
+.moduleDetailSection h5 {
+  margin: 0 0 5px;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.moduleDetailSection ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.moduleDetailSection li {
+  margin: 5px 0;
+  line-height: 1.45;
+}
+
+.kernelNote,
+.compatCallout {
+  margin-top: var(--space-3);
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent) 7%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+}
+
+.kernelNote strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.kernelNote p {
+  margin: 0 0 7px;
+  line-height: 1.5;
+}
+
+.kernelNote code {
+  display: block;
+  font-size: 10px;
+  white-space: normal;
+}
+
+.compatCallout {
+  color: var(--fg);
+  font-size: var(--text-xs);
+}
+
+.providerLive,
+.providerIdle {
+  display: inline-block;
+  border-radius: 999px;
+  border: 1px solid;
+  padding: 0 7px;
+  font-size: 10px;
+  vertical-align: 2px;
+}
+
+.providerLive {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.providerIdle {
+  border-color: var(--q-warning);
+  color: var(--q-warning);
+}
+
+/* Capability-free, content-bearing module demos. They are live controls, not placeholder artwork. */
+.moduleDemo {
+  overflow: hidden;
+  min-height: 210px;
+  margin: var(--space-2) 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 70%, var(--card));
+}
+
+.moduleDemoChrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28px;
+  padding: 0 9px;
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .03em;
+}
+
+.moduleDemoChrome strong {
+  max-width: 55%;
+  overflow: hidden;
+  color: var(--fg);
+  font-size: 11px;
+  letter-spacing: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.moduleDemoBody {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 181px;
+  padding: 10px;
+  color: var(--fg);
+  font-size: 11px;
+}
+
+.moduleDemo button,
+.moduleDemo input,
+.moduleDemo textarea {
+  color: inherit;
+  font: inherit;
+}
+
+.demoSearchLabel {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+}
+
+.demoSearchLabel input,
+.demoComposer input,
+.demoForm input,
+.demoEditor {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--fg);
+  outline: none;
+}
+
+.demoSearchLabel input,
+.demoComposer input,
+.demoForm input {
+  height: 27px;
+  padding: 0 8px;
+}
+
+.demoSearchLabel input:focus,
+.demoComposer input:focus,
+.demoForm input:focus,
+.demoEditor:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.demoResultList,
+.demoTree,
+.demoStatusList {
+  display: grid;
+  gap: 3px;
+}
+
+.demoResultList button,
+.demoTree button,
+.demoStatusList button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  border: 0;
+  border-radius: 5px;
+  padding: 6px 7px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.demoResultList button:hover,
+.demoTree button:hover,
+.demoResultList button[data-active="true"],
+.demoTree button[data-active="true"] {
+  background: color-mix(in srgb, var(--accent) 18%, var(--card));
+}
+
+.demoResultList strong {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demoResultList span,
+.demoSelection,
+.demoEmpty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.demoTree button {
+  justify-content: flex-start;
+  white-space: pre;
+}
+
+.demoChatLog {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  overflow: auto;
+}
+
+.demoChatLog p {
+  max-width: 82%;
+  margin: 0;
+  border-radius: 8px 8px 8px 2px;
+  padding: 6px 8px;
+  background: color-mix(in srgb, var(--fg) 8%, var(--card));
+  line-height: 1.35;
+}
+
+.demoChatLog p[data-side="user"] {
+  align-self: flex-end;
+  border-radius: 8px 8px 2px;
+  background: color-mix(in srgb, var(--accent) 18%, var(--card));
+}
+
+.demoComposer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px;
+}
+
+.demoComposer button,
+.demoForm button,
+.demoPanel button {
+  border: 1px solid color-mix(in srgb, var(--accent) 76%, var(--line));
+  border-radius: 6px;
+  padding: 0 9px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  cursor: pointer;
+}
+
+.demoDocumentHead,
+.demoDetailHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+}
+
+.demoDocumentHead strong,
+.demoDetailHead strong {
+  color: var(--fg);
+}
+
+.demoEditor {
+  flex: 1;
+  min-height: 137px;
+  resize: none;
+  padding: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.demoDocument {
+  flex: 1;
+  border-left: 3px solid color-mix(in srgb, var(--accent) 48%, var(--line));
+  padding: 6px 10px;
+  background: var(--card);
+}
+
+.demoDocument h5,
+.demoDocument p,
+.demoDocument ul {
+  margin: 0 0 7px;
+}
+
+.demoDocument ul {
+  padding-left: 16px;
+}
+
+.demoForm {
+  display: grid;
+  gap: 7px;
+}
+
+.demoForm label {
+  display: grid;
+  gap: 3px;
+  color: var(--muted);
+}
+
+.demoForm button {
+  justify-self: end;
+  min-height: 27px;
+}
+
+.demoNotice {
+  margin: 0;
+  border-radius: 5px;
+  padding: 5px 7px;
+  background: color-mix(in srgb, var(--ok) 12%, var(--card));
+  color: var(--ok);
+}
+
+.demoBoard {
+  display: grid;
+  grid-template-columns: repeat(8, 22px);
+  align-self: center;
+  border: 1px solid var(--line-strong);
+}
+
+.demoBoard button {
+  display: grid;
+  width: 22px;
+  height: 20px;
+  border: 0;
+  place-items: center;
+  padding: 0;
+  background: color-mix(in srgb, var(--accent) 10%, var(--card));
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.demoBoard button:nth-child(16n + 1),
+.demoBoard button:nth-child(16n + 3),
+.demoBoard button:nth-child(16n + 5),
+.demoBoard button:nth-child(16n + 7),
+.demoBoard button:nth-child(16n + 10),
+.demoBoard button:nth-child(16n + 12),
+.demoBoard button:nth-child(16n + 14),
+.demoBoard button:nth-child(16n + 16) {
+  background: color-mix(in srgb, var(--accent) 28%, var(--card));
+}
+
+.demoBoard button[data-active="true"] {
+  box-shadow: inset 0 0 0 2px var(--q-warning);
+}
+
+.demoSlides {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 76px 1fr;
+  gap: 7px;
+}
+
+.demoSlides nav {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+
+.demoSlides nav button {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 5px;
+  background: var(--card);
+  color: var(--muted);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 9px;
+}
+
+.demoSlides nav button[data-active="true"] {
+  border-color: var(--accent);
+  color: var(--fg);
+}
+
+.demoSlides nav span {
+  margin-right: 4px;
+  color: var(--accent);
+}
+
+.demoSlides article {
+  display: grid;
+  align-content: center;
+  min-width: 0;
+  border: 1px solid var(--line-strong);
+  padding: 12px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 13%, var(--card)), var(--card));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.demoSlides article small {
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: .09em;
+}
+
+.demoSlides article h5 {
+  margin: 6px 0;
+  font-size: 15px;
+}
+
+.demoSlides article p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.demoFacts {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  margin: 4px 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.demoFacts dt,
+.demoFacts dd {
+  margin: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 7px 4px;
+}
+
+.demoFacts dt {
+  color: var(--muted);
+}
+
+.demoStatusList button {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 7px;
+  min-height: 43px;
+  border: 1px solid var(--line);
+  background: var(--card);
+}
+
+.demoStatusList button span {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  place-items: center;
+  background: color-mix(in srgb, var(--ok) 16%, transparent);
+  color: var(--ok);
+}
+
+.demoStatusList button[data-tone="run"] span {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+
+.demoStatusList button[data-tone="wait"] span {
+  background: color-mix(in srgb, var(--q-warning) 16%, transparent);
+  color: var(--q-warning);
+}
+
+.demoStatusList small {
+  color: var(--muted);
+}
+
+.demoPanel {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 9px;
+  align-items: center;
+  margin-top: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--card);
+}
+
+.demoPanelIcon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+  font-size: 18px;
+}
+
+.demoPanel p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.demoPanel button {
+  min-height: 27px;
+}
+
+/* ── 权限 ─────────────────────────────────────────────────────────────────── */
+
+.bullet {
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  display: block;
+  margin-top: var(--space-2);
+}
+
+.bulletTrack {
+  fill: color-mix(in srgb, var(--fg) 7%, transparent);
+  stroke: var(--line);
+}
+
+.bulletTolerance {
+  fill: color-mix(in srgb, var(--q-warning) 18%, transparent);
+}
+
+.bulletText {
+  font-size: 11px;
+  fill: var(--muted);
+}
+
+.errText {
+  color: var(--err);
+  font-size: var(--text-sm);
+  margin: 6px 0 0;
+}
+
+.warnText {
+  color: var(--q-warning);
+  font-size: var(--text-sm);
+  margin: 6px 0 0;
+}
+
+.tcbLists {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.tcbFiles {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.tcbFiles summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.plainTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.plainTable th,
+.plainTable td {
+  text-align: left;
+  padding: 3px 10px 3px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.plainTable th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: var(--text-xs);
+}
+
+.matrixWrap {
+  overflow-x: auto;
+  margin-top: var(--space-2);
+}
+
+.matrix {
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.matrix th,
+.matrix td {
+  border: 1px solid var(--line);
+  padding: 4px 10px;
+  text-align: center;
+  min-width: 44px;
+}
+
+.matrix thead th,
+.matrix tbody th {
+  font-weight: 500;
+  font-size: var(--text-xs);
+  color: var(--muted);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.matrixCorner {
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.cellDiag {
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+
+.cellForbidden {
+  outline: 2px solid var(--err);
+  outline-offset: -2px;
+}
+
+.cellViolation {
+  outline: 2px solid var(--err);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--err) 18%, transparent);
+  color: var(--err);
+  font-weight: 600;
+}
+
+.concernGroup {
+  margin-top: var(--space-2);
+}
+
+.compactGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-2);
+}
+
+.compactCard {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: var(--text-sm);
+}
+
+.compactCard .muted {
+  margin-top: 4px;
+  font-size: var(--text-xs);
+}
+
+/* ── 流程 ─────────────────────────────────────────────────────────────────── */
+
+.flowsWrap {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.flowList {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.flowRow,
+.flowRowOn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  text-align: left;
+  white-space: normal;
+  padding: 8px 10px;
+}
+
+.flowRowOn {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.perspective {
+  display: inline-block;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.flowMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.coverage {
+  font-size: var(--text-sm);
+  border-left: 3px solid var(--line-strong);
+  padding-left: var(--space-2);
+  margin: var(--space-2) 0 0;
+}
+
+.laneEven {
+  fill: color-mix(in srgb, var(--fg) 3%, transparent);
+}
+
+.laneOdd {
+  fill: transparent;
+}
+
+.laneLabel {
+  font-size: 11px;
+  fill: var(--muted);
+}
+
+.stepBox {
+  cursor: pointer;
+}
+
+.stepRect {
+  fill: var(--card);
+  stroke: var(--line-strong);
+  stroke-width: 1.2;
+}
+
+.stepRectOn {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.stepRectInner {
+  fill: none;
+  stroke: var(--line-strong);
+  pointer-events: none;
+}
+
+.stepLabel {
+  font-size: 12px;
+  fill: var(--fg);
+  pointer-events: none;
+}
+
+.stepSub {
+  font-size: 10px;
+  fill: var(--muted);
+  pointer-events: none;
+}
+
+/* ── 右栏档案卡 ───────────────────────────────────────────────────────────── */
+
+.railCard {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 12px var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.railHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.railTitle {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-md);
+}
+
+.railClose {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: var(--space-1) var(--space-2);
+  margin: var(--space-2) 0 0;
+}
+
+.kv dt {
+  color: var(--muted);
+}
+
+.kv dd {
+  margin: 0;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.docRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px 0;
+}
+
+.docRow .mono {
+  flex: 1;
+}
+
+.relRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  border-top: 1px solid var(--line);
+  padding: 5px 0;
+}
+
+.relRow:first-of-type {
+  border-top: 0;
+}
+
+/* ── 演进 (commit-range evolution) ────────────────────────────────────────── */
+
+.evoTrackWrap {
+  margin: var(--space-3) 0 var(--space-2);
+  /* Handles overhang the track ends; keep them inside the card. */
+  padding: 0 10px;
+}
+
+.evoTrack {
+  position: relative;
+  height: 28px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--line) 45%, transparent);
+  touch-action: none;
+}
+
+.evoFill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--accent-soft);
+  border-top: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+
+.evoMark {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: var(--card);
+  border: 1.5px solid var(--fg);
+  pointer-events: none;
+}
+
+.evoMarkCurrent {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.evoHandle {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 26px;
+  transform: translate(-50%, -50%);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  border: 1.5px solid var(--accent);
+  cursor: grab;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--fg) 20%, transparent);
+}
+
+.evoHandle:active {
+  cursor: grabbing;
+}
+
+.evoHandle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.evoAxisLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.evoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.evoCols > section {
+  min-width: 0;
+}
+
+.evoAdd {
+  color: var(--ok);
+  font-variant-numeric: tabular-nums;
+}
+
+.evoDel {
+  color: var(--err);
+  font-variant-numeric: tabular-nums;
+}
+
+.evoList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.evoList li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding: 3px 0;
+  border-top: 1px solid var(--line);
+}
+
+.evoList li:first-child {
+  border-top: 0;
+}
+
+.evoModule {
+  border-top: 1px solid var(--line);
+  padding: 4px 0;
+}
+
+.evoModule summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.evoModuleName {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.evoFiles {
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: 0 0 0 var(--space-3);
+}
+
+.evoFiles li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 2px 0;
+}
+
+.evoFiles .mono {
+  flex: 1;
+  min-width: 0;
+}
+
+.evoSubject {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .body {
+    flex-direction: column;
+  }
+
+  .rail {
+    width: 100%;
+    position: static;
+  }
+
+  .flowsWrap {
+    flex-direction: column;
+  }
+
+  .flowList {
+    width: 100%;
+  }
+
+  .tcbLists {
+    grid-template-columns: 1fr;
+  }
+
+  .evoCols {
+    grid-template-columns: 1fr;
+  }
+
+  .moduleEcosystemGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .moduleInspector {
+    position: static;
+    max-height: none;
+  }
+}

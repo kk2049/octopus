@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>自主科研工作台 · 交互原型</title>
+  <style>
+    :root { color-scheme: light; font: 14px/1.5 ui-sans-serif, system-ui, sans-serif; color: #20231f; background: #eceee9; }
+    * { box-sizing: border-box; }
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid #7d50d9; outline-offset: 2px; }
+    .shell { min-height: 100vh; display: grid; grid-template-columns: 284px minmax(0, 1fr); }
+    .rail { position: sticky; top: 0; height: 100vh; padding: 16px; background: #20251f; color: #f6f7f2; overflow: auto; }
+    .brand, .rail-head, .rail-actions, .project-card, .member-row { display: flex; align-items: center; gap: 10px; }
+    .brand { margin-bottom: 22px; font-size: 16px; font-weight: 750; }
+    .brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: #d8f58e; color: #20251f; }
+    .rail-head { justify-content: space-between; margin-bottom: 8px; }
+    .rail-head h2 { margin: 0; font-size: 12px; letter-spacing: .08em; color: #b9c0b4; }
+    .icon-button, .rail-actions button, .project-card, .member-button { border: 0; color: inherit; background: transparent; cursor: pointer; }
+    .icon-button { width: 30px; height: 30px; border-radius: 8px; }
+    .icon-button:hover, .rail-actions button:hover, .member-button:hover { background: #353c33; }
+    .project-list { display: grid; gap: 5px; }
+    .project-card { width: 100%; padding: 10px; border-radius: 10px; text-align: left; }
+    .project-card[aria-current="page"] { background: #f4f6ee; color: #20231f; }
+    .project-card > span:first-child { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #9fda58; }
+    .project-card.is-archived > span:first-child { background: #8b9188; }
+    .project-copy { min-width: 0; flex: 1; }
+    .project-copy strong, .project-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .project-copy small { color: #9ea69a; }
+    .project-card[aria-current="page"] small { color: #697066; }
+    .rail-actions { margin: 14px 0 18px; }
+    .rail-actions button { flex: 1; padding: 8px; border: 1px solid #4b5448; border-radius: 9px; }
+    .people { border-top: 1px solid #3b4239; padding-top: 15px; }
+    .member-button { width: 100%; padding: 8px; border-radius: 9px; text-align: left; }
+    .avatars { display: flex; margin-left: auto; }
+    .avatar { display: grid; place-items: center; width: 25px; height: 25px; margin-left: -5px; border: 2px solid #20251f; border-radius: 50%; background: #d9d4ff; color: #33256a; font-size: 10px; font-weight: 750; }
+    .workspace { min-width: 0; padding: 22px 28px 40px; }
+    .mobile-head { display: none; }
+    .work-head { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 4px; color: #687063; font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(24px, 4vw, 38px); letter-spacing: -.04em; }
+    .subtitle { margin: 7px 0 0; color: #60675d; max-width: 760px; }
+    .status { flex: none; padding: 7px 11px; border-radius: 999px; background: #dff2bd; color: #334615; font-weight: 700; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr); gap: 16px; }
+    .panel { min-width: 0; background: #fafbf7; border: 1px solid #d8dbd4; border-radius: 16px; box-shadow: 0 10px 30px rgba(36, 42, 33, .06); overflow: hidden; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; border-bottom: 1px solid #e3e5df; }
+    .panel-head h2 { margin: 0; font-size: 14px; }
+    .panel-head small { color: #747b70; }
+    .transcript { padding: 18px; display: grid; gap: 13px; }
+    .message { padding: 12px 14px; border-radius: 12px; background: #eef0eb; }
+    .message.agent { background: #f0ecfb; }
+    .message b { display: block; margin-bottom: 4px; font-size: 12px; }
+    .message p { margin: 0; }
+    .document { padding: 20px 22px; }
+    .document h2 { margin: 0 0 8px; font-size: 22px; }
+    .document h3 { margin: 20px 0 7px; font-size: 15px; }
+    .document p, .document ul { color: #4d544a; }
+    .notice { margin: 16px; padding: 12px 14px; border-radius: 10px; background: #fff3cf; color: #5b4711; }
+    .empty { display: grid; place-items: center; min-height: 320px; padding: 32px; text-align: center; color: #636a60; }
+    .empty h2 { margin: 0 0 6px; color: #252924; }
+    .invite { position: fixed; inset: 0; z-index: 4; display: none; place-items: center; padding: 20px; background: rgba(17, 20, 16, .55); }
+    .invite[data-open="true"] { display: grid; }
+    .dialog { width: min(460px, 100%); padding: 20px; border-radius: 16px; background: white; box-shadow: 0 24px 70px rgba(0,0,0,.25); }
+    .dialog h2 { margin: 0; }
+    .dialog p { color: #60665d; }
+    .share-box { display: flex; gap: 8px; padding: 9px; border-radius: 10px; background: #eff1ec; }
+    .share-box code { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+    .dialog-actions button { padding: 8px 13px; border: 0; border-radius: 9px; cursor: pointer; }
+    .dialog-actions .primary { background: #252b24; color: white; }
+    [hidden] { display: none !important; }
+    @media (max-width: 860px) {
+      .shell { display: block; }
+      .rail { position: fixed; z-index: 3; width: min(86vw, 320px); transform: translateX(-105%); transition: transform .18s ease; box-shadow: 16px 0 40px rgba(0,0,0,.25); }
+      .rail[data-open="true"] { transform: translateX(0); }
+      .workspace { padding: 14px 16px 30px; }
+      .mobile-head { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+      .mobile-head button { width: 38px; height: 38px; border: 1px solid #cfd3cb; border-radius: 10px; background: white; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail" id="rail" aria-label="科研项目导航">
+      <div class="brand"><span class="brand-mark">研</span>自主科研工作台</div>
+      <div class="rail-head"><h2>我的项目</h2><button class="icon-button" id="collapse" aria-expanded="true" aria-controls="projects">⌃</button></div>
+      <div class="project-list" id="projects">
+        <button class="project-card" aria-current="page" data-view="normal"><span></span><span class="project-copy"><strong>量子材料筛选</strong><small>刚刚 · 18 条会话</small></span></button>
+        <button class="project-card" data-view="empty"><span></span><span class="project-copy"><strong>可解释催化模型</strong><small>尚未开始</small></span></button>
+        <button class="project-card is-archived" data-view="archived"><span></span><span class="project-copy"><strong>旧版图谱实验</strong><small>只读归档</small></span></button>
+      </div>
+      <div class="rail-actions"><button id="share">分享项目</button><button id="new">新项目</button></div>
+      <section class="people" aria-labelledby="people-title">
+        <div class="rail-head"><h2 id="people-title">项目成员</h2><button class="icon-button" id="invite" aria-label="邀请成员">＋</button></div>
+        <button class="member-button member-row"><span>成员与邀请</span><span class="avatars"><span class="avatar">林</span><span class="avatar">周</span><span class="avatar">+2</span></span></button>
+      </section>
+    </aside>
+
+    <main class="workspace">
+      <div class="mobile-head"><button id="menu" aria-label="打开项目导航">☰</button><strong>自主科研工作台</strong></div>
+      <header class="work-head">
+        <div><p class="eyebrow">当前项目 · 主导 Agent：探索协调员</p><h1 id="title">量子材料筛选</h1><p class="subtitle">进入即呈现最新工作会话与当前主导文档，切换项目不会离开工作台。</p></div>
+        <span class="status" id="status">进行中</span>
+      </header>
+      <div class="grid" id="normal-view">
+        <section class="panel" aria-labelledby="chat-title"><div class="panel-head"><div><h2 id="chat-title">最新会话</h2><small>探索协调员 · 5 分钟前</small></div><button>查看全部</button></div><div class="transcript"><article class="message"><b>研究负责人</b><p>先比较候选材料在高压环境下的稳定区间。</p></article><article class="message agent"><b>探索协调员</b><p>第一轮模拟已经归并为三类；主导文档同步记录了筛选依据与待验证假设。</p></article><article class="message agent"><b>验证 Agent</b><p>第二类存在一个边界异常，我已追加复现实验并等待结果。</p></article></div></section>
+        <article class="panel"><div class="panel-head"><div><h2>主导文档</h2><small>研究现状报告 · 刚刚更新</small></div><button>打开文件</button></div><div class="document"><h2>本周研究现状</h2><p>当前工作集中在三个候选族群，第一类已经通过稳定性复核。</p><h3>下一步</h3><ul><li>复现第二类的边界异常</li><li>补充第三类的温度敏感性分析</li><li>由负责人确认下一轮算力分配</li></ul></div></article>
+      </div>
+      <section class="panel empty" id="empty-view" hidden><div><h2>项目已经就绪</h2><p>还没有 Agent 会话。邀请成员或连接首个研究 Agent 后，最新会话会直接出现在这里。</p><button>打开成员与邀请</button></div></section>
+      <section class="panel empty" id="archived-view" hidden><div><h2>项目已归档</h2><p>会话、文档与主导历史保持可读；新的 Agent 更新已经冻结。</p><button>查看归档报告</button></div></section>
+    </main>
+  </div>
+
+  <div class="invite" id="invite-dialog" data-open="false" role="dialog" aria-modal="true" aria-labelledby="invite-title">
+    <div class="dialog"><h2 id="invite-title">邀请加入量子材料筛选</h2><p>从侧栏完成分享和成员管理，不离开当前工作台。</p><div class="share-box"><code>octopus.example/research/量子材料筛选</code><button id="copy">复制</button></div><p id="feedback" role="status">拥有链接且已登录的用户可申请加入 Viewer 或 Member。</p><div class="dialog-actions"><button id="simulate">模拟拒绝</button><button class="primary" id="close">完成</button></div></div>
+  </div>
+  <script>
+    const rail = document.querySelector('#rail');
+    const dialog = document.querySelector('#invite-dialog');
+    const feedback = document.querySelector('#feedback');
+    const openDialog = () => { dialog.dataset.open = 'true'; document.querySelector('#close').focus(); };
+    document.querySelector('#menu').addEventListener('click', () => { rail.dataset.open = 'true'; });
+    document.querySelector('#collapse').addEventListener('click', (event) => { const open = event.currentTarget.getAttribute('aria-expanded') === 'true'; event.currentTarget.setAttribute('aria-expanded', String(!open)); document.querySelector('#projects').hidden = open; });
+    document.querySelector('#share').addEventListener('click', openDialog);
+    document.querySelector('#invite').addEventListener('click', openDialog);
+    document.querySelector('.member-button').addEventListener('click', openDialog);
+    document.querySelector('#close').addEventListener('click', () => { dialog.dataset.open = 'false'; feedback.textContent = '拥有链接且已登录的用户可申请加入 Viewer 或 Member。'; });
+    document.querySelector('#copy').addEventListener('click', (event) => { event.currentTarget.disabled = true; event.currentTarget.textContent = '复制中…'; setTimeout(() => { event.currentTarget.disabled = false; event.currentTarget.textContent = '已复制'; feedback.textContent = '分享链接已复制。'; }, 500); });
+    document.querySelector('#simulate').addEventListener('click', () => { feedback.textContent = '邀请未发送：你没有管理成员的权限。当前内容已保留，可以关闭后继续浏览。'; });
+    document.querySelectorAll('.project-card').forEach((button) => button.addEventListener('click', () => {
+      document.querySelectorAll('.project-card').forEach((item) => item.removeAttribute('aria-current'));
+      button.setAttribute('aria-current', 'page');
+      const view = button.dataset.view;
+      document.querySelector('#normal-view').hidden = view !== 'normal';
+      document.querySelector('#empty-view').hidden = view !== 'empty';
+      document.querySelector('#archived-view').hidden = view !== 'archived';
+      document.querySelector('#title').textContent = button.querySelector('strong').textContent;
+      document.querySelector('#status').textContent = view === 'archived' ? '只读归档' : view === 'empty' ? '待接入' : '进行中';
+      rail.dataset.open = 'false';
+    }));
+  </script>
+</body>
+</html>

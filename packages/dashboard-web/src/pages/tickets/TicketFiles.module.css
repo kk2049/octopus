@@ -1,0 +1,11 @@
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.toolbar input { width: 90px; color: inherit; border: 1px solid var(--line); border-radius: 4px; }
+.path { font-family: var(--mono); overflow-wrap: anywhere; }
+.content { max-height: 65vh; overflow: auto; min-height: 160px; }
+.directory { display: grid; gap: 4px; }
+.directory button { text-align: left; padding: 7px; border: 0; border-radius: 4px; background: var(--tool-bg); color: inherit; cursor: pointer; overflow-wrap: anywhere; }
+.source { margin: 0; width: max-content; min-width: 100%; font: 13px/1.65 var(--mono); white-space: pre; }
+.source code > span { display: block; }
+.number { display: inline-block; width: 5em; padding-right: 1em; color: var(--muted); text-align: right; user-select: none; }
+.selected { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+@media (max-width: 720px) { .content { max-height: 60vh; } .toolbar { gap: 5px; } }

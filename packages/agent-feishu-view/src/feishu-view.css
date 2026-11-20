@@ -1,0 +1,13 @@
+.fv-document { display: grid; align-content: start; gap: 18px; min-height: 100%; padding: 24px; color: var(--av-fg, #e8ecf7); background: radial-gradient(circle at 95% 0, rgba(51,112,255,.18), transparent 32%); }
+.fv-document header { display: flex; align-items: center; gap: 12px; }
+.fv-document h2 { margin: 0 0 3px; font-size: 18px; }
+.fv-document header p { margin: 0; color: var(--av-muted, #98a2b8); font-size: 12px; }
+.fv-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: #3370ff; color: #fff; font-weight: 800; }
+.fv-safe { max-width: 680px; padding: 16px; border: 1px solid rgba(99,130,210,.32); border-radius: 12px; background: rgba(28,39,65,.56); line-height: 1.65; }
+.fv-safe p { margin: 0; }
+.fv-safe p + p { margin-top: 8px; color: var(--av-muted, #b1bad0); }
+.fv-link-label { font-size: 12px; color: var(--av-muted, #98a2b8); }
+.fv-link-row { display: flex; gap: 8px; max-width: 760px; }
+.fv-link-row input { min-width: 0; flex: 1; padding: 9px 11px; border: 1px solid rgba(126,145,190,.35); border-radius: 8px; color: inherit; background: rgba(11,17,31,.72); }
+.fv-link-row button { padding: 8px 13px; border: 0; border-radius: 8px; color: #fff; background: #3370ff; cursor: pointer; }
+.fv-empty { padding: 24px; color: var(--av-muted, #98a2b8); }

@@ -1,0 +1,7 @@
+title: 摘要
+layout:
+  - [summary, stats, ops]
+slots:
+  summary: { widget: markdown, bind: view.digest, props: { title: 今日摘要 } }
+  stats: { widget: kv, bind: view.stats, props: { title: 概况 } }
+  ops: { widget: actions, props: { items: [{ action: refresh, label: 🔄 让秘书巡检 }] } }

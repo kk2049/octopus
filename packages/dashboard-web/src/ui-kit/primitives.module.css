@@ -1,0 +1,190 @@
+.button:global(.ant-btn) {
+  height: var(--control-height);
+  padding-inline: var(--space-3);
+  color: var(--fg);
+  font: var(--control-weight) var(--text-sm) / var(--leading) var(--font-ui);
+  background: var(--card);
+  border-color: var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+}
+
+.button:global(.ant-btn):not(:disabled):hover,
+.button:global(.ant-btn):not(:disabled):focus-visible {
+  color: var(--accent);
+  background: var(--card);
+  border-color: var(--accent);
+}
+
+.primary:global(.ant-btn-primary),
+.primary:global(.ant-btn-primary):not(:disabled):hover,
+.primary:global(.ant-btn-primary):not(:disabled):focus-visible {
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.danger:global(.ant-btn-dangerous) {
+  color: var(--err);
+  background: transparent;
+  border-color: var(--err);
+}
+
+.danger:global(.ant-btn-dangerous):not(:disabled):hover,
+.danger:global(.ant-btn-dangerous):not(:disabled):focus-visible {
+  color: var(--accent-fg);
+  background: var(--err);
+  border-color: var(--err);
+}
+
+.quiet:global(.ant-btn-text) {
+  color: var(--muted);
+  background: transparent;
+  border-color: transparent;
+}
+
+.quiet:global(.ant-btn-text):not(:disabled):hover,
+.quiet:global(.ant-btn-text):not(:disabled):focus-visible {
+  color: var(--fg);
+  background: var(--hover);
+  border-color: transparent;
+}
+
+.control:global(.ant-input),
+.control:global(.ant-input-affix-wrapper),
+.select:global(.ant-select) {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  line-height: var(--leading);
+}
+
+/* Single-line fields share a row with buttons. Textareas retain content-driven
+ * height; the transparent input inside a Select is never a second field. */
+input.control:global(.ant-input),
+.control:global(.ant-input-affix-wrapper),
+.select:global(.ant-select) {
+  height: var(--control-height);
+}
+
+input.control:global(.ant-input),
+.control:global(.ant-input-affix-wrapper) {
+  padding-block: 0;
+}
+
+.control:global(.ant-input-affix-wrapper) > :global(.ant-input) {
+  min-height: 0;
+  padding-block: 0;
+  font: inherit;
+}
+
+.select:global(.ant-select) {
+  min-width: 140px;
+}
+
+/*
+ * Product themes own these semantic colours. Keep the visible selected value
+ * explicit at the adapter boundary as a final guard against a component
+ * algorithm inheriting the opposite OS colour scheme.
+ *
+ * These are Ant v6 class names. v6 replaced the v5 selector DOM with
+ * `SelectInput`: a single choice renders its label as a bare text node inside
+ * `.ant-select-content`, `.ant-select-selector` and
+ * `.ant-select-selection-placeholder` no longer exist, and
+ * `.ant-select-selection-item` survives only in multiple/tags mode. The v5
+ * names this block used to carry matched nothing at all, which is why the
+ * ticket pickers stayed unreadable across several "fixes" — the CSS landed,
+ * the tests passed, and not one declaration ever applied. `primitives.test.tsx`
+ * now pins every Ant class named here against the rendered DOM.
+ *
+ * These pickers do not enable `showSearch`, so the `-has-search-value` path
+ * (where Ant paints the stale value transparent behind the search term) cannot
+ * occur; turning search on would mean excluding it from the rule below.
+ */
+.select:global(.ant-select) :global(.ant-select-content-has-value) {
+  color: var(--fg);
+}
+
+.select:global(.ant-select) :global(.ant-select-placeholder) {
+  color: var(--muted);
+}
+
+/*
+ * Ant v6 dims the chosen value to opacity .25 while the dropdown is open, to
+ * move attention to the list. On a model/effort picker the chosen value is
+ * precisely what people open the menu to check, and at .25 over `--card` it
+ * reads as an empty control whose text is still selectable and pasteable.
+ * The highlighted row in the list already marks what is current.
+ */
+.select:global(.ant-select-open) :global(.ant-select-content-has-value) {
+  opacity: 1;
+}
+
+.checkbox:global(.ant-checkbox-wrapper) {
+  color: inherit;
+  font: inherit;
+}
+
+.card:global(.ant-card) {
+  color: var(--fg);
+  background: var(--card);
+  border-color: var(--line);
+  box-shadow: var(--shadow-sm);
+}
+
+.table:global(.ant-table-wrapper) :global(.ant-table) {
+  color: var(--fg);
+  background: var(--card);
+}
+
+.table:global(.ant-table-wrapper) :global(.ant-table-thead > tr > th) {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.tabs :global(.ant-tabs-content-holder) {
+  min-width: 0;
+}
+
+@media (max-width: 720px), (hover: none) and (pointer: coarse) {
+  .button:global(.ant-btn),
+  input.control:global(.ant-input),
+  .control:global(.ant-input-affix-wrapper) {
+    min-height: 44px;
+  }
+
+  .select:global(.ant-select) {
+    min-width: 0;
+    min-height: 44px;
+  }
+}
+
+/*
+ * The input is Ant's transparent keyboard/focus layer, not a second text box.
+ * Keep native theme backgrounds, borders and focus shadows off that layer,
+ * including when the dock opens after a page has loaded additional styles.
+ * Focus feedback belongs to the Select root.
+ */
+.select:global(.ant-select) :global(.ant-select-input) {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  min-height: 0;
+  padding: 0;
+}
+
+.selectWrap:global(.ant-select) {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+}
+
+.selectWrap:global(.ant-select) :global(.ant-select-content-has-value),
+.selectOptionLabel {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.selectOptionLabel {
+  display: block;
+}

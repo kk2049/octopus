@@ -1,0 +1,27 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, expect, it, vi } from "vitest";
+import type { ResearchNode, WorkflowPage } from "@claude-bot/research-canvas-contract";
+import type { Call } from "./client.js";
+vi.mock("./windows/AgentWindow.js", () => ({ AgentWindow: ({ node, conversationId }: { node: ResearchNode; conversationId?: string }) => <div role="region" aria-label="会话详情">{node.title}<span>{conversationId ?? "原生会话"}</span></div> }));
+import { WorkflowPanel } from "./WorkflowPanel.js";
+const stamp = { kind: "human" as const, owner: "alice", trigger: "fixture", agent: null, run: null, model: null, at: "2026-09-26T12:00:00Z" };
+const agent: ResearchNode = { id: "legacy", type: "agent", ref: "agent:legacy", title: "既有研究会话", summary: "", schema: 1, data: {}, phase: "present", version: 1, archived: false, created: stamp, updated: stamp, x: 0, y: 0 };
+const empty: WorkflowPage = { agents: [agent], drafts: [], runs: [], flags: [], rules: [], batches: [], executions: [], summaries: {}, truncated: false };
+beforeEach(() => localStorage.clear());
+it("opens a legacy Agent on explicit navigation and shares metadata without a second workflow read", async () => {
+  const call = vi.fn(), refresh = vi.fn(), intent = { agent: "legacy", request: 1 };
+  const props = { project: "research", viewer: "alice", nodes: [agent], call: call as Call, epoch: 0, editable: true, runnable: true, openNode: vi.fn(), workflow: { page: empty, error: "", refresh } };
+  const view = render(<WorkflowPanel {...props} />);
+  expect(screen.queryByRole("region", { name: "会话详情" })).toBeNull();
+  expect(call).not.toHaveBeenCalled();
+  view.rerender(<WorkflowPanel {...props} intent={intent} />);
+  expect(await screen.findByRole("region", { name: "会话详情" })).toHaveTextContent("既有研究会话原生会话");
+  expect(call).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "待处理 0" }));
+  fireEvent.click(screen.getByText("显式提出待审问题"));
+  fireEvent.change(screen.getByLabelText("问题"), { target: { value: "不要被导航元数据刷新覆盖" } });
+  view.rerender(<WorkflowPanel {...props} epoch={2} intent={intent} workflow={{ page: { ...empty }, error: "", refresh }} />);
+  await waitFor(() => expect(screen.getByLabelText("问题")).toHaveValue("不要被导航元数据刷新覆盖"));
+  expect(screen.queryByRole("region", { name: "会话详情" })).toBeNull();
+  expect(call).not.toHaveBeenCalled();
+});

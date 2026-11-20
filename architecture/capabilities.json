@@ -1,0 +1,323 @@
+{
+  "$schema": "./capabilities.schema.json",
+  "version": 1,
+  "capabilities": [
+    {
+      "id": "discussions.topic-meetings",
+      "kind": "product",
+      "label": "议题群聊与常驻秘书",
+      "description": "以召集人为中心创建真人与 Bot 飞书群，Sol 过滤、GPT-6 秘书、顾问、群活动卡、Sessions+ 会议进展，以及任意已连接 CLI/Runner 的 MCP 发起流程。",
+      "aliases": ["议题", "会议", "拉群", "群聊", "秘书", "discussion", "meeting", "secretary", "triage"],
+      "modules": ["topic-discussions", "mcp-surface", "dashboard-web", "dashboard-server", "persistence-store"],
+      "paths": ["packages/bot/src/discussions/", "packages/dashboard-web/src/pages/session-plus/Discussions.tsx"],
+      "docs": ["packages/bot/src/discussions/README.md"]
+    },
+    {
+      "id": "sessions-plus.navigation",
+      "kind": "product",
+      "label": "Sessions+ 导航与目录索引",
+      "description": "Sessions+ 左侧导航、统一目录索引、收藏置顶、最近会话、home 导航与会话弹层。",
+      "aliases": ["sessions+", "session plus", "session+", "导航栏", "目录索引", "收藏", "置顶", "最近会话", "roster", "directory index", "navigation"],
+      "modules": ["agent-sessions-view", "session-plus-view", "session-plus-host"],
+      "paths": ["packages/agent-sessions-view/src/lib/directory-index.ts", "packages/agent-sessions-view/src/controller.ts"],
+      "docs": ["packages/agent-sessions-view/CLAUDE.md"]
+    },
+    {
+      "id": "sessions-plus.mobile",
+      "kind": "product",
+      "label": "Sessions+ 与工单页的手机端体验",
+      "description": "手机视口下的布局、输入框、发送键、导航切换、滚动、返回入口与 debug 按钮。",
+      "aliases": ["手机端", "手机版本", "手机", "移动端", "viewport", "mobile", "phone", "横滑", "触摸板", "输入框", "发送键"],
+      "modules": ["session-plus-view", "agent-sessions-view", "dashboard-web", "agent-view-react"],
+      "docs": [".claude/rules/frontend-stability.md"]
+    },
+    {
+      "id": "sessions-plus.chat",
+      "kind": "product",
+      "label": "会话转录与聊天展示",
+      "description": "transcript/chat 的展示、刷新、滚动锚点、标题、思考折叠、Todo 进度卡、用量提示与缺席提示。",
+      "aliases": ["聊天", "chat", "transcript", "转录", "刷新", "滚动", "抖动", "标题", "思考", "todo", "进度卡", "闪烁", "缺席提示"],
+      "modules": ["agent-sessions-view", "chat-ui-commons", "session-plus-view", "dashboard-web"],
+      "docs": [".claude/rules/frontend-stability.md", "packages/chat-ui-commons/CLAUDE.md"]
+    },
+    {
+      "id": "sessions-plus.agent-lifecycle",
+      "kind": "product",
+      "label": "会话 Agent 生命周期",
+      "description": "新建、续接、接管、追加消息、中断、启动可靠性与 provider（Claude/Codex/OMP）差异。",
+      "aliases": ["接管", "中断", "打断", "续接", "续跑", "resume", "新建 agent", "启动不了", "追加消息", "steer", "interrupt", "takeover", "omp", "codex", "claude code", "provider"],
+      "modules": ["session-plus-host", "agent-session", "runner-device", "runner-authority", "session-plus-view", "agent-sessions-view"],
+      "paths": ["packages/runner/src/agent-control-plane.ts", "packages/runner/src/omp-rpc.ts"]
+    },
+    {
+      "id": "sessions-plus.files",
+      "kind": "product",
+      "label": "文件链接、打开与预览",
+      "description": "聊天中的文件链接识别、路径解析、打开/预览文本与二进制（PDF、图片）、上传与多分块流。",
+      "aliases": ["文件", "打开", "预览", "pdf", "上传", "链接", "file", "open", "preview", "md 预览", "行号", "media", "resolve"],
+      "modules": ["agent-workspace-files-view", "agent-sessions-view", "workspace-files-plane", "workspace-files-contract", "resource-stream-broker", "resource-stream-contract", "runner-device", "session-resource"],
+      "paths": ["packages/agent-sessions-view/src/lib/file-link.ts", "packages/agent-sessions-view/src/lib/file-mentions.ts"]
+    },
+    {
+      "id": "sessions-plus.cold-start",
+      "kind": "product",
+      "label": "会话冷启动与刷新风暴",
+      "description": "Sessions+ 与 Dashboard 的冷启动读取、有界 head、刷新合并与重复读取。",
+      "aliases": ["冷启动", "cold start", "刷新风暴", "重复读取", "head", "coalesce", "首屏"],
+      "modules": ["session-plus-host", "agent-sessions-view", "session-hub", "dashboard-server"]
+    },
+    {
+      "id": "tickets.ui",
+      "kind": "product",
+      "label": "工单页界面",
+      "description": "Dashboard 工单列表与详情、折叠布局、模型/effort 下拉、未决问题、工单切换与旧响应丢弃。",
+      "aliases": ["工单页", "工单界面", "工单系统", "工单切换", "下拉", "effort", "未决问题", "open question", "折叠", "tickets page"],
+      "modules": ["dashboard-web", "dashboard-server"],
+      "paths": ["packages/dashboard-web/src/pages/TicketsPage.tsx"],
+      "docs": [".claude/rules/dashboard.md", ".claude/rules/frontend-stability.md"]
+    },
+    {
+      "id": "tickets.agent-runtime",
+      "kind": "product",
+      "label": "工单 Agent 运行与提示",
+      "description": "工单 agent 的启动提示、轮次、追加消息、重启续跑、默认模型、效率与对话鲁棒性。",
+      "aliases": ["工单 agent", "ticket agent", "提示词", "prompt", "轮次", "续执行", "重启", "默认 agent", "默认模型", "效率", "鲁棒性", "追加"],
+      "modules": ["dev-pipeline", "mcp-surface"],
+      "paths": ["packages/bot/src/devpipe/prompts.ts", "packages/bot/src/devpipe/pipeline.ts"],
+      "docs": [".claude/rules/devpipe-and-ops.md"]
+    },
+    {
+      "id": "devpipe.landing",
+      "kind": "product",
+      "label": "落地门与合并",
+      "description": "devpipe_submit、合并锁、ff-only、thin gate、changed tests、CI roster、CLI 简报与 land.sh。",
+      "aliases": ["落地", "land", "submit", "合并锁", "ff", "门禁", "gate", "changed tests", "roster", "简报", "cli report", "worktree"],
+      "modules": ["dev-pipeline", "operations", "persistence-store"],
+      "paths": ["packages/bot/src/devpipe/land-gate.ts", "scripts/ops/land.sh"],
+      "constraints": ["DELIVERY-001"],
+      "docs": ["doc/runbooks/development-workflow.md", "doc/cli-reports/README.md"]
+    },
+    {
+      "id": "devpipe.ci",
+      "kind": "product",
+      "label": "GitLab CI 与修复票路由",
+      "description": "post-submit 批次 CI、红灯清单、修复票路由、机器授权、夜间聚合与 fix-forward 闭环。",
+      "aliases": ["ci", "gitlab", "红灯", "修复票", "fix-forward", "批次", "roster", "lht-val15", "夜间", "全量"],
+      "modules": ["dev-pipeline", "operations"],
+      "paths": ["packages/bot/src/devpipe/ci-roster.ts", "packages/bot/src/devpipe/gitlab-ci.ts", ".gitlab-ci.yml"],
+      "docs": ["doc/runbooks/ci-triage.md", "doc/runbooks/testing.md"]
+    },
+    {
+      "id": "devpipe.deploy",
+      "kind": "product",
+      "label": "部署、健康门与回滚",
+      "description": "deploy.sh、启动健康门、冷启动预算、已验证包恢复、浏览器状态恢复与上线体验。",
+      "aliases": ["部署", "上线", "deploy", "健康门", "冷启动", "回滚", "supervisor", "readiness", "build 很久", "等部署"],
+      "modules": ["dev-pipeline", "operations", "v3-bootstrap"],
+      "paths": ["scripts/ops/deploy.sh", "scripts/supervisord.sh"],
+      "docs": ["doc/runbooks/deployment.md"]
+    },
+    {
+      "id": "devpipe.knowledge",
+      "kind": "product",
+      "label": "开发知识恢复与交付追踪",
+      "description": "工单落地台账、结构化 knowledge、CLI 交付追踪、知识图谱构建与启动上下文装配。",
+      "aliases": ["知识", "knowledge", "交付追踪", "台账", "landing", "上下文", "context", "图谱", "索引"],
+      "modules": ["dev-pipeline", "persistence-store", "knowledge-graph"],
+      "docs": ["doc/development/2026-08-20-knowledge-graph-redesign.md"]
+    },
+    {
+      "id": "app-release",
+      "kind": "product",
+      "label": "Agentic App 发布与激活",
+      "description": "App 热发布、待发布债务、激活、多版本池、按 release 路由、cohort drain 与 digest 审批。",
+      "aliases": ["发布", "release", "热发布", "待发布", "激活", "activation", "hot-swap", "digest", "版本池", "cohort", "app-only"],
+      "modules": ["app-release-hosting", "app-registry", "app-runtime", "dev-pipeline"],
+      "paths": ["packages/bot/src/devpipe/app-scopes.ts", "ctl/app-release.ts"],
+      "docs": ["doc/runbooks/app-release.md"]
+    },
+    {
+      "id": "agentic-app.platform",
+      "kind": "product",
+      "label": "Agentic App 模块平台",
+      "description": "模块 ABI、typed ports、resource bindings、workspace-files contract、组合根、依赖隔离与中立 UI 包。",
+      "aliases": ["模块", "abi", "typed port", "resource binding", "绑定", "组合根", "composition root", "contract", "依赖隔离", "中立", "agent view", "app view"],
+      "modules": ["agent-view-react", "agent-module-contract", "typed-port-kit", "agent-resources", "web-trust", "web-trust-contract", "chat-ui-commons", "engine-core", "engine-public-api", "engine-host", "engine-runtime", "engine-agent", "child-rpc", "app-agents", "agent-view-build", "agent-view-preview", "agent-sessions-contract", "crdt-doc-contract", "deck-model-contract", "crdt-doc-plane"],
+      "constraints": ["TRUST-001", "TRUST-002", "TRUST-003", "MOD-001"],
+      "docs": [".claude/rules/agentic-app.md", ".claude/rules/resource-bindings.md"]
+    },
+    {
+      "id": "agentic-app.apps",
+      "kind": "product",
+      "label": "具体 Agentic App",
+      "description": "日程简报、汇报空间、会议室预订、报销单、PPT studio、象棋、showcase 等声明式 App。",
+      "aliases": ["简报", "汇报", "会议室", "报销", "ppt", "象棋", "chess", "showcase", "daily brief", "report space", "deck"],
+      "modules": ["daily-brief-view", "report-space-view", "meeting-room-view", "expense-intake-view", "ppt-studio-view", "chess-view", "showcase-view", "agent-data-view", "agent-deck-view", "agent-board-view", "agent-schedule-view", "agent-intake-view", "agent-crdt-view", "agent-editor-view", "agent-feishu-view", "agent-text-view"],
+      "docs": [".claude/rules/agentic-app.md"]
+    },
+    {
+      "id": "dashboard.shell",
+      "kind": "product",
+      "label": "Dashboard 壳层与外观",
+      "description": "导航栏、logo、应用后台/市场、架构页展示、主题、用量与配额提示。",
+      "aliases": ["导航", "logo", "应用市场", "应用后台", "架构界面", "主题", "antd", "用量", "配额", "quota", "usage", "dashboard", "状态栏", "顶栏", "额度", "负载", "status strip"],
+      "modules": ["dashboard-web", "dashboard-server"],
+      "docs": [".claude/rules/dashboard.md"]
+    },
+    {
+      "id": "dashboard.identity-access",
+      "kind": "product",
+      "label": "身份、登录与权限审批",
+      "description": "用户身份模型、GitHub 登录、权限审批交互、Policy Domains、Permission Studio 与 access-preview。",
+      "aliases": ["登录", "身份", "github", "审批", "权限", "approval", "policy", "permission", "access-preview", "授权", "grant"],
+      "modules": ["dashboard-authz", "permissions", "user-domain", "capability-kernel", "dashboard-web"],
+      "constraints": ["AUTH-001", "AUTH-002", "AUTH-003", "ROUTE-001", "KERNEL-001"],
+      "docs": ["doc/tcb-reading-guide.md"]
+    },
+    {
+      "id": "agent-adaptor",
+      "kind": "product",
+      "label": "Agent adaptor 与浏览器接管",
+      "description": "Claude Code / Codex / OMP 的 hooks、AskUser 与权限交互、浏览器接管验收、消息去重。",
+      "aliases": ["adaptor", "adapter", "hooks", "askuser", "ask user", "接管", "去重", "权限档位", "权限交互"],
+      "modules": ["runner-device", "runner-authority", "agent-interactions", "session-plus-host"]
+    },
+    {
+      "id": "runner.placement",
+      "kind": "product",
+      "label": "Runner 放置与跨机执行",
+      "description": "Agent 运行机与执行机分离、会话级 MCP 凭证、tmux 探测、wss 校验、跨机执行交付。",
+      "aliases": ["runner", "运行机", "执行机", "跨机", "tmux", "wss", "mcp 凭证", "placement", "双机"],
+      "modules": ["runner-device", "runner-authority", "session-plus-host"],
+      "docs": ["doc/adr/0009-runner-placement-and-session-mcp.md"]
+    },
+    {
+      "id": "dsh-mesh",
+      "kind": "product",
+      "label": "DSH、Tentacle 与 Personal Mesh",
+      "description": "dsh 认证网关、tentacle 远程工具、fleet 剖面、personal mesh companion、外部宿主与生产网络边界。",
+      "aliases": ["dsh", "tentacle", "fleet", "mesh", "companion", "触角", "外部宿主", "external_app_hosts", "caddy", "网络边界", "公网"],
+      "modules": ["runner-device", "channels", "operations", "v3-host", "cli"],
+      "docs": ["doc/runbooks/production-network-boundary.md", "doc/deploy-dashboard-security.md"]
+    },
+    {
+      "id": "architecture-governance",
+      "kind": "product",
+      "label": "架构观测与收敛治理",
+      "description": "Architecture Observatory、约束见证与豁免、行数预算、收敛门 G0–G5、收敛线提案。",
+      "aliases": ["架构", "observatory", "约束", "豁免", "waiver", "预算", "budget", "收敛", "convergence", "atlas", "架构页"],
+      "modules": ["architecture-observatory", "convergence-gates", "dashboard-server"],
+      "constraints": ["TCB-001", "MOD-001"],
+      "docs": ["doc/design-architecture-observatory.md"]
+    },
+    {
+      "id": "feishu",
+      "kind": "product",
+      "label": "飞书通道与卡片",
+      "description": "飞书 OAuth、租户目录、网关工具目录、话题讨论群与直发卡片。",
+      "aliases": ["飞书", "feishu", "lark", "卡片", "card", "oauth"],
+      "modules": ["channels"],
+      "docs": [".claude/rules/feishu.md"]
+    },
+    {
+      "id": "notifications",
+      "kind": "product",
+      "label": "通知与钩子",
+      "description": "任务完成通知、QQ bot 钩子、notify 契约与投递面。",
+      "aliases": ["通知", "notify", "钩子", "hook", "qq"],
+      "modules": ["notify-plane", "notify-contract"]
+    },
+    {
+      "id": "concern.trust-boundary",
+      "kind": "concern",
+      "label": "信任边界",
+      "description": "不可信 View 与可信 Dashboard/Bot 的隔离、依赖倒灌、caller-supplied identity、opaque ref 与 TCB 闭包。",
+      "aliases": ["信任", "trust", "不可信", "untrusted", "隔离", "tcb", "opaque ref", "铸造", "依赖倒灌", "同源", "origin"],
+      "modules": ["web-trust", "web-trust-contract", "capability-kernel", "agent-view-react", "dashboard-web"],
+      "constraints": ["TRUST-001", "TRUST-002", "TRUST-003", "TCB-001", "KERNEL-001"],
+      "docs": ["doc/adr/0001-session-plus-trust-boundaries.md", "doc/tcb-reading-guide.md"]
+    },
+    {
+      "id": "concern.authority",
+      "kind": "concern",
+      "label": "授权与裁决点",
+      "description": "请求门、route policy、审批恢复、capability 调用链上的授权顺序与 fail-closed。",
+      "aliases": ["授权", "authority", "authz", "gate", "route policy", "审批", "fail-closed", "失败关闭"],
+      "modules": ["dashboard-authz", "permissions", "capability-kernel", "session-resource-contract"],
+      "constraints": ["AUTH-001", "AUTH-002", "AUTH-003", "ROUTE-001", "FLOW-001", "FLOW-002", "FLOW-004"]
+    },
+    {
+      "id": "concern.interaction-stability",
+      "kind": "concern",
+      "label": "前端交互稳定性",
+      "description": "交互状态按稳定身份保存、generation/abort 守卫、旧响应丢弃、pending/confirmed/refused 动作生命周期。",
+      "aliases": ["稳定", "identity", "generation", "stale", "旧响应", "覆盖", "抖动", "pending", "乐观", "optimistic", "rid", "opId"],
+      "modules": ["dashboard-web", "agent-sessions-view", "session-plus-view", "agent-view-react", "chat-ui-commons"],
+      "docs": [".claude/rules/frontend-stability.md"]
+    },
+    {
+      "id": "concern.lifecycle",
+      "kind": "concern",
+      "label": "生命周期与重启恢复",
+      "description": "进程/会话/工单的启动、drain、重启续跑、崩溃窗口恢复与 unknown 与 failed 的区分。",
+      "aliases": ["生命周期", "lifecycle", "重启", "restart", "drain", "恢复", "recover", "崩溃", "unknown"],
+      "modules": ["v3-bootstrap", "dev-pipeline", "agent-session", "session-hub", "persistence-store"],
+      "constraints": ["LIFE-001", "FLOW-005"],
+      "docs": ["doc/design-lifecycle-persistence.md"]
+    },
+    {
+      "id": "concern.delivery",
+      "kind": "concern",
+      "label": "交付纪律",
+      "description": "分支/worktree 模型、落地即完成点、部署显式、交付文档与 CLI 简报的写入纪律。",
+      "aliases": ["交付", "delivery", "worktree", "分支", "branch", "v4", "落地", "简报"],
+      "modules": ["dev-pipeline", "operations"],
+      "constraints": ["DELIVERY-001"],
+      "docs": ["doc/runbooks/development-workflow.md"]
+    },
+    {
+      "id": "concern.data-model",
+      "kind": "concern",
+      "label": "数据模型与迁移",
+      "description": "SQLite schema、追加式迁移、owner 作用域、时间戳写入点与事务边界。",
+      "aliases": ["数据模型", "schema", "迁移", "migration", "sqlite", "事务", "transaction", "store"],
+      "modules": ["persistence-store", "app-state"],
+      "constraints": ["DATA-001"],
+      "docs": ["packages/bot/src/store/CLAUDE.md"]
+    },
+    {
+      "id": "concern.reliability",
+      "kind": "concern",
+      "label": "超时、预算与重试",
+      "description": "超时预算、重试、单飞、观察窗口与副作用幂等。",
+      "aliases": ["超时", "timeout", "预算", "budget", "重试", "retry", "单飞", "single-flight", "幂等", "竞态", "race"],
+      "modules": ["dev-pipeline", "runner-device", "session-plus-host", "resource-stream-broker"],
+      "constraints": ["EFFECT-001"]
+    },
+    {
+      "id": "concern.modularity",
+      "kind": "concern",
+      "label": "模块边界与依赖",
+      "description": "无环依赖、契约包、组合根显式注入、包级文档不变量与架构归类。",
+      "aliases": ["模块边界", "依赖", "dependency", "循环依赖", "cycle", "契约", "contract", "组合根", "归类", "unmapped"],
+      "modules": ["bot-core", "architecture-observatory", "bot-shared-infrastructure", "plugin-surface"],
+      "constraints": ["MOD-001"]
+    },
+    {
+      "id": "concern.privacy",
+      "kind": "concern",
+      "label": "隐私与凭据",
+      "description": "transcript、用户原文、凭据与 token 的存放边界；派生数据不得含正文与秘密。",
+      "aliases": ["隐私", "privacy", "凭据", "credential", "token", "secret", "transcript", "正文"],
+      "modules": ["persistence-store", "dev-pipeline", "knowledge-graph", "user-memory"]
+    },
+    {
+      "id": "secretary-hq",
+      "kind": "product",
+      "label": "用户技能与记忆区",
+      "description": "账号级 Skill registry 与 Agent 记忆区。秘书汇报、HQ 工作台与看板已于 2026-10-15 下线；id 保留以兼容既有知识记录。",
+      "aliases": ["技能", "skill", "记忆", "memory", "秘书", "hq", "看板"],
+      "modules": ["user-skills", "user-memory"]
+    }
+  ]
+}

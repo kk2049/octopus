@@ -1,0 +1,196 @@
+/*
+ * Theme: feishu — the Feishu-style enterprise skin. OWNED by the feishu art
+ * workstream; other theme workstreams must not edit this file. Everything in
+ * here must be scoped under html[data-theme="feishu"], so the file is inert
+ * otherwise.
+ *
+ * ── Design statement ─────────────────────────────────────────────────────────
+ *
+ * Feishu reads the panel as a clean collaboration workspace: white chrome on a
+ * barely-gray field, one confident brand blue doing all the accent work, and a
+ * high information density that still breathes. Light mode is the daytime
+ * office — paper-white cards on #f5f6f7, light hairlines, moderate 6/8/12
+ * radii, hover states as a quiet gray wash. Dark mode follows Feishu's own
+ * dark chrome: a deep gray-blue field with the signature #1f2329 surface and a
+ * bright blue accent that stays legible without glowing.
+ *
+ * The working accent is #245bdb — Feishu's brand-blue family one step deeper
+ * than the #3370ff logo swatch, because #3370ff measures 4.29:1 on white,
+ * under WCAG AA for link text. #3370ff still exists here, but only in the
+ * focus halo and the hover wash, where it never carries text.
+ *
+ * Full palette, contrast table (every text pair >= 4.5:1, machine-verified)
+ * and tradeoffs: doc/deliveries/2026-08-10-feishu-deepseek-themes.md.
+ *
+ * Mechanics (same trap theme-aurora.css documents): these selectors outrank
+ * the :root dark block in tokens.css, so every variable the light block sets
+ * MUST be answered in the dark block below, or dark mode inherits the light
+ * value.
+ */
+
+/* ── palette · daytime office ── */
+
+html[data-theme="feishu"] {
+  /* surfaces */
+  --bg: #f5f6f7;
+  --card: #ffffff;
+  --tool-bg: #f2f3f5;
+  --user-bg: #e6eefc;
+  --accent-soft: #e9efff;
+
+  /* ink */
+  --fg: #1f2329;
+  --muted: #646a73;
+  --think: #6a707b;
+  --bad: #8f959e;
+
+  /* lines */
+  --line: #dee0e3;
+  --line-strong: #bbbfc4;
+
+  /* the working accent: Feishu brand blue, deepened one step for AA text */
+  --accent: #245bdb;
+  --accent-fg: #ffffff;
+
+  /* status */
+  --ok: #1c7a33;
+  --err: #cf3230;
+
+  /* shape: crisp and moderate — enterprise, not playful */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* elevation: neutral, shallow, never dramatic */
+  --shadow-sm: 0 1px 2px rgba(31, 35, 41, 0.06);
+  --shadow-md: 0 2px 8px rgba(31, 35, 41, 0.1);
+  --shadow-lg: 0 8px 24px rgba(31, 35, 41, 0.14);
+  --shadow-overlay: 0 14px 40px rgba(31, 35, 41, 0.2);
+
+  /* private to this file: the logo-blue, decorative only (never carries text) */
+  --feishu-brand: #3370ff;
+  --feishu-halo: color-mix(in srgb, var(--feishu-brand) 18%, transparent);
+}
+
+/* ── palette · Feishu dark chrome ── */
+
+html:where([data-color-scheme="dark"])[data-theme="feishu"] {
+  --bg: #16181d;
+  --card: #1f2329;
+  --tool-bg: #262b33;
+  --user-bg: #1e2c4e;
+  --accent-soft: #1d3057;
+
+  --fg: #e8eaed;
+  --muted: #a6adb8;
+  --think: #98a2b3;
+  --bad: #656b76;
+
+  --line: #363b44;
+  --line-strong: #4e5561;
+
+  /* bright blue on the gray-blue night surface; filled controls therefore
+   * carry dark navy text instead of white on a too-light dye */
+  --accent: #6ba1ff;
+  --accent-fg: #0c2050;
+
+  --ok: #51c463;
+  --err: #f8837f;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-overlay: 0 16px 44px rgba(0, 0, 0, 0.55);
+
+  --feishu-brand: #6ba1ff;
+  --feishu-halo: color-mix(in srgb, var(--feishu-brand) 22%, transparent);
+}
+
+/* ── texture · type ── */
+
+html[data-theme="feishu"] h1,
+html[data-theme="feishu"] h2,
+html[data-theme="feishu"] h3 {
+  letter-spacing: -0.01em;
+}
+
+html[data-theme="feishu"] ::selection {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* ── texture · navigation ──
+ * `tab`/`active` are stable contract names (the browser suite reads them);
+ * styling them is allowed, removing them is not. Feishu's selected nav item
+ * is a soft blue chip with blue text.
+ */
+
+html[data-theme="feishu"] a.tab {
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+
+html[data-theme="feishu"] a.tab.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ── texture · controls ──
+ * Hover is Feishu's quiet gray wash. Primary keeps the accent fill and only
+ * brightens; danger answers with a faint red wash. No blanket button shadow —
+ * many module buttons are borderless link-style controls (see the aurora
+ * notes) and a shadow under a transparent rectangle reads as a smudge.
+ */
+
+html[data-theme="feishu"] button {
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease,
+    filter 0.12s ease;
+}
+
+html[data-theme="feishu"] button:hover:not(:disabled) {
+  background: var(--tool-bg);
+}
+
+html[data-theme="feishu"] button.primary:hover:not(:disabled) {
+  background: var(--accent);
+  filter: brightness(1.1);
+}
+
+html[data-theme="feishu"] button.danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--err) 8%, transparent);
+}
+
+/*
+ * Fields: white surface, hairline border, and the Feishu focus signature — an
+ * accent border with a soft logo-blue halo (the keyboard :focus-visible
+ * outline still applies on top; two indicators never hurt).
+ */
+html[data-theme="feishu"] select,
+html[data-theme="feishu"] input[type="text"],
+html[data-theme="feishu"] input[type="search"],
+html[data-theme="feishu"] input[type="password"],
+html[data-theme="feishu"] textarea {
+  background: var(--card);
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+html[data-theme="feishu"] select:focus,
+html[data-theme="feishu"] input[type="text"]:focus,
+html[data-theme="feishu"] input[type="search"]:focus,
+html[data-theme="feishu"] input[type="password"]:focus,
+html[data-theme="feishu"] textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--feishu-halo);
+}
+
+/* ── texture · chrome details ── */
+
+html[data-theme="feishu"] * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}

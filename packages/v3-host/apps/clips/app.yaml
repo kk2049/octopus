@@ -1,0 +1,39 @@
+# clips 收藏夹 — per-user link clipboard.
+# Delete is an appended clip_dropped event, never a rewrite: the log keeps
+# the full story, the projection just stops listing the entry.
+app: clips
+title: 收藏夹
+scope: per-user
+
+actions:
+  add_clip:
+    title: 收藏链接
+    predicate: owner
+    params:
+      url: { type: string, required: true, description: 链接（http/https） }
+      title: { type: string, required: true, description: 标题 }
+      note: { type: string, description: 备注（可空） }
+      tag: { type: string, description: 标签（可空，优先复用现有）, enum_bind: view.tagIds }
+  mark_read:
+    title: 标已读
+    predicate: owner
+    params:
+      id: { type: string, required: true, description: 收藏 id（如 clip-3）, enum_bind: view.openIds }
+  drop_clip:
+    title: 删除收藏
+    predicate: owner
+    confirm: true
+    params:
+      id: { type: string, required: true, description: 收藏 id（如 clip-3） }
+
+agents:
+  keeper:
+    adapter: openai-loop
+    prompt: prompts/keeper.md
+
+pages:
+  main: pages/main.yaml
+  digest: pages/digest.yaml
+
+feishu:
+  cards: [digest]

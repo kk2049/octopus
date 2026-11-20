@@ -1,0 +1,313 @@
+/**
+ * Build-only description of the isolated Agent View theme tokens.
+ *
+ * This file is deliberately DOM-free. The Dashboard and an Agent View cannot
+ * share a stylesheet or runtime module, but the Node-only View builder can
+ * consume this bounded data table and emit the corresponding `--av-*` CSS into
+ * the opaque-origin View bundle. `themes.ts` re-exports the same registry as
+ * the canonical theme surface.
+ *
+ * `scheme()` keeps light and dark values addressable for contrast tests;
+ * `generated()` covers compound values such as shadows whose colour arms sit
+ * inside a larger CSS value. `legacyLight` is the complete fallback for
+ * browsers that do not resolve `light-dark()` in custom properties.
+ */
+
+export interface AgentViewSchemeToken {
+  readonly light: string;
+  readonly dark: string;
+}
+
+export interface AgentViewGeneratedToken {
+  readonly value: string;
+  readonly legacyLight?: string;
+}
+
+export type AgentViewThemeToken = AgentViewSchemeToken | AgentViewGeneratedToken;
+
+export interface AgentViewThemeProfile {
+  readonly id: string;
+  readonly tokens: Readonly<Record<string, AgentViewThemeToken>>;
+}
+
+const scheme = (light: string, dark: string): AgentViewSchemeToken => ({ light, dark });
+const generated = (value: string, legacyLight?: string): AgentViewGeneratedToken => (
+  legacyLight === undefined ? { value } : { value, legacyLight }
+);
+
+export const AGENT_VIEW_THEME_PROFILES: readonly AgentViewThemeProfile[] = [
+  {
+    id: "classic",
+    tokens: {
+      fg: scheme("#1d2430", "#e5e9f0"),
+      muted: scheme("#616c80", "#9ba5b5"),
+      line: scheme("#dfe3e9", "#343b47"),
+      surface: scheme("#ffffff", "#1a1f27"),
+      canvas: scheme("#f5f7fa", "#11151b"),
+      raised: scheme("#ffffff", "#202630"),
+      accent: scheme("#315fd6", "#7fa2ff"),
+      "accent-contrast": scheme("#ffffff", "#10141b"),
+      ok: scheme("#147a45", "#4fc48a"),
+      warn: scheme("#a45a08", "#e5a34e"),
+      error: scheme("#c43636", "#f17676"),
+      info: scheme("#315fd6", "#8caaff"),
+      "user-bg": scheme("#eef2ff", "#232a3d"),
+      "tool-bg": scheme("#f2f4f8", "#1f242d"),
+      think: scheme("#6f63a2", "#b3a8dd"),
+      live: scheme("#ef4444", "#f36f6f"),
+      "shadow-sm": generated(
+        "0 10px 30px light-dark(rgb(0 0 0 / 22%), rgb(0 0 0 / 55%))",
+        "0 10px 30px rgb(0 0 0 / 22%)",
+      ),
+    },
+  },
+  {
+    id: "aurora",
+    tokens: {
+      fg: scheme("#1a2433", "#e5edf8"),
+      muted: scheme("#526073", "#b6c3d6"),
+      line: scheme("#dbe3ee", "#202e46"),
+      surface: scheme("#ffffff", "#101a2a"),
+      canvas: scheme("#eff4fa", "#0a111d"),
+      raised: scheme("#ffffff", "#162236"),
+      accent: scheme("#0c7a67", "#3ce0a5"),
+      "accent-contrast": scheme("#ffffff", "#052019"),
+      ok: scheme("#147a45", "#45d68f"),
+      warn: scheme("#a45d09", "#f0b06a"),
+      error: scheme("#cf2d4e", "#f7768e"),
+      info: scheme("#0c7a67", "#3ce0a5"),
+      "user-bg": scheme("#e3f2ec", "#123029"),
+      "tool-bg": scheme("#edf2f8", "#162236"),
+      think: scheme("#4b5b73", "#8494ac"),
+      live: scheme("#cf2d4e", "#ff8ba7"),
+      "shadow-sm": generated(
+        "0 10px 30px light-dark(rgb(20 122 105 / 22%), rgb(0 0 0 / 55%))",
+        "0 10px 30px rgb(20 122 105 / 22%)",
+      ),
+    },
+  },
+  {
+    id: "ink",
+    tokens: {
+      fg: scheme("#242722", "#ecece4"),
+      muted: scheme("#62675f", "#aaa99f"),
+      line: scheme("#d9d5cb", "#343a34"),
+      surface: scheme("#fbfaf6", "#1d211d"),
+      canvas: scheme("#f2f0e9", "#151815"),
+      raised: scheme("#fbfaf6", "#1d211d"),
+      accent: scheme("#2f626a", "#8bb8b6"),
+      "accent-contrast": scheme("#ffffff", "#151815"),
+      ok: scheme("#356b50", "#82b997"),
+      warn: scheme("#8a5a18", "#dfad65"),
+      error: scheme("#a44249", "#ec7c82"),
+      info: scheme("#2f626a", "#8bb8b6"),
+      "user-bg": scheme("#e4eeec", "#24312f"),
+      "tool-bg": scheme("#ebe9e2", "#252a25"),
+      think: scheme("#556158", "#8f958c"),
+      live: scheme("#a44249", "#ec7c82"),
+      "shadow-sm": generated(
+        "0 10px 30px light-dark(rgb(31 35 30 / 16%), rgb(0 0 0 / 55%))",
+        "0 10px 30px rgb(31 35 30 / 16%)",
+      ),
+    },
+  },
+  {
+    id: "feishu",
+    tokens: {
+      fg: scheme("#1f2329", "#e8eaed"),
+      muted: scheme("#646a73", "#a6adb8"),
+      line: scheme("#dee0e3", "#363b44"),
+      surface: scheme("#ffffff", "#1f2329"),
+      canvas: scheme("#f5f6f7", "#16181d"),
+      raised: scheme("#ffffff", "#262b33"),
+      accent: scheme("#245bdb", "#6ba1ff"),
+      "accent-contrast": scheme("#ffffff", "#0c2050"),
+      ok: scheme("#1c7a33", "#51c463"),
+      warn: scheme("#a45a08", "#e8a44a"),
+      error: scheme("#cf3230", "#f8837f"),
+      info: scheme("#245bdb", "#6ba1ff"),
+      "user-bg": scheme("#e6eefc", "#1e2c4e"),
+      "tool-bg": scheme("#f2f3f5", "#262b33"),
+      think: scheme("#6a707b", "#98a2b3"),
+      live: scheme("#f54a45", "#ff7873"),
+      "shadow-sm": generated(
+        "0 10px 30px light-dark(rgb(31 35 41 / 14%), rgb(0 0 0 / 55%))",
+        "0 10px 30px rgb(31 35 41 / 14%)",
+      ),
+    },
+  },
+  {
+    id: "deepseek",
+    tokens: {
+      fg: scheme("#0f1115", "#f9fafb"),
+      muted: scheme("#61666b", "#adb2b8"),
+      line: scheme("#e1e5ee", "#343436"),
+      surface: scheme("#ffffff", "#232324"),
+      canvas: scheme("#ffffff", "#151517"),
+      raised: scheme("#ffffff", "#2c2c2e"),
+      accent: scheme("#315fc7", "#679efe"),
+      "accent-contrast": scheme("#ffffff", "#0f1115"),
+      ok: scheme("#14804a", "#55c17e"),
+      warn: scheme("#9c5c0d", "#dfa14e"),
+      error: scheme("#cd3345", "#f28b87"),
+      info: scheme("#315fc7", "#679efe"),
+      "user-bg": scheme("#edf3fe", "#2c2c2e"),
+      "tool-bg": scheme("#f5f6f7", "#2c2c2e"),
+      think: scheme("#61666b", "#adb2b8"),
+      live: scheme("#ef4444", "#ff7d78"),
+      "shadow-sm": generated(
+        "0 4px 12px light-dark(rgb(0 0 0 / 2%), rgb(0 0 0 / 18%)), 0 2px 8px light-dark(rgb(0 0 0 / 4%), rgb(0 0 0 / 24%))",
+        "0 4px 12px rgb(0 0 0 / 2%), 0 2px 8px rgb(0 0 0 / 4%)",
+      ),
+      rs: generated("8px"),
+      rm: generated("12px"),
+      duration: generated("200ms"),
+      ease: generated("cubic-bezier(0.4, 0, 0.2, 1)"),
+      font: generated('-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif'),
+      "chat-inset": generated("16px"),
+      "chat-user-radius": generated("22px"),
+      "chat-user-padding": generated("10px 16px"),
+      "chat-user-max-width": generated("min(525px, 82%)"),
+      "chat-user-font": generated("16px/24px var(--av-font)"),
+      "chat-turn-gap": generated("16px"),
+      "chat-prose-font": generated("16px/28px var(--av-font)"),
+      "chat-tool-radius": generated("6px"),
+      "chat-card-border": generated("transparent"),
+    },
+  },
+  {
+    id: "apple",
+    tokens: {
+      fg: scheme("#1d1d1f", "#f5f5f7"),
+      muted: scheme("#5f6368", "#b0b0b5"),
+      line: scheme("#d9d9de", "#3a3a3c"),
+      surface: scheme("#ffffff", "#1c1c1e"),
+      canvas: scheme("#f5f5f7", "#0b0b0d"),
+      raised: scheme("#ffffff", "#2c2c2e"),
+      accent: scheme("#0066cc", "#0a84ff"),
+      "accent-contrast": scheme("#ffffff", "#00172b"),
+      ok: scheme("#19733b", "#30d158"),
+      warn: scheme("#8a5b00", "#ffd60a"),
+      error: scheme("#c43131", "#ff6961"),
+      info: scheme("#0066cc", "#64d2ff"),
+      "user-bg": scheme("#e8f2ff", "#1b3048"),
+      "tool-bg": scheme("#f2f2f7", "#2c2c2e"),
+      think: scheme("#665e6d", "#b7afbc"),
+      live: scheme("#c43131", "#ff6961"),
+      "shadow-sm": generated(
+        "0 1px 2px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 30%)), 0 8px 24px light-dark(rgb(0 0 0 / 10%), rgb(0 0 0 / 48%))",
+        "0 1px 2px rgb(0 0 0 / 6%), 0 8px 24px rgb(0 0 0 / 10%)",
+      ),
+      "shadow-md": generated(
+        "0 12px 36px light-dark(rgb(30 42 58 / 13%), rgb(0 0 0 / 42%)), 0 2px 8px light-dark(rgb(30 42 58 / 6%), rgb(0 0 0 / 24%))",
+        "0 12px 36px rgb(30 42 58 / 13%), 0 2px 8px rgb(30 42 58 / 6%)",
+      ),
+      "shadow-overlay": generated(
+        "0 24px 64px light-dark(rgb(30 42 58 / 14%), rgb(0 0 0 / 42%)), 0 2px 10px light-dark(rgb(30 42 58 / 7%), rgb(0 0 0 / 24%))",
+        "0 24px 64px rgb(30 42 58 / 14%), 0 2px 10px rgb(30 42 58 / 7%)",
+      ),
+      "material-solid": scheme("#ffffff", "#1c1c1e"),
+      material: generated(
+        "light-dark(rgb(255 255 255 / 78%), rgb(29 29 31 / 82%))",
+        "rgb(255 255 255 / 78%)",
+      ),
+      "material-strong": generated(
+        "light-dark(rgb(255 255 255 / 92%), rgb(29 29 31 / 94%))",
+        "rgb(255 255 255 / 92%)",
+      ),
+      "material-filter": generated("saturate(180%) blur(24px)"),
+      "dock-host-solid": generated("var(--av-material-solid)"),
+      "dock-host-material": generated("var(--av-material-strong)"),
+      "dock-chrome-solid": generated("var(--av-material-solid)"),
+      "dock-chrome-material": generated("var(--av-material)"),
+      "mobile-chrome-solid": generated("var(--av-material-solid)"),
+      "mobile-chrome-material": generated("var(--av-material)"),
+      "dock-material-filter": generated("var(--av-material-filter)"),
+      "overlay-solid": generated("var(--av-material-solid)"),
+      "overlay-material": generated("var(--av-material-strong)"),
+      "overlay-filter": generated("saturate(180%) blur(30px)"),
+      s0: generated("4px"),
+      s1: generated("8px"),
+      s2: generated("12px"),
+      s3: generated("16px"),
+      s4: generated("24px"),
+      s5: generated("32px"),
+      s6: generated("40px"),
+      rs: generated("12px"),
+      "r-sm": generated("14px"),
+      rm: generated("18px"),
+      "r-md": generated("20px"),
+      rl: generated("24px"),
+      "r-xl": generated("28px"),
+      duration: generated("180ms"),
+      ease: generated("cubic-bezier(0.22, 1, 0.36, 1)"),
+      font: generated('-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'),
+      "font-2xs": generated("11px"),
+      "font-xs": generated("12px"),
+      "font-sm": generated("12px"),
+      "font-label": generated("13px"),
+      "font-meta": generated("13px"),
+      "font-caption": generated("14px"),
+      "font-body": generated("15px"),
+      "font-title": generated("17px"),
+      "font-control": generated("17px"),
+      "font-subheading": generated("20px"),
+      "font-heading": generated("28px"),
+      "line-footnote": generated("16px"),
+      "line-body": generated("22px"),
+      "line-title": generated("24px"),
+      "line-display": generated("32px"),
+      "control-h": generated("40px"),
+      "control-h-compact": generated("40px"),
+      "control-h-md": generated("42px"),
+      "control-h-lg": generated("44px"),
+      "field-h": generated("44px"),
+      "touch-target": generated("44px"),
+      "primary-action-h": generated("48px"),
+      "control-weight": generated("590"),
+      "card-padding": generated("20px"),
+      "list-row-h": generated("52px"),
+      "session-rs": generated("12px"),
+      "session-rm": generated("18px"),
+      "session-duration": generated("180ms"),
+      "session-body-font": generated("var(--av-font-body)/var(--av-line-body) var(--av-font)"),
+      "session-material": generated("var(--av-material)"),
+      "session-material-strong": generated("var(--av-material-strong)"),
+      "session-material-solid": generated("var(--av-material-solid)"),
+      "session-material-strong-solid": generated("var(--av-material-solid)"),
+      "session-material-filter": generated("var(--av-material-filter)"),
+      "session-shadow": generated("var(--av-shadow-md)"),
+      "session-window-shadow": generated("var(--av-shadow-overlay)"),
+      "session-app-gap": generated("16px"),
+      "session-app-padding": generated("16px 14px 24px"),
+      "session-window-radius": generated("24px"),
+      "session-group-radius": generated("18px"),
+      "session-tab-radius": generated("12px"),
+      "session-heading-size": generated("17px"),
+      "session-control-h": generated("40px"),
+      "session-button-radius": generated("12px"),
+      "session-field-h": generated("44px"),
+      "session-field-radius": generated("14px"),
+      "session-textarea-h": generated("64px"),
+      "session-textarea-radius": generated("18px"),
+      "session-overlay-radius": generated("20px"),
+      "session-detail-head-h": generated("52px"),
+      "session-detail-title-size": generated("20px"),
+      "session-composer-h": generated("136px"),
+      "session-chat-inset": generated("24px clamp(24px, 5vw, 72px) 12px"),
+      "session-chat-turn-gap": generated("24px"),
+      "session-chat-user-radius": generated("20px 20px 8px 20px"),
+      "session-chat-user-padding": generated("12px 16px"),
+      "session-chat-user-max-width": generated("min(620px, 80%)"),
+      "chat-inset": generated("18px"),
+      "chat-user-radius": generated("18px"),
+      "chat-user-padding": generated("9px 14px"),
+      "chat-user-max-width": generated("min(560px, 82%)"),
+      "chat-user-font": generated("15px/23px var(--av-font)"),
+      "chat-turn-gap": generated("18px"),
+      "chat-prose-font": generated("15px/25px var(--av-font)"),
+      "chat-tool-radius": generated("12px"),
+      "chat-card-border": generated("var(--av-line)"),
+    },
+  },
+];

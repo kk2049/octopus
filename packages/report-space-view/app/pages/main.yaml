@@ -1,0 +1,11 @@
+# The v4 View is the React composition in src/plan.ts; the backend release
+# layout still names this file, so it records the action surface for a reader.
+layout: report-space-docked
+sources: {}
+actions:
+  submit: submit_report
+  seen: mark_seen
+  discuss: comment_report
+  decide: record_decision
+  close: close_report
+  retract: retract_report

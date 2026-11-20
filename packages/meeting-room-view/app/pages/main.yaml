@@ -1,0 +1,4 @@
+layout: meeting-room
+sources: {}
+actions:
+  book: book_room

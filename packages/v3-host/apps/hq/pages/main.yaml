@@ -1,0 +1,23 @@
+title: 工作台
+layout:
+  - [projects, stats, alert]
+  - [b_block, b_run]
+  - [b_verify, b_todo]
+  - [tl, doc]
+  - [chat]
+widths: [2, 3, 3, 3, 3]
+slots:
+  projects: { widget: list, bind: view.projects, props: { title: 项目 } }
+  stats: { widget: kv, bind: view.stats, props: { title: 概况 } }
+  alert: { widget: banner, bind: view.banner }
+  b_block: { widget: list, bind: view.buckets.block, props: { title: 卡住·等你 } }
+  b_run: { widget: list, bind: view.buckets.run, props: { title: 进行中 } }
+  b_verify:
+    widget: list
+    bind: view.buckets.verify
+    props: { title: 称已完成·点击验收 }
+    on: { select: "action:close_item" }
+  b_todo: { widget: list, bind: view.buckets.todo, props: { title: 还没开始 } }
+  tl: { widget: timeline, bind: view.timeline, props: { title: 时间线 } }
+  doc: { widget: docedit, bind: view.doc, props: { title: 共笔文档, action: edit_doc } }
+  chat: { widget: agent-chat, agent: page }

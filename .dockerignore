@@ -1,0 +1,8 @@
+node_modules
+**/node_modules
+**/dist
+instances
+.git
+.claude
+*.pyc
+__pycache__

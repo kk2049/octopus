@@ -1,0 +1,548 @@
+id: research-program
+schema: 4
+state_epoch: 4
+state:
+  scope: shared
+roles:
+  owner: {max: 1}
+  member: {max: 64}
+  viewer: {max: 64, observer: true}
+actions:
+  configure_project:
+    binding: runtime
+    handler: configure_project
+    title: 设置项目资料
+    description: 项目 Owner 或其获授权 MCP Agent 设置名称、资助标识与简介。
+    roles: [owner]
+    params:
+      title: {type: string, max: 120, required: true, description: 项目名称}
+      funding_label: {type: string, max: 120, required: false, description: 资助计划或编号}
+      summary: {type: string, max: 1200, required: false, description: 项目简介}
+  publish_agent_update:
+    binding: runtime
+    handler: publish_agent_update
+    title: 发布 Agent 会话状态
+    description: 项目成员或已绑定 Agent 发布一个有界的 Agent、工作区与会话快照。
+    roles: [owner, member]
+    params:
+      agent_key: {type: string, max: 96, required: true, description: 项目内稳定 Agent 标识}
+      agent_label: {type: string, max: 120, required: true, description: Agent 显示名}
+      provider: {type: string, max: 16, required: true, enum: [codex, codex-runner, claude], description: 主导 Agent 类型；对应 Codex 第一方、Codex 本地 Runner、Claude Opus}
+      workspace_key: {type: string, max: 96, required: true, description: 项目内稳定工作区标识}
+      workspace_label: {type: string, max: 160, required: true, description: 工作区显示名，不是授权路径}
+      session_key: {type: string, max: 96, required: true, description: 项目内稳定会话标识}
+      session_title: {type: string, max: 200, required: true, description: 会话标题}
+      status: {type: string, max: 16, required: true, enum: [active, waiting, idle, done, blocked], description: 当前会话状态}
+  publish_chat_message:
+    binding: runtime
+    handler: publish_chat_message
+    title: 发布会话消息
+    description: 向已登记会话追加一条有界消息，用于项目状态镜像。
+    roles: [owner, member]
+    params:
+      session_key: {type: string, max: 96, required: true, description: 已登记会话标识}
+      role: {type: string, max: 16, required: true, enum: [user, assistant, system], description: 消息角色}
+      text: {type: string, max: 12000, required: true, description: Markdown 消息正文}
+  publish_document:
+    binding: runtime
+    handler: publish_document
+    title: 发布现状文档
+    description: 发布或替换一个项目现状文档；正文只作为安全 Markdown 展示。
+    roles: [owner, member]
+    params:
+      document_key: {type: string, max: 96, required: true, description: 项目内稳定文档标识}
+      path: {type: string, max: 320, required: true, description: 显示路径，不是文件能力或 ref}
+      title: {type: string, max: 200, required: true, description: 文档标题}
+      summary: {type: string, max: 1200, required: false, description: 一句话摘要}
+      body: {type: string, max: 32000, required: true, description: Markdown 正文}
+      workspace_key: {type: string, max: 96, required: true, description: 所属工作区稳定标识}
+      workspace_label: {type: string, max: 160, required: true, description: 工作区显示名}
+  set_lead_agent:
+    binding: runtime
+    handler: set_lead_agent
+    title: 切换主导 Agent
+    description: 将已登记 Agent 的一个会话注册为项目主导者并记录历史；后台 subagent 不得调用此动作登记自己。
+    roles: [owner, member]
+    params:
+      agent_key: {type: string, max: 96, required: true, description: 已登记 Agent 标识}
+      session_key: {type: string, max: 96, required: true, description: 该 Agent 的已登记会话}
+      reason: {type: string, max: 500, required: true, description: 切换原因}
+  set_lead_document:
+    binding: runtime
+    handler: set_lead_document
+    title: 切换主导文档
+    description: 将已发布文档设为项目默认现状汇报，并记录历史。
+    roles: [owner, member]
+    params:
+      document_key: {type: string, max: 96, required: true, description: 已发布文档标识}
+      reason: {type: string, max: 500, required: true, description: 切换原因}
+  archive_project:
+    binding: runtime
+    handler: archive_project
+    title: 归档项目
+    description: 冻结项目更新；保留成员可读的完整状态与主导历史。
+    roles: [owner]
+    human_only: true
+    params:
+      confirm: {type: string, max: 8, required: true, enum: [确认], description: 防误触确认}
+      reason: {type: string, max: 500, required: true, description: 归档原因}
+  reopen_project:
+    binding: runtime
+    handler: reopen_project
+    title: 重新开放项目
+    description: 解除归档并恢复项目更新；Agent 不可调用。
+    roles: [owner]
+    human_only: true
+    params:
+      confirm: {type: string, max: 8, required: true, enum: [确认], description: 防误触确认}
+      reason: {type: string, max: 500, required: true, description: 重开原因}
+  research_record:
+    binding: "runtime"
+    handler: "research_record"
+    title: "登记不可变科研记录"
+    description: "登记不可变科研记录；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member"]
+    params:
+      record: {"type": "string", "max": 96, "required": true}
+      kind: {"type": "string", "max": 24, "required": true, "enum": ["request", "hypothesis", "plan", "experiment", "dataset", "artifact", "claim", "decision", "briefing", "note"]}
+      title: {"type": "string", "max": 200, "required": true}
+      body: {"type": "string", "max": 6000, "required": true}
+      documents: {type: string, max: 2600, required: false, description: 'JSON 字符串，内容为已发布文档 ID 数组，例如 ["doc-1"]；绑定当前文档事件版本'}
+      parents: {type: string, max: 2600, required: false, description: 'JSON 字符串，内容为已有父记录 ID 数组，例如 ["record-1"]；无父记录则省略或传 []'}
+      links: {type: string, max: 4000, required: false, description: 'JSON 字符串，内容为证据关系对象数组，例如 [{"relation":"requested_by","target":"request-1"}]；relation 可为 derived_from、supports、contradicts、supersedes、uses、produces、requested_by；target 必须是已有记录 ID。不得传裸 ID 或逗号分隔列表；无引用则省略或传 []'}
+      source: {"type": "string", "max": 500, "required": false}
+      origin: {"type": "string", "max": 16, "required": false, "enum": ["authored", "imported"]}
+      critical: {"type": "string", "max": 5, "required": false, "enum": ["true", "false"]}
+      tags: {type: string, max: 2600, required: false, description: 'JSON 字符串，内容为短标签 ID 数组，例如 ["acceptance"]；无标签则省略或传 []'}
+  research_fork:
+    binding: "runtime"
+    handler: "research_fork"
+    title: "从提交分叉研究任务"
+    description: "从提交分叉研究任务；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member"]
+    params:
+      branch: {"type": "string", "max": 96, "required": true}
+      from: {"type": "string", "max": 96, "required": false}
+      title: {"type": "string", "max": 200, "required": true}
+      purpose: {"type": "string", "max": 1200, "required": true}
+  research_advance:
+    binding: "runtime"
+    handler: "research_advance"
+    title: "推进分支 head"
+    description: "推进分支 head；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member"]
+    params:
+      branch: {"type": "string", "max": 96, "required": true}
+      expected_head: {"type": "string", "max": 96, "required": false}
+      record: {"type": "string", "max": 96, "required": true}
+      reason: {"type": "string", "max": 500, "required": true}
+  research_transition:
+    binding: "runtime"
+    handler: "research_transition"
+    title: "切换科研工作状态"
+    description: "切换科研工作状态；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member"]
+    params:
+      branch: {"type": "string", "max": 96, "required": true}
+      expected_status: {"type": "string", "max": 24, "required": true}
+      status: {"type": "string", "max": 24, "required": true, "enum": ["active", "blocked", "paused", "changes_requested", "abandoned"]}
+      reason: {"type": "string", "max": 1200, "required": true}
+  research_deliver:
+    binding: "runtime"
+    handler: "research_deliver"
+    title: "提交可学习和验收的交付"
+    description: "提交可学习和验收的交付；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member"]
+    params:
+      branch: {"type": "string", "max": 96, "required": true}
+      expected_head: {"type": "string", "max": 96, "required": false}
+      record: {"type": "string", "max": 96, "required": true}
+      title: {"type": "string", "max": 200, "required": true}
+      evidence: {"type": "string", "max": 2600, "required": true}
+      summary: {"type": "string", "max": 1400, "required": true}
+      reproduce: {"type": "string", "max": 1400, "required": true}
+      limitations: {"type": "string", "max": 1400, "required": true}
+      question: {"type": "string", "max": 1400, "required": true}
+  research_request_confirmation:
+    binding: "runtime"
+    handler: "research_request_confirmation"
+    title: "请求真人明确判断"
+    description: "请求真人明确判断；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member"]
+    params:
+      request: {"type": "string", "max": 96, "required": true}
+      record: {"type": "string", "max": 96, "required": true}
+      question: {"type": "string", "max": 1200, "required": true}
+  research_attest:
+    binding: "runtime"
+    handler: "research_attest"
+    title: "本人确认学习或判断"
+    description: "本人确认学习或判断；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member"]
+    human_only: true
+    params:
+      record: {"type": "string", "max": 96, "required": true}
+      kind: {"type": "string", "max": 20, "required": true, "enum": ["understood", "approve", "reject", "disagree", "withdraw"]}
+      response: {"type": "string", "max": 1200, "required": true}
+      main: {"type": "string", "max": 96, "required": false}
+  research_merge:
+    binding: "runtime"
+    handler: "research_merge"
+    title: "按已批准的精确版本合入科研主线"
+    description: "按已批准的精确版本合入科研主线；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member"]
+    params:
+      branch: {"type": "string", "max": 96, "required": true}
+      expected_head: {"type": "string", "max": 96, "required": false}
+      expected_main: {"type": "string", "max": 96, "required": false}
+      record: {"type": "string", "max": 96, "required": true}
+      reason: {"type": "string", "max": 1200, "required": true}
+  research_query:
+    binding: "runtime"
+    handler: "research_query"
+    title: "按类型、作者、证据和关键词检索"
+    description: "按类型、作者、证据和关键词检索；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member", "viewer"]
+    params:
+      since: {type: string, max: 40, required: false, description: ISO 时间下界}
+      relation: {type: string, max: 24, required: false, enum: [derived_from, supports, contradicts, supersedes, uses, produces, requested_by]}
+      kind: {"type": "string", "max": 24, "required": false}
+      query: {"type": "string", "max": 200, "required": false}
+      author: {"type": "string", "max": 160, "required": false}
+      target: {"type": "string", "max": 96, "required": false}
+      cursor: {"type": "string", "max": 8, "required": false}
+  research_mark_seen:
+    binding: "runtime"
+    handler: "research_mark_seen"
+    title: "记录本人已浏览到的水位"
+    description: "记录本人已浏览到的水位；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member", "viewer"]
+    human_only: true
+    params:
+      through: {"type": "string", "max": 12, "required": true}
+  research_read_history:
+    binding: "runtime"
+    handler: "research_read_history"
+    title: "分页读取完整科研、聊天或文档历史"
+    description: "分页读取完整科研、聊天或文档历史；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member", "viewer"]
+    history_cursor: "after_seq"
+    params:
+      after_seq: {"type": "string", "max": 12, "required": true}
+      session: {"type": "string", "max": 96, "required": false}
+      document: {"type": "string", "max": 96, "required": false}
+  research_import_chat:
+    binding: "runtime"
+    handler: "research_import_chat"
+    title: "按来源顺序幂等导入历史聊天"
+    description: "按来源顺序幂等导入历史聊天；身份与权限由可信协调器绑定。"
+    roles: ["owner", "member"]
+    params:
+      session_key: {"type": "string", "max": 96, "required": true}
+      offset: {"type": "string", "max": 12, "required": true}
+      batch_id: {"type": "string", "max": 96, "required": true}
+      messages_json: {"type": "string", "max": 32000, "required": true}
+  research_capture_requirement:
+    binding: runtime
+    handler: research_capture_requirement
+    history_cursor: after_seq
+    title: 引用真人原始要求
+    description: 从可信历史页的首个真人输入逐字登记要求；正文不可由 Agent 参数代填。导入聊天不满足条件。
+    roles: [owner, member]
+    params:
+      after_seq: {type: string, max: 12, required: true}
+      record: {type: string, max: 96, required: true}
+      title: {type: string, max: 200, required: true}
+      critical: {type: string, max: 5, required: false, enum: ['true', 'false']}
+  research_register_archive:
+    binding: runtime
+    handler: research_register_archive
+    title: 登记历史会话档案
+    description: 显式登记历史来源，保留真实 provider，永不自动登记为项目主导者。
+    roles: [owner, member]
+    params:
+      session_key: {type: string, max: 96, required: true}
+      source_session: {type: string, max: 96, required: true}
+      provider: {type: string, max: 16, required: true, enum: [codex, claude, omp, other]}
+      title: {type: string, max: 200, required: true}
+      workspace_key: {type: string, max: 96, required: true}
+      workspace_label: {type: string, max: 160, required: true}
+  research_bind_source:
+    binding: runtime
+    handler: research_bind_source
+    title: 绑定项目会话或文档来源
+    description: 显式维护来源身份与版本；历史 Agent 可浏览，不改变当前主导者。归档项目仅 Owner 可修复资料。
+    roles: [owner, member]
+    params:
+      source_key: {type: string, max: 96, required: true}
+      generation: {type: string, max: 64, required: true}
+      expected_generation: {type: string, max: 64, required: false}
+      kind: {type: string, max: 16, required: true}
+      encoding: {type: string, max: 16, required: false}
+      total: {type: string, max: 12, required: true}
+      provider: {type: string, max: 16, required: false}
+      title: {type: string, max: 200, required: true}
+      source_ref: {type: string, max: 320, required: true}
+      reason: {type: string, max: 500, required: true}
+  research_publish_source:
+    binding: runtime
+    handler: research_publish_source
+    title: 同步来源内容分段
+    description: 严格校验来源版本与偏移，保留 Sessions+ 原生内容块和完整文档。
+    roles: [owner, member]
+    params:
+      source_key: {type: string, max: 96, required: true}
+      generation: {type: string, max: 64, required: true}
+      offset: {type: string, max: 12, required: true}
+      payload: {type: string, max: 32000, required: true}
+      fragment_offset: {type: string, max: 12, required: false}
+      fragment_total: {type: string, max: 12, required: false}
+  research_read_source:
+    binding: runtime
+    handler: research_read_source
+    title: 读取已绑定来源
+    description: 按当前项目授权与来源索引读取内容，供会话和文档共享模块使用。
+    roles: [owner, member, viewer]
+    history_cursor: after_seq
+    params:
+      source_key: {type: string, max: 96, required: true}
+      generation: {type: string, max: 64, required: true}
+      after_seq: {type: string, max: 12, required: true}
+  research_set_source_locations:
+    binding: runtime
+    handler: research_set_source_locations
+    title: 维护项目来源位置映射
+    description: 显式登记项目根、旧路径别名及已绑定会话的真实定位；映射不授予文件或执行权限。
+    roles: [owner]
+    params:
+      expected_revision: {type: string, max: 12, required: true}
+      locations: {type: string, max: 30000, required: true}
+      reason: {type: string, max: 500, required: true}
+  research_source_status:
+    binding: runtime
+    handler: research_source_status
+    title: 查询项目与来源同步状态
+    description: 有界目录与单来源索引；完整投影过大时使用此接口维护版本、偏移和当前主导登记。
+    roles: [owner, member, viewer]
+    params:
+      source_key: {type: string, max: 96, required: false}
+      cursor: {type: string, max: 96, required: false}
+  research_unbind_source:
+    binding: runtime
+    handler: research_unbind_source
+    title: 解除来源导航绑定
+    description: 从项目导航隐藏已绑定来源，保留历史；当前默认 Agent 和文档须先换成继任者。
+    roles: [owner, member]
+    params:
+      source_key: {type: string, max: 96, required: true}
+      generation: {type: string, max: 64, required: true}
+      reason: {type: string, max: 500, required: true}
+  open_session:
+    binding: resource
+    roles: [owner]
+    human_only: true
+    title: 打开会话
+    description: 读取一条会话的正文。
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+        description: 会话的不透明 id
+      limit:
+        type: string
+        max: 4
+      offset:
+        type: string
+        max: 12
+  append_session:
+    binding: resource
+    roles: [owner]
+    human_only: true
+    title: 追加一轮
+    description: 在一条已有会话里继续跑一轮；本人可信页面直接执行，Agent 发起仍需批准。
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+      prompt:
+        type: string
+        max: 393216
+        required: true
+      permission_profile:
+        type: string
+        max: 16
+        enum: [full_access, manual]
+      model:
+        type: string
+        max: 120
+      effort:
+        type: string
+        max: 16
+  resume_session:
+    binding: resource
+    roles: [owner]
+    human_only: true
+    title: 恢复会话
+    description: 恢复一条会话并继续跑一轮；本人可信页面直接执行，Agent 发起仍需批准。
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+      prompt:
+        type: string
+        max: 393216
+        required: true
+      permission_profile:
+        type: string
+        max: 16
+        enum: [full_access, manual]
+      model:
+        type: string
+        max: 120
+      effort:
+        type: string
+        max: 16
+  takeover_session:
+    binding: resource
+    roles: [owner]
+    title: 接管并继续
+    description: 中断 Runner 已精确识别的本机 CLI 进程，再恢复同一会话；本人可信页面直接执行。
+    human_only: true
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+      prompt:
+        type: string
+        max: 393216
+        required: true
+      permission_profile:
+        type: string
+        max: 16
+        enum: [full_access, manual]
+      model:
+        type: string
+        max: 120
+      effort:
+        type: string
+        max: 16
+  interrupt_session:
+    binding: resource
+    roles: [owner]
+    title: 停止当前托管轮次
+    description: 使用 Claude Agent SDK 或 Codex app-server 的原生 interrupt 停止当前 Octopus 托管轮次。
+    human_only: true
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+  release_session_control:
+    binding: resource
+    roles: [owner]
+    title: 释放 Codex 后台占用
+    description: 仅在一次 Codex 托管轮次已经结束、独立 app-server 自动退出失败时，释放当前会话的精确后台附件。
+    human_only: true
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+  attach_file:
+    binding: resource
+    roles: [owner]
+    human_only: true
+    title: 上传会话文件
+    description: 把用户选择的文件存进当前会话所在设备的临时目录，返回下一条消息可引用的绝对路径。
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+        description: 当前会话的不透明资源 id；可信侧据此解析设备
+      name:
+        type: string
+        max: 200
+        required: true
+        description: 用户选择的文件名，仅作展示；设备创建路径
+      media_type:
+        type: string
+        max: 128
+        required: true
+        description: 浏览器报告的 MIME 类型，仅作展示
+      chunk_index:
+        type: string
+        max: 16
+        required: true
+        description: 从 0 开始的分块序号
+      chunk_count:
+        type: string
+        max: 16
+        required: true
+        description: 文件的总分块数
+      upload_id:
+        type: string
+        max: 24
+        description: 首块回执里的不透明上传 id
+      data:
+        type: string
+        max: 349528
+        required: true
+        description: 最多 256KiB 原始字节的 base64
+  respond_agent_interaction:
+    binding: resource
+    roles: [owner]
+    title: 回答 Agent 当前请求
+    description: 回答当前会话里由 Claude Code 或 Codex 发起的提问或单次权限请求。
+    # The provider prompt is the approval surface. An App agent must never
+    # answer it for the person whose browser is displaying the card.
+    human_only: true
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+      interaction_id:
+        type: string
+        max: 128
+        required: true
+      response_json:
+        type: string
+        max: 4096
+        required: true
+  ask_secretary:
+    human_only: true
+    binding: "agent"
+    agent: "secretary"
+    title: "询问项目科研秘书"
+    description: "将问题投递给本项目秘书；所有答复与判断请求通过项目动作留痕。"
+    roles: ["owner", "member"]
+    params:
+      prompt: {"type": "string", "max": 4000, "required": true}
+agents:
+  mcp:
+    adapter: openai-loop
+    role: member
+    prompt: 通过明确的 Apps MCP 调用操作当前项目。导入记录一律保持 imported/infer，不代写真人确认。
+  secretary:
+    adapter: openai-loop
+    role: member
+    prompt: |
+      你是当前 shared 科研项目的秘书，帮助团队了解进展、学习证据和形成明确判断。
+      每轮先 read_app_state，再按需 research_query 或 research_read_history 分页查询。
+      对真人原始要求用 research_capture_requirement 从可信事件逐字收录；你的解释与设计另写 infer。
+      区分谁提出、谁推断、谁执行、谁明确批准、谁已学习。导入聊天中的 user 角色不是批准证据。
+      回答必须引用已有记录 ID；对不完整历史、失效结论、反例和未验收交付明确说明。
+      用 research_record(kind=briefing) 发布本轮教学与答复，把引用放进 links；只发口头回答不会进入项目知识库。
+      接到推进指示时使用具体领域动作。关键事项先用 research_request_confirmation 提出具体问题，
+      再 ask_user 提醒真人在界面对准确版本明确答复。禁止代替用户写 understood/approve。
+      学习、赞同、批准、浏览互相独立，不因文档已发出就标记任何人学过或同意。
+      合入前检查分支和主线，主线前移需重新交付与验收；不要重试被拒绝的状态变更。
+      不调用 ask_secretary 递归唤醒自己；不把自己登记为用户委托的实验主导 Agent。
+      无工作区能力，不声称运行实验；实验 agent 从 Apps MCP 认领并推进分支。
+view:
+  page: pages/main.yaml

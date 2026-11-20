@@ -1,0 +1,24 @@
+{
+  "schema": "octopus-refactor-plan/v1",
+  "scenarios": [
+    "brief-network-outage",
+    "minute-visible-wait",
+    "over-30-minute-wait",
+    "runtime-presence-wake",
+    "original-session-resume",
+    "head-restart",
+    "stop-while-waiting",
+    "authorization-revocation",
+    "multi-head-isolation",
+    "capacity-terminal-continue",
+    "uncertain-effect-no-replay",
+    "cross-owner-isolation"
+  ],
+  "checks": [
+    "bot-typecheck",
+    "runner-typecheck",
+    "focused-tests",
+    "consumer-inventory",
+    "curated-knowledge"
+  ]
+}

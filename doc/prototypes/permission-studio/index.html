@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Permission Studio · Clean-room prototype</title>
+  <style>
+    :root {
+      --ink: #192329;
+      --muted: #647078;
+      --faint: #8b969c;
+      --line: #d8dedb;
+      --soft-line: #e8ece9;
+      --paper: #fbfaf6;
+      --surface: #ffffff;
+      --surface-2: #f4f4ef;
+      --green: #087a60;
+      --green-soft: #dff2e9;
+      --amber: #9a5900;
+      --amber-soft: #fff0ce;
+      --red: #b13632;
+      --red-soft: #fde8e5;
+      --blue: #315f87;
+      --blue-soft: #e6eff7;
+      --purple: #705293;
+      --purple-soft: #eee8f5;
+      --shadow: 0 12px 34px rgba(32, 45, 48, .10);
+      --radius: 12px;
+      --font: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: #e8ebe7; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--font);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,.9), transparent 29rem),
+        #e8ebe7;
+      min-height: 100vh;
+    }
+    button, select, input { font: inherit; }
+    button, select { color: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+    :focus-visible {
+      outline: 3px solid #2c78bd;
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+
+    .demo-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 18px;
+      background: rgba(25, 35, 41, .96);
+      color: white;
+      box-shadow: 0 4px 16px rgba(0,0,0,.18);
+    }
+    .demo-label { font-size: 12px; color: #bec8cd; letter-spacing: .06em; text-transform: uppercase; }
+    .demo-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .demo-controls label { display: flex; gap: 6px; align-items: center; font-size: 12px; color: #d9e0e3; }
+    .demo-controls select {
+      border: 1px solid #69767d;
+      color: white;
+      background: #303c42;
+      border-radius: 7px;
+      padding: 6px 28px 6px 8px;
+    }
+    .viewport-switch { display: flex; border: 1px solid #69767d; border-radius: 8px; overflow: hidden; }
+    .viewport-switch button { border: 0; padding: 7px 9px; color: white; background: #303c42; font-size: 12px; }
+    .viewport-switch button + button { border-left: 1px solid #69767d; }
+    .viewport-switch button[aria-pressed="true"] { background: #dcebe5; color: #132c25; }
+    .demo-note { margin-left: auto; color: #b9c5c9; font-size: 12px; }
+
+    .stage { padding: 26px; overflow: auto; }
+    .prototype {
+      width: min(1480px, 100%);
+      min-height: calc(100vh - 106px);
+      margin: 0 auto;
+      background: var(--paper);
+      border: 1px solid #cbd2ce;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: width .22s ease;
+    }
+    .prototype[data-viewport="narrow"] { width: 390px; min-width: 390px; }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      min-height: 66px;
+      gap: 20px;
+      padding: 12px 22px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(251,250,246,.96);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; min-width: 218px; }
+    .brand-mark {
+      width: 34px; height: 34px; display: grid; place-items: center;
+      background: var(--ink); color: white; border-radius: 9px;
+      font-family: var(--mono); font-weight: 800; font-size: 15px;
+    }
+    .brand-name { font-weight: 760; letter-spacing: -.02em; }
+    .brand-sub { font-size: 11px; color: var(--muted); }
+    .top-nav { display: flex; align-self: stretch; gap: 4px; }
+    .top-nav button {
+      border: 0; border-bottom: 3px solid transparent; background: transparent;
+      padding: 0 11px; font-size: 13px; color: var(--muted);
+    }
+    .top-nav button[aria-current="page"] { color: var(--ink); border-color: var(--green); font-weight: 700; }
+    .scope-pill { margin-left: auto; display: flex; align-items: center; gap: 9px; font-size: 12px; }
+    .avatar { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: #d9e8df; font-weight: 800; }
+
+    .main { padding: 22px; }
+    .role-strip {
+      display: grid;
+      grid-template-columns: minmax(260px, 1.4fr) minmax(340px, 2fr) auto;
+      gap: 18px;
+      align-items: center;
+      padding: 17px 18px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--green);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .eyebrow { color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    .role-strip h1 { margin: 4px 0 4px; font-size: 20px; letter-spacing: -.025em; }
+    .role-strip p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .role-task { border-left: 1px solid var(--line); padding-left: 18px; }
+    .role-task strong { display: block; margin-bottom: 3px; font-size: 13px; }
+    .role-status { text-align: right; }
+    .role-status .big { display: block; font-size: 22px; font-weight: 760; }
+    .role-status .small { color: var(--muted); font-size: 11px; }
+
+    .state-banner {
+      margin-top: 12px;
+      display: none;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid;
+      font-size: 13px;
+    }
+    .state-banner.show { display: flex; }
+    .state-banner.pending { background: var(--blue-soft); border-color: #b8ccde; }
+    .state-banner.refused { background: var(--red-soft); border-color: #efbab5; }
+    .state-banner.readonly { background: var(--purple-soft); border-color: #cfc0df; }
+    .state-banner.terminal { background: #edf0ef; border-color: #c9cfcc; }
+    .banner-icon { font-weight: 900; width: 22px; text-align: center; }
+    .state-banner strong { display: block; margin-bottom: 2px; }
+    .state-banner p { margin: 0; color: #4e5b61; line-height: 1.45; }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      margin: 24px 0 10px;
+    }
+    .section-head h2 { margin: 0 0 3px; font-size: 17px; letter-spacing: -.015em; }
+    .section-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .legend { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+    .legend .key { display: inline-flex; gap: 4px; align-items: center; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot.auto { background: var(--green); }
+    .dot.ask { background: #d07c00; }
+    .dot.deny { background: #adb5b3; }
+    .dot.block { background: var(--red); transform: rotate(45deg); border-radius: 1px; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 338px;
+      gap: 14px;
+      align-items: start;
+    }
+    .matrix-shell {
+      min-width: 0;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .matrix-toolbar {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-2);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .filter-button, .secondary-button, .primary-button, .danger-button {
+      min-height: 34px;
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .filter-button, .secondary-button { border: 1px solid var(--line); background: white; }
+    .primary-button { border: 1px solid var(--green); background: var(--green); color: white; }
+    .danger-button { border: 1px solid #d9958f; background: white; color: var(--red); }
+    .matrix-toolbar .spacer { flex: 1; }
+    .matrix-count { font-size: 11px; color: var(--muted); }
+    .table-scroll { max-width: 100%; overflow: auto; }
+    table { width: 100%; min-width: 1030px; border-collapse: separate; border-spacing: 0; font-size: 12px; }
+    th, td { padding: 9px 8px; border-bottom: 1px solid var(--soft-line); border-right: 1px solid var(--soft-line); text-align: left; vertical-align: top; }
+    th { position: sticky; top: 0; z-index: 3; background: #f1f3ef; color: #4e5a60; font-size: 11px; }
+    th:first-child, td:first-child { position: sticky; left: 0; z-index: 2; background: white; min-width: 196px; max-width: 196px; }
+    th:first-child { z-index: 4; background: #f1f3ef; }
+    tr:last-child td { border-bottom: 0; }
+    td:last-child, th:last-child { border-right: 0; }
+    .resource-name { display: block; font-family: var(--mono); font-size: 11px; font-weight: 800; }
+    .resource-meta { display: block; margin-top: 4px; color: var(--muted); line-height: 1.35; font-size: 10px; }
+    .authority-tag { display: inline-block; margin-top: 5px; padding: 2px 5px; border-radius: 4px; background: var(--blue-soft); color: #254e70; font-size: 9px; font-weight: 800; }
+    .authority-tag.mandatory { background: var(--purple-soft); color: #5d407b; }
+    .permit-cell {
+      width: 100%; min-height: 48px; border: 1px solid transparent; border-radius: 7px;
+      padding: 5px; background: transparent; text-align: left;
+    }
+    .permit-cell:hover { border-color: #aebbb5; background: #f8faf8; }
+    .permit-cell.selected { border-color: var(--green); background: #eef8f3; box-shadow: inset 0 0 0 1px var(--green); }
+    .permit-line { display: flex; align-items: center; gap: 4px; margin: 1px 0; white-space: nowrap; }
+    .permit-line .action { font-family: var(--mono); font-size: 9px; }
+    .mode {
+      display: inline-block; border-radius: 999px; padding: 1px 4px;
+      font-size: 8px; font-weight: 900; letter-spacing: .04em;
+    }
+    .mode.auto { color: var(--green); background: var(--green-soft); }
+    .mode.ask { color: var(--amber); background: var(--amber-soft); }
+    .mode.deny { color: #68726f; background: #e9edeb; }
+    .mode.block { color: var(--red); background: var(--red-soft); }
+    .empty-cell { color: #a4acab; padding: 9px 6px; }
+
+    .mobile-permit-list { display: none; padding: 8px; }
+    .mobile-permit {
+      border: 1px solid var(--line); border-radius: 9px; background: white;
+      padding: 11px; margin-bottom: 8px; width: 100%; text-align: left;
+    }
+    .mobile-permit.selected { border: 2px solid var(--green); padding: 10px; background: #f5fbf8; }
+    .mobile-permit-top { display: flex; justify-content: space-between; gap: 8px; }
+    .mobile-permit .holder { font-weight: 800; font-size: 12px; }
+    .mobile-permit .res { margin-top: 4px; font-family: var(--mono); font-size: 10px; color: var(--muted); }
+    .mobile-permit .permit-lines { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px 8px; }
+
+    .detail-panel {
+      position: sticky;
+      top: 68px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: white;
+      overflow: hidden;
+    }
+    .detail-head { padding: 15px 15px 12px; border-bottom: 1px solid var(--line); }
+    .detail-kicker { color: var(--green); font-size: 10px; font-weight: 900; letter-spacing: .08em; }
+    .detail-head h3 { margin: 4px 0; font-size: 15px; }
+    .detail-head p { margin: 0; color: var(--muted); font-size: 11px; }
+    .decision-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
+    .decision { font-size: 19px; font-weight: 850; }
+    .decision.allow { color: var(--green); }
+    .decision.ask { color: var(--amber); }
+    .decision.deny, .decision.block { color: var(--red); }
+    .decision-note { color: var(--muted); font-size: 10px; text-align: right; }
+    .explain-steps { margin: 0; padding: 10px 15px 6px; list-style: none; }
+    .explain-steps li { position: relative; padding: 0 0 13px 27px; font-size: 11px; line-height: 1.4; }
+    .explain-steps li::before {
+      content: attr(data-step); position: absolute; left: 0; top: 0;
+      width: 18px; height: 18px; border: 1px solid #9fb0a8; border-radius: 50%;
+      display: grid; place-items: center; font-size: 9px; font-weight: 800; background: #f5f8f6;
+    }
+    .explain-steps li:not(:last-child)::after {
+      content: ""; position: absolute; left: 9px; top: 18px; bottom: 0; width: 1px; background: #cbd4d0;
+    }
+    .step-label { display: block; color: var(--muted); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+    .detail-actions { display: flex; gap: 7px; padding: 10px 14px 14px; border-top: 1px solid var(--soft-line); }
+    .detail-actions button { flex: 1; }
+
+    .explain-builder {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: white;
+      padding: 14px;
+    }
+    .explain-builder h2 { margin: 0 0 3px; font-size: 15px; }
+    .explain-builder > p { margin: 0 0 12px; color: var(--muted); font-size: 11px; }
+    .query-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 8px; align-items: end; }
+    .field label { display: block; margin-bottom: 4px; color: var(--muted); font-size: 10px; font-weight: 750; }
+    .field select, .field input {
+      width: 100%; min-height: 35px; border: 1px solid #bac4bf; border-radius: 7px;
+      background: white; padding: 6px 8px; font-size: 11px;
+    }
+
+    .cross-domain {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      margin-top: 10px;
+    }
+    .artifact {
+      position: relative; border: 1px solid var(--line); border-radius: 10px;
+      background: white; padding: 13px 13px 12px 48px; min-height: 105px;
+    }
+    .artifact-icon {
+      position: absolute; left: 12px; top: 14px; width: 26px; height: 26px;
+      display: grid; place-items: center; border-radius: 7px; background: var(--blue-soft);
+      color: var(--blue); font-family: var(--mono); font-weight: 900;
+    }
+    .artifact h3 { margin: 0 0 3px; font-size: 13px; }
+    .artifact p { margin: 0 0 8px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+    .artifact-meta { display: flex; flex-wrap: wrap; gap: 5px; }
+    .artifact-meta span { padding: 2px 5px; border-radius: 4px; background: var(--surface-2); color: #526067; font-size: 9px; font-weight: 750; }
+
+    .first-run { display: none; }
+    .first-run.show { display: block; }
+    .standard-content.hidden { display: none; }
+    .install-shell {
+      max-width: 900px; margin: 26px auto 4px; border: 1px solid var(--line);
+      border-radius: 14px; background: white; box-shadow: 0 10px 30px rgba(40,52,48,.07);
+      overflow: hidden;
+    }
+    .install-title { padding: 22px; border-bottom: 1px solid var(--line); background: #f8f8f4; }
+    .app-lockup { display: flex; align-items: center; gap: 13px; }
+    .app-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 12px; background: #1f664f; color: white; font-weight: 900; }
+    .install-title h2 { margin: 0 0 4px; font-size: 19px; }
+    .install-title p { margin: 0; color: var(--muted); font-size: 12px; }
+    .install-body { padding: 20px 22px; }
+    .install-principle {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 18px;
+    }
+    .principle { border: 1px solid var(--soft-line); padding: 10px; border-radius: 8px; font-size: 11px; line-height: 1.4; }
+    .principle strong { display: block; margin-bottom: 2px; }
+    .install-actions { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .install-row {
+      display: grid; grid-template-columns: 1.4fr 1fr 170px; gap: 10px; align-items: center;
+      padding: 11px 12px; border-bottom: 1px solid var(--soft-line);
+    }
+    .install-row:last-child { border-bottom: 0; }
+    .install-row .action-name { font-family: var(--mono); font-weight: 800; font-size: 11px; }
+    .install-row .action-help { color: var(--muted); font-size: 10px; }
+    .segmented { display: flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+    .segmented button { flex: 1; border: 0; background: white; padding: 6px 5px; font-size: 9px; font-weight: 850; }
+    .segmented button + button { border-left: 1px solid var(--line); }
+    .segmented button.active { background: var(--ink); color: white; }
+    .install-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 15px 22px; border-top: 1px solid var(--line); background: #fafaf7; }
+    .install-footer p { margin: 0; color: var(--muted); font-size: 10px; max-width: 530px; }
+
+    .editor-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: rgba(21,30,34,.38); align-items: stretch; justify-content: flex-end;
+    }
+    .editor-backdrop.open { display: flex; }
+    .editor {
+      width: min(560px, 100%); height: 100%; overflow: auto; background: var(--paper);
+      box-shadow: -12px 0 36px rgba(0,0,0,.2); padding-bottom: 96px;
+    }
+    .editor-head {
+      position: sticky; top: 0; z-index: 3; display: flex; gap: 12px; align-items: flex-start;
+      padding: 17px 18px; border-bottom: 1px solid var(--line); background: rgba(251,250,246,.97);
+    }
+    .editor-head h2 { margin: 0 0 3px; font-size: 17px; }
+    .editor-head p { margin: 0; color: var(--muted); font-size: 11px; }
+    .close-button { margin-left: auto; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 8px; background: white; font-size: 18px; }
+    .editor-body { padding: 17px 18px; }
+    .edit-summary {
+      border: 1px solid var(--line); border-radius: 10px; background: white; padding: 12px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px;
+    }
+    .edit-summary span { display: block; color: var(--muted); font-size: 9px; margin-bottom: 2px; }
+    .mandatory-note { display: none; margin-top: 10px; padding: 10px; border-radius: 8px; background: var(--purple-soft); color: #594072; font-size: 11px; }
+    .mandatory-note.show { display: block; }
+    .edit-actions { margin-top: 15px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: white; }
+    .edit-actions-head, .edit-action-row { display: grid; grid-template-columns: 1fr 190px; gap: 10px; align-items: center; padding: 9px 11px; }
+    .edit-actions-head { background: var(--surface-2); color: var(--muted); font-size: 9px; font-weight: 850; }
+    .edit-action-row { border-top: 1px solid var(--soft-line); }
+    .edit-action-row .name { font-family: var(--mono); font-size: 11px; font-weight: 750; }
+    .edit-action-row .why { display: block; margin-top: 2px; color: var(--muted); font-family: var(--font); font-size: 9px; font-weight: 400; }
+    .editor-audience { margin-top: 15px; border: 1px solid var(--line); border-radius: 10px; background: white; padding: 12px; }
+    .editor-audience h3 { margin: 0 0 8px; font-size: 12px; }
+    .editor-audience .field + .field { margin-top: 9px; }
+    .edit-warning { margin-top: 12px; padding: 10px; border-radius: 8px; background: var(--amber-soft); color: #6d4709; font-size: 10px; line-height: 1.45; }
+    .save-refusal { display: none; margin-top: 12px; padding: 11px; border: 1px solid #e4a49e; border-radius: 8px; background: var(--red-soft); font-size: 11px; }
+    .save-refusal.show { display: block; }
+    .save-refusal strong { display: block; margin-bottom: 2px; }
+    .editor-footer {
+      position: fixed; right: 0; bottom: 0; width: min(560px, 100%);
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      padding: 13px 18px; border-top: 1px solid var(--line); background: rgba(251,250,246,.97);
+    }
+    .unsaved { font-size: 10px; color: var(--amber); font-weight: 750; }
+    .save-actions { display: flex; gap: 8px; }
+    .spinner {
+      display: inline-block; width: 11px; height: 11px; margin-right: 5px;
+      border: 2px solid rgba(255,255,255,.45); border-top-color: white; border-radius: 50%;
+      animation: spin .7s linear infinite; vertical-align: -2px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .toast {
+      position: fixed; left: 50%; bottom: 22px; z-index: 130; transform: translateX(-50%) translateY(20px);
+      padding: 10px 14px; background: #1c2b2d; color: white; border-radius: 8px; font-size: 11px;
+      box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .empty-state { display: none; padding: 44px 22px 50px; text-align: center; }
+    .empty-state.show { display: block; }
+    .empty-visual { width: 120px; height: 72px; position: relative; margin: 0 auto 16px; }
+    .empty-visual span { position: absolute; border: 1px solid #9fb0a8; background: white; border-radius: 7px; }
+    .empty-visual .r1 { width: 54px; height: 34px; left: 0; top: 20px; }
+    .empty-visual .r2 { width: 54px; height: 34px; right: 0; top: 20px; }
+    .empty-visual .line { width: 20px; height: 1px; border: 0; border-top: 2px dashed #9fb0a8; left: 50px; top: 36px; border-radius: 0; background: transparent; }
+    .empty-state h2 { margin: 0 0 7px; font-size: 18px; }
+    .empty-state p { max-width: 500px; margin: 0 auto 17px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+    .prototype[data-viewport="narrow"] .top-nav,
+    .prototype[data-viewport="narrow"] .scope-pill .scope-text { display: none; }
+    .prototype[data-viewport="narrow"] .app-header { padding: 10px 13px; min-height: 56px; }
+    .prototype[data-viewport="narrow"] .brand { min-width: 0; }
+    .prototype[data-viewport="narrow"] .brand-sub { display: none; }
+    .prototype[data-viewport="narrow"] .main { padding: 12px; }
+    .prototype[data-viewport="narrow"] .role-strip { grid-template-columns: 1fr auto; gap: 10px; padding: 13px; }
+    .prototype[data-viewport="narrow"] .role-strip h1 { font-size: 17px; }
+    .prototype[data-viewport="narrow"] .role-task { grid-column: 1 / -1; grid-row: 2; border-left: 0; border-top: 1px solid var(--line); padding: 10px 0 0; }
+    .prototype[data-viewport="narrow"] .role-status .big { font-size: 17px; }
+    .prototype[data-viewport="narrow"] .section-head { display: block; margin-top: 18px; }
+    .prototype[data-viewport="narrow"] .legend { margin-top: 9px; }
+    .prototype[data-viewport="narrow"] .workspace { display: flex; flex-direction: column; }
+    .prototype[data-viewport="narrow"] .matrix-shell { width: 100%; }
+    .prototype[data-viewport="narrow"] .table-scroll { display: none; }
+    .prototype[data-viewport="narrow"] .mobile-permit-list { display: block; }
+    .prototype[data-viewport="narrow"] .detail-panel { position: static; width: 100%; }
+    .prototype[data-viewport="narrow"] .matrix-toolbar .filter-button { display: none; }
+    .prototype[data-viewport="narrow"] .query-grid { grid-template-columns: 1fr 1fr; }
+    .prototype[data-viewport="narrow"] .query-grid .field:nth-child(3),
+    .prototype[data-viewport="narrow"] .query-grid .field:nth-child(4) { grid-column: span 1; }
+    .prototype[data-viewport="narrow"] .query-grid .primary-button { grid-column: 1 / -1; }
+    .prototype[data-viewport="narrow"] .cross-domain { grid-template-columns: 1fr; }
+    .prototype[data-viewport="narrow"] .install-principle { grid-template-columns: 1fr; }
+    .prototype[data-viewport="narrow"] .install-shell { margin-top: 14px; }
+    .prototype[data-viewport="narrow"] .install-title, .prototype[data-viewport="narrow"] .install-body { padding: 15px; }
+    .prototype[data-viewport="narrow"] .install-row { grid-template-columns: 1fr; gap: 5px; }
+    .prototype[data-viewport="narrow"] .install-footer { align-items: stretch; flex-direction: column; padding: 14px 15px; }
+    .prototype[data-viewport="narrow"] .install-footer .primary-button { width: 100%; }
+
+    @media (max-width: 640px) {
+      .demo-bar { position: static; padding: 9px 10px; align-items: flex-start; }
+      .demo-label, .demo-note { display: none; }
+      .demo-controls { width: 100%; }
+      .demo-controls label { flex: 1; flex-direction: column; align-items: stretch; }
+      .demo-controls select { width: 100%; }
+      .viewport-switch { display: none; }
+      .stage { padding: 0; }
+      .prototype, .prototype[data-viewport="wide"] { width: 100%; min-width: 0; border: 0; border-radius: 0; }
+      .prototype[data-viewport="wide"] .top-nav, .prototype[data-viewport="wide"] .scope-pill .scope-text { display: none; }
+      .prototype[data-viewport="wide"] .app-header { padding: 10px 13px; min-height: 56px; }
+      .prototype[data-viewport="wide"] .brand { min-width: 0; }
+      .prototype[data-viewport="wide"] .brand-sub { display: none; }
+      .prototype[data-viewport="wide"] .main { padding: 12px; }
+      .prototype[data-viewport="wide"] .role-strip { grid-template-columns: 1fr auto; gap: 10px; padding: 13px; }
+      .prototype[data-viewport="wide"] .role-task { grid-column: 1 / -1; border: 0; border-top: 1px solid var(--line); padding: 10px 0 0; }
+      .prototype[data-viewport="wide"] .workspace { display: flex; flex-direction: column; }
+      .prototype[data-viewport="wide"] .table-scroll { display: none; }
+      .prototype[data-viewport="wide"] .mobile-permit-list { display: block; }
+      .prototype[data-viewport="wide"] .detail-panel { position: static; width: 100%; }
+      .prototype[data-viewport="wide"] .query-grid { grid-template-columns: 1fr 1fr; }
+      .prototype[data-viewport="wide"] .query-grid .primary-button { grid-column: 1 / -1; }
+      .prototype[data-viewport="wide"] .cross-domain { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-bar" aria-label="Prototype controls">
+    <span class="demo-label">Prototype fixtures</span>
+    <div class="demo-controls">
+      <label>角色
+        <select id="roleSelect">
+          <option value="owner">Alice · 个人 owner</option>
+          <option value="steward">Alice · ACME 资源 steward</option>
+          <option value="workspace">Alice · workspace 管理员</option>
+          <option value="auditor">Alice · 审计查看者</option>
+        </select>
+      </label>
+      <label>状态
+        <select id="stateSelect">
+          <option value="first">首次安装 / 空状态</option>
+          <option value="normal" selected>常规</option>
+          <option value="dense">密集数据</option>
+          <option value="pending">保存 pending</option>
+          <option value="refused">拒绝并保留编辑</option>
+          <option value="readonly">只读审计</option>
+          <option value="revoked">已撤销终态</option>
+        </select>
+      </label>
+      <div class="viewport-switch" aria-label="Viewport fixture">
+        <button type="button" data-viewport="wide" aria-pressed="true">宽屏</button>
+        <button type="button" data-viewport="narrow" aria-pressed="false">390px</button>
+      </div>
+    </div>
+    <span class="demo-note">纯假数据 · 无真实授权或保存</span>
+  </div>
+
+  <div class="stage">
+    <div class="prototype" id="prototype" data-viewport="wide">
+      <header class="app-header">
+        <div class="brand">
+          <div class="brand-mark">P/</div>
+          <div><div class="brand-name">Permission Studio</div><div class="brand-sub">Authority · Domain / Audience · Permit</div></div>
+        </div>
+        <nav class="top-nav" aria-label="Primary">
+          <button type="button" aria-current="page">资源权限</button>
+          <button type="button">跨域产物</button>
+          <button type="button">变更记录</button>
+        </nav>
+        <div class="scope-pill"><span class="scope-text">当前查看</span><strong id="headerScope">Alice 的资源</strong><span class="avatar" aria-hidden="true">A</span></div>
+      </header>
+
+      <main class="main">
+        <section class="role-strip" aria-labelledby="roleTitle">
+          <div><div class="eyebrow" id="roleEyebrow">个人 owner</div><h1 id="roleTitle">谁能动用我登记的资源？</h1><p id="roleDescription">检查直接许可、继承来源和目标受众；必要时收紧长期上限内的规则。</p></div>
+          <div class="role-task"><strong id="roleTaskTitle">此刻要决定</strong><p id="roleTask">Expense Helper 能否对 calendar 工具执行 create，以及是否每次向 Alice 确认。</p></div>
+          <div class="role-status"><span class="big" id="roleCount">12</span><span class="small" id="roleCountLabel">项有效许可</span></div>
+        </section>
+
+        <div id="stateBanner" class="state-banner" role="status"><div class="banner-icon">●</div><div><strong id="bannerTitle"></strong><p id="bannerText"></p></div></div>
+
+        <section class="first-run" id="firstRun" aria-labelledby="installTitle">
+          <div class="install-shell">
+            <div class="install-title">
+              <div class="app-lockup"><div class="app-icon">EH</div><div><div class="eyebrow">首次安装 · 由 Alice 决定</div><h2 id="installTitle">设置 Expense Helper 的长期权限上限</h2><p>这不是一次实际授权。原型仅演示 Alice 最多愿意让 App 请求什么。</p></div></div>
+            </div>
+            <div class="install-body">
+              <div class="install-principle">
+                <div class="principle"><strong>同域 read</strong>可默认 AUTO；无许可仍是 deny。</div>
+                <div class="principle"><strong>create / update</strong>分别设为 DENY、ASK 或 AUTO。</div>
+                <div class="principle"><strong>敏感动作独立</strong>delete、send、pay 等不会被一并放开。</div>
+              </div>
+              <div class="install-actions" id="installActions"></div>
+            </div>
+            <div class="install-footer"><p>以后单个资源只能在这个上限内获得许可。ACME 托管资源仍由组织 mandatory authority 决定，Alice 不能用此处覆盖。</p><button class="primary-button" type="button" id="installButton">确认上限并查看资源</button></div>
+          </div>
+          <div class="empty-state show">
+            <div class="empty-visual" aria-hidden="true"><span class="r1"></span><span class="line"></span><span class="r2"></span></div>
+            <h2>还没有可查看的资源许可</h2>
+            <p>安装完成后，Alice 可以登记个人资源。机构托管资源会在 ACME authority 授予时出现，并明确标出其不可被个人覆盖的来源。</p>
+            <button class="secondary-button" type="button" id="previewButton">用假数据预览常规状态</button>
+          </div>
+        </section>
+
+        <div class="standard-content" id="standardContent">
+          <div class="section-head"><div><h2 id="mapTitle">资源权限地图</h2><p id="mapSubtitle">行是已登记资源，列是持有许可的 user / app / agent / org / workspace。空白即 deny。</p></div><div class="legend" aria-label="Permit modes"><span class="key"><span class="dot auto"></span>AUTO</span><span class="key"><span class="dot ask"></span>ASK</span><span class="key"><span class="dot deny"></span>DENY</span><span class="key"><span class="dot block"></span>BLOCK（硬阻断）</span></div></div>
+          <div class="workspace">
+            <section class="matrix-shell" aria-label="Resource permission matrix">
+              <div class="matrix-toolbar"><button class="filter-button" type="button">全部 authority ▾</button><button class="filter-button" type="button">全部 domain ▾</button><button class="filter-button" type="button">仅显示有许可</button><span class="spacer"></span><span class="matrix-count" id="matrixCount">4 资源 · 12 许可</span></div>
+              <div class="table-scroll"><table><thead id="matrixHead"></thead><tbody id="matrixBody"></tbody></table></div>
+              <div class="mobile-permit-list" id="mobileList"></div>
+            </section>
+            <aside class="detail-panel" aria-live="polite" aria-labelledby="detailTitle">
+              <div class="detail-head"><div class="detail-kicker">EXPLAIN 当前动作</div><h3 id="detailTitle">Expense Helper → calendar · create</h3><p id="detailSub">目标受众：仅 Alice · 个人域</p><div class="decision-line"><span class="decision ask" id="decisionText">ASK</span><span class="decision-note" id="decisionNote">允许请求<br>执行前确认</span></div></div>
+              <ol class="explain-steps" id="explainSteps"></ol>
+              <div class="detail-actions"><button class="secondary-button" type="button" id="historyButton">查看变更</button><button class="primary-button" type="button" id="editButton">编辑许可</button></div>
+            </aside>
+          </div>
+
+          <section class="explain-builder" aria-labelledby="explainBuilderTitle"><h2 id="explainBuilderTitle">解释任一具体动作</h2><p>选择 authority、资源、动作和目标受众；结果来自当前假数据，不会执行该动作。</p><div class="query-grid">
+            <div class="field"><label for="queryActor">谁发起</label><select id="queryActor"><option>Expense Helper app</option><option>Reconcile agent</option><option>Mei 用户</option><option>Alice 用户</option><option>ACME org</option><option>Q3 Strategy workspace</option></select></div>
+            <div class="field"><label for="queryResource">对什么资源</label><select id="queryResource"><option value="report">report/42</option><option value="expenses">expenses 目录</option><option value="calendar">calendar 工具</option><option value="github">GitHub credential handle</option></select></div>
+            <div class="field"><label for="queryAction">什么动作</label><select id="queryAction"><option>read</option><option>create</option><option>update</option><option>delete</option><option>send</option><option>pay</option><option>publish</option><option>execute</option><option>manage_access</option><option>use_credential</option></select></div>
+            <div class="field"><label for="queryAudience">给谁看 / 影响谁</label><select id="queryAudience"><option>仅 Alice</option><option>Q3 Strategy 成员</option><option>ACME 成员</option><option>Mei</option><option>公开 audience</option></select></div>
+            <button type="button" class="primary-button" id="explainButton">EXPLAIN</button>
+          </div></section>
+
+          <div class="section-head"><div><h2>跨域产物</h2><p>资源不跨域漂移。只有明确的 publish、link 或 copy 会产生新的受众边界。</p></div></div>
+          <section class="cross-domain" aria-label="Cross-domain artifacts">
+            <article class="artifact"><div class="artifact-icon">C</div><h3>共享快照</h3><p>report/42 在发布时复制一份静态内容；之后不随原件更新。</p><div class="artifact-meta"><span>copy</span><span>受众：Mei</span><span>来源：Alice</span></div></article>
+            <article class="artifact"><div class="artifact-icon">L</div><h3>实时只读视图</h3><p>Q3 Strategy 成员通过 link 读取当前版本；不能更新原件。</p><div class="artifact-meta"><span>link</span><span>read · AUTO</span><span>可撤销</span></div></article>
+            <article class="artifact"><div class="artifact-icon">C+</div><h3>可编辑工作副本</h3><p>复制进 Q3 Strategy 后由 workspace authority 管理，新副本可编辑。</p><div class="artifact-meta"><span>copy</span><span>新 authority</span><span>update · ASK</span></div></article>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="editor-backdrop" id="editorBackdrop">
+    <section class="editor" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
+      <div class="editor-head"><div><div class="eyebrow">规则编辑</div><h2 id="editorTitle">Expense Helper 对 calendar 工具</h2><p>只编辑当前 authority 可决定的许可；动作之间互不隐含。</p></div><button class="close-button" id="closeEditor" type="button" aria-label="关闭编辑器">×</button></div>
+      <div class="editor-body">
+        <div class="edit-summary"><div><span>Authority</span><strong id="editAuthority">Alice · 个人 owner</strong></div><div><span>Domain / Audience</span><strong id="editDomain">个人域 · 仅 Alice</strong></div><div><span>Holder</span><strong id="editHolder">Expense Helper app</strong></div><div><span>安装长期上限</span><strong>read AUTO · create ASK</strong></div></div>
+        <div class="mandatory-note" id="mandatoryNote"><strong>ACME mandatory authority</strong><br>此规则由组织托管。你可以查看理由，但不能在个人或 workspace 层放宽或覆盖。</div>
+        <div class="edit-actions"><div class="edit-actions-head"><span>独立动作</span><span>许可模式</span></div><div id="editActionRows"></div></div>
+        <div class="editor-audience"><h3>目标受众与继承</h3><div class="field"><label for="editAudience">目标受众</label><select id="editAudience"><option>仅 Alice</option><option>Q3 Strategy 当前成员</option><option>Mei</option></select></div><div class="field"><label for="editInheritance">许可来源</label><select id="editInheritance"><option>直接许可 · Alice</option><option>继承自 Q3 Strategy workspace</option><option>ACME mandatory authority（只读）</option></select></div></div>
+        <div class="edit-warning">共享数据可能含有恶意 prompt injection。AUTO 只表示无需逐次确认，不表示内容可信；Expense Helper 仍可能犯细微错误。</div>
+        <div class="save-refusal" id="saveRefusal"><strong>组织规则拒绝这次修改</strong>你尝试把 <span id="refusedAction">pay</span> 调整为 AUTO，超出 ACME mandatory authority。所有编辑已保留；收紧该动作后可重试。</div>
+      </div>
+      <div class="editor-footer"><span class="unsaved" id="unsavedLabel">有未保存更改</span><div class="save-actions"><button class="secondary-button" id="cancelEdit" type="button">取消</button><button class="primary-button" id="saveEdit" type="button">保存规则</button></div></div>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const holders = ["Alice 用户", "Expense Helper app", "Reconcile agent", "Mei 用户", "ACME org", "Q3 Strategy workspace"];
+    const resources = [
+      { id: "report", name: "report/42", meta: "文档 · Alice 登记 · 个人域", authority: "Alice", tag: "个人 authority" },
+      { id: "expenses", name: "expenses 目录", meta: "目录 · ACME 托管域", authority: "ACME", tag: "mandatory authority", mandatory: true },
+      { id: "calendar", name: "calendar 工具", meta: "工具 · Alice 登记 · 个人域", authority: "Alice", tag: "个人 authority" },
+      { id: "github", name: "GitHub credential handle", meta: "凭据引用 · Alice 登记 · 个人域", authority: "Alice", tag: "个人 authority" }
+    ];
+    const permits = {
+      report: {
+        "Alice 用户": [["read","AUTO"],["update","AUTO"]],
+        "Expense Helper app": [["read","AUTO"],["update","ASK"]],
+        "Reconcile agent": [["read","ASK"]],
+        "Mei 用户": [["read","AUTO"]],
+        "Q3 Strategy workspace": [["publish","ASK"]]
+      },
+      expenses: {
+        "Alice 用户": [["read","AUTO"],["update","ASK"]],
+        "Expense Helper app": [["read","AUTO"],["create","AUTO"],["pay","ASK"]],
+        "Reconcile agent": [["read","AUTO"],["update","ASK"]],
+        "ACME org": [["manage_access","AUTO"]],
+        "Q3 Strategy workspace": [["read","AUTO"]]
+      },
+      calendar: {
+        "Alice 用户": [["read","AUTO"],["create","AUTO"]],
+        "Expense Helper app": [["read","AUTO"],["create","ASK"],["delete","DENY"]],
+        "Reconcile agent": [["read","ASK"]]
+      },
+      github: {
+        "Alice 用户": [["manage_access","AUTO"]],
+        "Expense Helper app": [["use_credential","ASK"],["execute","BLOCK"]],
+        "Reconcile agent": [["use_credential","DENY"]]
+      }
+    };
+    const roles = {
+      owner: { eyebrow:"个人 owner", title:"谁能动用我登记的资源？", description:"检查直接许可、继承来源和目标受众；必要时收紧长期上限内的规则。", task:"Expense Helper 能否对 calendar 工具执行 create，以及是否每次向 Alice 确认。", count:"12", label:"项有效许可", scope:"Alice 的资源" },
+      steward: { eyebrow:"机构资源 steward", title:"ACME 托管资源是否遵守组织边界？", description:"优先查看 mandatory authority、例外请求与组织受众；个人许可不能覆盖组织规则。", task:"确认 Expense Helper 对 expenses 目录的 pay 只能 ASK，且公开 publish 被组织规则拒绝。", count:"3", label:"项待审查例外", scope:"ACME 托管域" },
+      workspace: { eyebrow:"Workspace 管理员", title:"新旧成员能看到哪些历史内容？", description:"设置 Q3 Strategy 的成员受众，并区分实时只读视图与可编辑工作副本。", task:"决定未来加入 Q3 Strategy 的成员是否自动获得历史 report/42 实时只读视图。", count:"1", label:"项历史策略待定", scope:"Q3 Strategy" },
+      auditor: { eyebrow:"审计查看者", title:"为什么这个具体动作会被允许或拒绝？", description:"只读检查 authority、许可模式、继承来源和目标受众；不能更改规则。", task:"解释 Reconcile agent 对 GitHub credential handle 执行 use_credential 为什么是 deny。", count:"27", label:"项可解释决策", scope:"审计视图" }
+    };
+    const actionHelp = {
+      read:"读取内容", create:"创建新内容", update:"修改现有内容", delete:"删除资源",
+      send:"向外发送", pay:"发起付款", publish:"发布到新受众", execute:"执行外部操作",
+      manage_access:"管理他人许可", use_credential:"使用凭据引用"
+    };
+    const allActions = ["read","create","update","delete","send","pay","publish","execute","manage_access","use_credential"];
+    const installDefaults = {read:"AUTO",create:"ASK",update:"ASK",delete:"DENY",send:"ASK",pay:"ASK",publish:"ASK",execute:"ASK",manage_access:"DENY",use_credential:"ASK"};
+    let selected = {resource:"calendar", holder:"Expense Helper app", action:"create"};
+    let lastFocus = null;
+
+    const $ = (id) => document.getElementById(id);
+    function modeClass(mode){ return mode.toLowerCase(); }
+    function renderPermitLines(lines){ return lines.map(([a,m]) => `<span class="permit-line"><span class="action">${a}</span><span class="mode ${modeClass(m)}">${m}</span></span>`).join(""); }
+
+    function renderMatrix(dense=false){
+      $("matrixHead").innerHTML = `<tr><th scope="col">已登记资源 / Authority</th>${holders.map(h=>`<th scope="col">${h}</th>`).join("")}</tr>`;
+      const rows = dense ? [...resources, {id:"report-copy",name:"report/42 · 工作副本",meta:"文档 · Q3 Strategy 域",authority:"Q3 Strategy",tag:"workspace authority"},{id:"snapshot",name:"report/42 · Mei 快照",meta:"静态副本 · Mei audience",authority:"Mei",tag:"个人 authority"}] : resources;
+      $("matrixBody").innerHTML = rows.map(r => {
+        const source = permits[r.id] || (r.id === "report-copy" ? {"Mei 用户":[["read","AUTO"],["update","ASK"]],"Q3 Strategy workspace":[["manage_access","AUTO"]]} : {"Mei 用户":[["read","AUTO"]]});
+        const cells = holders.map(h => {
+          const lines = source[h];
+          if(!lines) return `<td><span class="empty-cell" aria-label="No permit, denied">—</span></td>`;
+          if($("stateSelect").value==="revoked" && h==="Expense Helper app") return `<td><span class="permit-line"><span class="action">已撤销</span><span class="mode deny">DENY</span></span></td>`;
+          const selectedHere = selected.resource === r.id && selected.holder === h;
+          return `<td><button type="button" class="permit-cell ${selectedHere?"selected":""}" data-resource="${r.id}" data-holder="${h}" aria-label="${r.name}, ${h}: ${lines.map(x=>x.join(" ")).join(", ")}">${renderPermitLines(lines)}</button></td>`;
+        }).join("");
+        return `<tr><td><span class="resource-name">${r.name}</span><span class="resource-meta">${r.meta}</span><span class="authority-tag ${r.mandatory?"mandatory":""}">${r.tag}</span></td>${cells}</tr>`;
+      }).join("");
+      const mobileEntries=[];
+      rows.forEach(r=>{
+        const source = permits[r.id] || (r.id === "report-copy" ? {"Mei 用户":[["read","AUTO"],["update","ASK"]],"Q3 Strategy workspace":[["manage_access","AUTO"]]} : {"Mei 用户":[["read","AUTO"]]});
+        Object.entries(source).forEach(([holder, lines])=> {
+          const shownLines=$("stateSelect").value==="revoked"&&holder==="Expense Helper app"?[["已撤销","DENY"]]:lines;
+          mobileEntries.push(`<button class="mobile-permit ${selected.resource===r.id&&selected.holder===holder?"selected":""}" type="button" data-resource="${r.id}" data-holder="${holder}"><span class="mobile-permit-top"><span class="holder">${holder}</span><span class="authority-tag ${r.mandatory?"mandatory":""}">${r.tag}</span></span><span class="res">${r.name}</span><span class="permit-lines">${renderPermitLines(shownLines)}</span></button>`);
+        });
+      });
+      $("mobileList").innerHTML=mobileEntries.join("");
+      const total = mobileEntries.length;
+      $("matrixCount").textContent=`${rows.length} 资源 · ${total} holder 许可`;
+      bindPermitCells();
+    }
+
+    function bindPermitCells(){ document.querySelectorAll("[data-resource][data-holder]").forEach(btn=>btn.addEventListener("click",()=>{
+      selected.resource=btn.dataset.resource; selected.holder=btn.dataset.holder; delete selected.audience;
+      const lines=(permits[selected.resource]||{})[selected.holder] || [["read","AUTO"]];
+      selected.action=lines[0][0]; renderMatrix($("stateSelect").value==="dense"); renderDetail();
+    })); }
+
+    function detailDecision(){
+      const lines=(permits[selected.resource]||{})[selected.holder] || [];
+      if($("stateSelect").value==="revoked" && selected.holder==="Expense Helper app") return "DENY";
+      const found=lines.find(([a])=>a===selected.action);
+      return found ? found[1] : "DENY";
+    }
+    function resourceFor(id){ return resources.find(r=>r.id===id) || {name:id,authority:"Q3 Strategy",tag:"workspace authority",meta:"工作副本"}; }
+    function renderDetail(){
+      const r=resourceFor(selected.resource); const decision=detailDecision();
+      $("detailTitle").textContent=`${selected.holder.replace(" app","").replace(" 用户","")} → ${r.name} · ${selected.action}`;
+      const audience = selected.audience || (selected.resource==="expenses" ? "ACME 成员" : selected.holder==="Mei 用户" ? "Mei" : "仅 Alice");
+      $("detailSub").textContent=`目标受众：${audience} · ${r.meta.split("·").slice(-1)[0].trim()}`;
+      $("decisionText").textContent=decision; $("decisionText").className=`decision ${modeClass(decision)}`;
+      const notes={AUTO:"允许执行\n无需逐次确认",ASK:"允许请求\n执行前确认",DENY:"没有许可\n普通拒绝",BLOCK:"硬阻断\n不能被继承覆盖"};
+      $("decisionNote").innerHTML=(notes[decision]||notes.DENY).replace("\n","<br>");
+      const authority = r.authority === "ACME" ? "ACME mandatory authority" : `${r.authority} authority`;
+      const source = r.authority === "ACME" ? "组织直接规则，不可由 Alice 或 workspace 放宽" : selected.holder.includes("workspace") ? "继承自 Q3 Strategy workspace" : `由 ${r.authority} 直接授予`;
+      const ceiling = decision==="DENY" ? `未找到 ${selected.action} 许可；普通未授权即 deny` : decision==="BLOCK" ? "命中少量硬阻断；停止继续评估" : `许可模式为 ${decision}，且未超过 Expense Helper 安装上限`;
+      $("explainSteps").innerHTML=`<li data-step="1"><span class="step-label">Authority</span>${authority} 有权决定 ${r.name}</li><li data-step="2"><span class="step-label">Domain / Audience</span>动作留在 ${audience} 的明确边界内${selected.action==="publish"?"，publish 将创建跨域产物":""}</li><li data-step="3"><span class="step-label">Permit</span>${source}；${ceiling}</li>`;
+      const locked = $("roleSelect").value==="auditor" || ["readonly","revoked"].includes($("stateSelect").value);
+      $("editButton").disabled=locked; $("editButton").textContent=locked?"只读":"编辑许可";
+    }
+
+    function renderInstallActions(){
+      $("installActions").innerHTML=allActions.map(action=>{
+        const def=installDefaults[action];
+        return `<div class="install-row"><div><span class="action-name">${action}</span><span class="action-help">${actionHelp[action]}</span></div><span class="action-help">单独设置长期上限</span><div class="segmented" data-install-action="${action}">${["DENY","ASK","AUTO"].map(m=>`<button type="button" class="${m===def?"active":""}" data-mode="${m}">${m}</button>`).join("")}</div></div>`;
+      }).join("");
+      document.querySelectorAll("[data-install-action] button").forEach(btn=>btn.addEventListener("click",()=>{
+        const row=btn.parentElement; row.querySelectorAll("button").forEach(b=>b.classList.remove("active")); btn.classList.add("active");
+      }));
+    }
+
+    function renderEditorRows(mandatory=false){
+      $("editActionRows").innerHTML=allActions.map(action=>{
+        const current=((permits[selected.resource]||{})[selected.holder]||[]).find(x=>x[0]===action)?.[1] || "DENY";
+        const hard=action==="execute" && selected.resource==="github";
+        return `<div class="edit-action-row"><div class="name">${action}<span class="why">${actionHelp[action]}${hard?" · 硬阻断":""}</span></div><div class="segmented" data-edit-action="${action}">${["DENY","ASK","AUTO"].map(m=>`<button type="button" class="${m===current||(hard&&m==="DENY")?"active":""}" data-mode="${m}" ${mandatory||hard?"disabled":""}>${hard&&m==="DENY"?"BLOCK":m}</button>`).join("")}</div></div>`;
+      }).join("");
+      document.querySelectorAll("[data-edit-action] button:not(:disabled)").forEach(btn=>btn.addEventListener("click",()=>{
+        btn.parentElement.querySelectorAll("button").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); $("unsavedLabel").textContent="有未保存更改";
+      }));
+    }
+
+    function openEditor(forceState){
+      lastFocus=document.activeElement; const r=resourceFor(selected.resource); const mandatory=r.authority==="ACME"; const stewardCanEdit=mandatory&&$("roleSelect").value==="steward"; const lockedMandatory=mandatory&&!stewardCanEdit;
+      $("editorTitle").textContent=`${selected.holder} 对 ${r.name}`; $("editAuthority").textContent=mandatory?"ACME · mandatory authority":`${r.authority} · ${r.tag}`;
+      $("editDomain").textContent=selected.resource==="expenses"?"ACME 托管域 · ACME 成员":"个人域 · 仅 Alice"; $("editHolder").textContent=selected.holder;
+      $("mandatoryNote").innerHTML=stewardCanEdit?"<strong>ACME mandatory authority</strong><br>你正以 ACME 资源 steward 身份编辑组织规则。更改会影响该托管域，不能被个人或 workspace 规则放宽。":"<strong>ACME mandatory authority</strong><br>此规则由组织托管。你可以查看理由，但不能在个人或 workspace 层放宽或覆盖。";
+      $("mandatoryNote").classList.toggle("show",mandatory); renderEditorRows(lockedMandatory); $("editAudience").disabled=lockedMandatory; $("editInheritance").disabled=lockedMandatory;
+      const state=forceState||$("stateSelect").value; const refused=state==="refused";
+      $("saveRefusal").classList.toggle("show",refused); $("saveEdit").disabled=lockedMandatory || state==="pending" || ["readonly","revoked"].includes(state);
+      $("saveEdit").innerHTML=state==="pending"?'<span class="spinner"></span>正在保存…':refused?"重试保存":"保存规则";
+      $("editorBackdrop").classList.add("open"); $("closeEditor").focus();
+    }
+    function closeEditor(){ $("editorBackdrop").classList.remove("open"); if(lastFocus) lastFocus.focus(); }
+    function showToast(message){ $("toast").textContent=message; $("toast").classList.add("show"); setTimeout(()=>$("toast").classList.remove("show"),1800); }
+
+    function setRole(role){
+      const r=roles[role]; $("roleEyebrow").textContent=r.eyebrow; $("roleTitle").textContent=r.title; $("roleDescription").textContent=r.description; $("roleTask").textContent=r.task; $("roleCount").textContent=r.count; $("roleCountLabel").textContent=r.label; $("headerScope").textContent=r.scope;
+      if(role==="steward") selected={resource:"expenses",holder:"Expense Helper app",action:"pay"};
+      if(role==="workspace") selected={resource:"report",holder:"Q3 Strategy workspace",action:"publish"};
+      if(role==="auditor") selected={resource:"github",holder:"Reconcile agent",action:"use_credential"};
+      if(role==="owner") selected={resource:"calendar",holder:"Expense Helper app",action:"create"};
+      renderMatrix($("stateSelect").value==="dense"); renderDetail();
+    }
+
+    function setState(state){
+      if(state==="refused") selected={resource:"expenses",holder:"Expense Helper app",action:"pay"};
+      if(state==="revoked") selected={resource:"calendar",holder:"Expense Helper app",action:"read"};
+      $("firstRun").classList.toggle("show",state==="first"); $("standardContent").classList.toggle("hidden",state==="first");
+      const banners={
+        pending:["pending","正在保存规则","同一修改已锁定，保存完成前不能重复提交。你可以关闭编辑器，当前演示不会真正持久化。"],
+        refused:["refused","修改被 authority 拒绝，编辑已保留","你把 pay 放宽到 AUTO，超出 ACME mandatory authority。收紧后可直接重试，无需重新填写其他动作。"],
+        readonly:["readonly","只读审计视图","你可以 EXPLAIN 每个动作并查看变更记录，但不能编辑或撤销许可。"],
+        revoked:["terminal","Expense Helper 的长期上限已撤销","这是终态：App 不再持有任何许可，未完成的 ASK 已失效。审计记录仍可查看。"]
+      };
+      const b=banners[state]; $("stateBanner").className=`state-banner ${b?b[0]:""} ${b?"show":""}`;
+      if(b){ $("bannerTitle").textContent=b[1]; $("bannerText").textContent=b[2]; }
+      $("mapTitle").textContent=state==="revoked"?"撤销后的资源权限地图":state==="dense"?"资源权限地图 · 密集数据":"资源权限地图";
+      if(state==="revoked") $("mapSubtitle").textContent="Expense Helper 的单元均作为无许可处理；保留历史只用于解释撤销前决策。";
+      else $("mapSubtitle").textContent="行是已登记资源，列是持有许可的 user / app / agent / org / workspace。空白即 deny。";
+      renderMatrix(state==="dense"); renderDetail();
+      if(["pending","refused"].includes(state)) setTimeout(()=>openEditor(state),80); else if($("editorBackdrop").classList.contains("open")) closeEditor();
+    }
+
+    $("roleSelect").addEventListener("change",e=>setRole(e.target.value));
+    $("stateSelect").addEventListener("change",e=>setState(e.target.value));
+    document.querySelectorAll("[data-viewport]").forEach(btn=>btn.addEventListener("click",()=>{
+      $("prototype").dataset.viewport=btn.dataset.viewport; document.querySelectorAll("[data-viewport]").forEach(b=>b.setAttribute("aria-pressed",String(b===btn)));
+    }));
+    $("editButton").addEventListener("click",()=>openEditor()); $("closeEditor").addEventListener("click",closeEditor); $("cancelEdit").addEventListener("click",closeEditor);
+    $("editorBackdrop").addEventListener("click",e=>{ if(e.target===$("editorBackdrop")) closeEditor(); });
+    document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&$("editorBackdrop").classList.contains("open")) closeEditor(); });
+    $("saveEdit").addEventListener("click",()=>{
+      if($("stateSelect").value==="refused"){ $("saveRefusal").classList.remove("show"); $("saveEdit").innerHTML='<span class="spinner"></span>正在保存…'; $("saveEdit").disabled=true; setTimeout(()=>{ $("saveEdit").textContent="保存规则"; $("saveEdit").disabled=false; $("unsavedLabel").textContent="更改已保留，请先收紧 pay"; $("saveRefusal").classList.add("show"); },900); return; }
+      $("saveEdit").innerHTML='<span class="spinner"></span>正在保存…'; $("saveEdit").disabled=true; $("unsavedLabel").textContent="保存中 · 已防止重复提交";
+      setTimeout(()=>{ closeEditor(); $("saveEdit").textContent="保存规则"; $("saveEdit").disabled=false; showToast("原型：规则保存成功（未真实持久化）"); },1100);
+    });
+    $("historyButton").addEventListener("click",()=>showToast("原型：变更记录为只读假数据"));
+    $("explainButton").addEventListener("click",()=>{
+      selected.resource=$("queryResource").value; selected.holder=$("queryActor").value; selected.action=$("queryAction").value; selected.audience=$("queryAudience").value;
+      renderMatrix($("stateSelect").value==="dense"); renderDetail(); document.querySelector(".detail-panel").scrollIntoView({behavior:"smooth",block:"nearest"});
+    });
+    $("previewButton").addEventListener("click",()=>{ $("stateSelect").value="normal"; setState("normal"); });
+    $("installButton").addEventListener("click",()=>{ $("installButton").disabled=true; $("installButton").innerHTML='<span class="spinner"></span>正在确认…'; setTimeout(()=>{ $("stateSelect").value="normal"; setState("normal"); showToast("原型：安装上限已进入常规视图"); $("installButton").disabled=false; $("installButton").textContent="确认上限并查看资源"; },900); });
+
+    renderInstallActions(); renderMatrix(false); renderDetail();
+  </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+# 软件工厂 — the engine editing itself. The /factory page (kernel-rendered,
+# admin-only) is the visual face; this app supplies the durable half: the save
+# audit log and the resident architect agent.
+#
+# The architect used to declare `adapter: claude-code`, and SEC-06 removed that.
+# It is the sample this repository ships, so it was also the sample that taught
+# "an App Agent may be a coding CLI" — which is precisely the shape a
+# `cloud-multi-user` host must not have. An ordinary App Agent gets a
+# tool-calling loop and the capability tools its grant names; a heavyweight
+# coding CLI is either the OWNER's own session (Session Hub) or the owner-only
+# `system:dev-factory` trusted service, and neither of those is an App Agent.
+#
+# On a `local-owner` deployment the CLI adapters are still available and this
+# file could name one — but the sample stays on the portable choice, because a
+# sample that only loads on one profile is a sample that fails at boot on the
+# default one.
+app: factory
+title: 软件工厂
+scope: shared
+
+agents:
+  architect:
+    adapter: openai-loop
+    prompt: prompts/architect.md
+
+pages:
+  main: pages/main.yaml

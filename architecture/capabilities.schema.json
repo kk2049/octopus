@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.example.org/schemas/octopus-capabilities-v1.json",
+  "title": "Octopus product capabilities and cross-cutting concerns",
+  "description": "Human-curated bridge between requirement language and architecture vocabulary. Modules and constraints must exist in architecture/atlas.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "capabilities"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "const": 1 },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "label", "description", "aliases", "modules"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)?$" },
+          "kind": { "enum": ["product", "concern"] },
+          "label": { "type": "string", "minLength": 1, "maxLength": 60 },
+          "description": { "type": "string", "minLength": 1, "maxLength": 400 },
+          "aliases": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 40,
+            "items": { "type": "string", "minLength": 2, "maxLength": 40 }
+          },
+          "modules": {
+            "type": "array",
+            "maxItems": 30,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "paths": {
+            "type": "array",
+            "maxItems": 30,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "constraints": {
+            "type": "array",
+            "maxItems": 20,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "docs": {
+            "type": "array",
+            "maxItems": 10,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "parent": { "type": "string" }
+        }
+      }
+    }
+  }
+}

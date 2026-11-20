@@ -1,0 +1,80 @@
+.group {
+  flex: 1;
+  min-height: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+/*
+ * A vertical group divides HEIGHT, so its own `flex: 1` (which asks for the
+ * remaining width of a row) has to become a height in a column instead. Its
+ * children are already `min-height: 0`.
+ */
+.vgroup {
+  min-width: 0;
+}
+
+.handle {
+  flex: none;
+  width: 5px;
+  background: transparent;
+  position: relative;
+  z-index: 5;
+  align-self: stretch;
+}
+
+.vhandle {
+  width: auto;
+  height: 5px;
+}
+
+.handle:hover,
+.handle[data-resize-handle-active] {
+  background: var(--accent);
+}
+
+.handle:focus-visible {
+  outline: var(--focus);
+  outline-offset: -1px;
+}
+
+/*
+ * Narrow viewports turn columns into full-height, horizontally swipeable
+ * panels, so a precision resize divider makes no sense.
+ *
+ * `react-resizable-panels` writes `flex-direction`, `flex-basis: 0`, the
+ * percentage `flex-grow` and `overflow: hidden` as INLINE styles, so every
+ * declaration here needs `!important` or it silently loses — the previous
+ * version of this block never actually applied. The earlier vertical stack
+ * squeezed several independently scrolling panes into short strips. A snap
+ * row keeps one useful workspace visible and leaves a sliver of the next one
+ * as the touch affordance.
+ *
+ * Only COLUMN groups stack (ticket #61): a vertical group is already rows, and
+ * forcing an even share on it would undo a collapsed panel — the ticket page's
+ * conversation opens collapsed, and on a phone that matters more, not less.
+ */
+@media (max-width: 760px) {
+  .group:not(.vgroup) {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+  }
+  .group:not(.vgroup) > .handle {
+    display: none;
+  }
+  .group:not(.vgroup) > .panel {
+    flex: 0 0 92% !important;
+    min-width: 88%;
+    min-height: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+}

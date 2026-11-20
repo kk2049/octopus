@@ -1,0 +1,5 @@
+{
+  "$schema": "./waivers.schema.json",
+  "version": 1,
+  "waivers": []
+}

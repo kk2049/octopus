@@ -1,0 +1,31 @@
+.banner {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: var(--space-2) 14px;
+  background: #7c2d12;
+  color: #fff;
+  font-size: var(--text-sm);
+  flex: none;
+}
+
+.banner button {
+  border: none;
+}
+
+.rollback {
+  background: #fff;
+  color: var(--err);
+}
+
+.failure {
+  font-weight: 600;
+}
+
+.origin {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

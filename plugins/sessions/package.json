@@ -1,0 +1,33 @@
+{
+  "name": "@claude-bot/plugin-sessions",
+  "version": "2.1.0",
+  "type": "module",
+  "main": "dist/server.js",
+  "exports": {
+    ".": "./dist/server.js",
+    "./scan": {
+      "types": "./dist/scan.d.ts",
+      "default": "./dist/scan.js"
+    },
+    "./parse": {
+      "types": "./dist/parse.d.ts",
+      "default": "./dist/parse.js"
+    },
+    "./remote": {
+      "types": "./dist/remote.d.ts",
+      "default": "./dist/remote.js"
+    }
+  },
+  "scripts": {
+    "build": "node ../../tools/build-cache/bin/octo-build.mjs -- 'tsup src/server.ts src/scan.ts src/parse.ts src/remote.ts --format esm --dts --clean'",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@claude-bot/agent-sessions-contract": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0"
+  }
+}

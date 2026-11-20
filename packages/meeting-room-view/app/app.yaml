@@ -1,0 +1,22 @@
+id: meeting-room
+schema: 3
+state:
+  scope: shared
+roles:
+  coordinator: {max: 8}
+  member: {max: 64}
+actions:
+  book_room:
+    binding: runtime
+    handler: book_room
+    title: 预订会议室
+    description: 按整点选择同一天、同一会议室的连续时段；服务端再次检查冲突。
+    roles: [coordinator, member]
+    params:
+      date: {type: string, max: 10, required: true, description: 日期 YYYY-MM-DD}
+      room: {type: string, max: 16, required: true, enum: [room-a, room-b, room-c], description: 会议室}
+      start: {type: number, max: 2, required: true, description: 开始小时 8..19}
+      end: {type: number, max: 2, required: true, description: 结束小时 9..20}
+      purpose: {type: string, max: 500, required: true, description: 会议用途}
+view:
+  page: pages/main.yaml

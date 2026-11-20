@@ -1,0 +1,20 @@
+.wrap {
+  composes: page from "../ui-kit/layout.module.css";
+  max-width: 720px;
+  padding-bottom: 40px;
+}
+
+.wrap h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 17px;
+}
+
+.lead {
+  composes: lead from "../ui-kit/layout.module.css";
+}
+
+/* Ant owns the callout surface; page CSS only controls its placement. */
+.warn {
+  font-size: var(--text-sm);
+  margin-top: 14px;
+}

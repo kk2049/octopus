@@ -1,0 +1,14 @@
+scopes:
+  lht:
+    - { type: clip_added, by: "user:lht", at: "2026-07-20T08:30:00Z",
+        data: { id: clip-1, url: "https://arxiv.org/abs/1706.03762", title: "Attention Is All You Need", tag: llm, note: "重读一遍附录里的位置编码推导" } }
+    - { type: clip_added, by: "user:lht", at: "2026-07-21T13:05:00Z",
+        data: { id: clip-2, url: "https://www.anthropic.com/engineering/building-effective-agents", title: "Building Effective Agents", tag: llm, note: "workflow vs agent 的分界那节值得抄进设计文档" } }
+    - { type: clip_added, by: "user:lht", at: "2026-07-22T09:40:00Z",
+        data: { id: clip-3, url: "https://karpathy.github.io/2019/04/25/recipe/", title: "A Recipe for Training Neural Networks", tag: engineering } }
+    - { type: clip_read, by: "user:lht", at: "2026-07-22T21:10:00Z", data: { id: clip-1 } }
+    - { type: clip_added, by: "user:lht", at: "2026-07-24T11:20:00Z",
+        data: { id: clip-4, url: "https://martinfowler.com/articles/patterns-of-distributed-systems/", title: "Patterns of Distributed Systems", tag: engineering, note: "对照 devpipe 的合并锁看 lease/versioned-value 那几个模式" } }
+    - { type: clip_read, by: "user:lht", at: "2026-07-25T08:00:00Z", data: { id: clip-3 } }
+    - { type: clip_added, by: "user:lht", at: "2026-07-26T19:45:00Z",
+        data: { id: clip-5, url: "https://arxiv.org/abs/2203.02155", title: "Training language models to follow instructions with human feedback", tag: llm } }

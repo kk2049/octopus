@@ -1,0 +1,30 @@
+.rv-evidence-window { display: grid; gap: 14px; padding: 12px; }
+.rv-evidence-window header { display: flex; align-items: center; justify-content: space-between; }
+.rv-report-selections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.rv-report-selections > div { border: 1px solid var(--rv-line, #d6dfdf); border-radius: 9px; padding: 12px; background: var(--rv-surface, #f5f8f7); }
+.rv-report-selections small, .rv-evidence-preview small { display: block; color: #526667; margin-bottom: 6px; }
+.rv-report-selections p { margin: 8px 0 0; }
+.rv-report-claim { color: #536765; font-size: 12px; }
+.rv-evidence-links > div { display: grid; grid-template-columns: 85px 1fr; gap: 10px; margin: 10px 0; }
+.rv-evidence-links dd { margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.rv-evidence-preview { display: grid; gap: .5em; }
+.rv-evidence-preview p { margin: 5px 0; }
+@media (max-width: 650px) { .rv-report-selections { grid-template-columns: 1fr; } }
+
+.rv-evidence-statuses { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5em; }
+.rv-evidence-statuses > div { min-width: 0; padding: .375em; border: 1px solid var(--rv-line, #d6dfdf); border-radius: 6px; }
+.rv-evidence-statuses button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: left; }
+.rv-evidence-charts { display: grid; gap: .5em; }
+.rv-evidence-thumbnail { min-width: 0; margin: 0; }
+.rv-evidence-image { font-size: inherit; display: block; width: 100%; min-height: 4.5em; padding: .25em; border: 1px solid var(--rv-line, #d6dfdf); border-radius: 6px; background: var(--rv-surface, #f5f8f7); }
+.rv-evidence-image img { display: block; width: 100%; height: 8.75em; object-fit: contain; }
+.rv-evidence-thumbnail figcaption { margin-top: .25em; overflow-wrap: anywhere; font-size: .75em; }
+.rv-evidence-thumbnail small[role="alert"] { color: #b33d37; overflow-wrap: anywhere; }
+
+.rv-app .rv-card-content.rv-report-card { overflow: auto; overscroll-behavior: contain; }
+.rv-app .rv-report-card > .rv-card-summary { max-height: 4.5em; overflow: auto; }
+.rv-app .rv-report-card .rv-evidence-statuses button { font-size: .82em; padding: .2em .3em; }
+.rv-app .rv-report-card .rv-evidence-preview small { margin-bottom: .375em; }
+
+/* Keep host fixed-pixel button padding from clipping charts when zoomed out. */
+.rv-app .rv-report-card .rv-evidence-image { font-size: inherit; padding: .25em; }

@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.example.org/schemas/octopus-architecture-atlas-v1.json",
+  "title": "Octopus Architecture Atlas",
+  "type": "object",
+  "required": ["system", "zones", "modules", "flows", "constraints"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "system": {
+      "type": "object",
+      "required": ["id", "title", "description"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "sourceUrlTemplate": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "analysis": {
+      "type": "object",
+      "properties": {
+        "sourceRoots": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "exclude": { "type": "array", "items": { "type": "string" } },
+        "gitHistoryCommits": { "type": "integer", "minimum": 1, "maximum": 5000 }
+      },
+      "additionalProperties": false
+    },
+    "zones": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/zone" },
+      "minItems": 1
+    },
+    "modules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/module" },
+      "minItems": 1
+    },
+    "flows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/flow" }
+    },
+    "constraints": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/constraint" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "source": {
+      "type": "object",
+      "required": ["path", "line"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "line": { "type": "integer", "minimum": 1 },
+        "endLine": { "type": "integer", "minimum": 1 },
+        "symbol": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "zone": {
+      "type": "object",
+      "required": ["id", "label", "description", "color", "trust"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "trust": { "enum": ["external", "untrusted", "trusted", "critical"] }
+      },
+      "additionalProperties": false
+    },
+    "module": {
+      "type": "object",
+      "required": ["id", "label", "description", "zone", "criticality", "pathPrefixes"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "zone": { "$ref": "#/$defs/id" },
+        "criticality": { "enum": ["critical", "high", "normal", "supporting"] },
+        "pathPrefixes": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "docs": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "flowStep": {
+      "type": "object",
+      "required": ["id", "label", "zone"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "zone": { "$ref": "#/$defs/id" },
+        "module": { "$ref": "#/$defs/id" },
+        "after": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "role": { "type": "string" },
+        "condition": { "type": "string", "minLength": 1 },
+        "outcome": { "type": "string", "minLength": 1 },
+        "authority": { "type": "string", "minLength": 1 },
+        "terminal": { "type": "boolean" },
+        "source": { "$ref": "#/$defs/source" },
+        "anchorRequired": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "flow": {
+      "type": "object",
+      "required": ["id", "title", "description", "perspective"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "perspective": { "enum": ["control", "authority", "data", "lifecycle"] },
+        "coverage": {
+          "type": "object",
+          "required": ["mode", "scope"],
+          "properties": {
+            "mode": { "const": "critical-branches" },
+            "scope": { "type": "string", "minLength": 1 },
+            "exclusions": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          },
+          "additionalProperties": false
+        },
+        "entrySteps": { "type": "array", "items": { "$ref": "#/$defs/flowStep" } }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["grade", "label"],
+      "properties": {
+        "grade": { "enum": ["derived", "executable", "declared", "runtime"] },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "source": { "$ref": "#/$defs/source" },
+        "document": { "type": "string" },
+        "command": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "forbidDependency": {
+      "type": "object",
+      "required": ["kind", "from", "to"],
+      "properties": {
+        "kind": { "const": "forbid-dependency" },
+        "from": { "type": "array", "items": { "$ref": "#/$defs/id" }, "minItems": 1 },
+        "to": { "type": "array", "items": { "$ref": "#/$defs/id" }, "minItems": 1 },
+        "transitive": { "type": "boolean" },
+        "includeTypeOnly": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "forbidExternal": {
+      "type": "object",
+      "required": ["kind", "from", "patterns"],
+      "properties": {
+        "kind": { "const": "forbid-external" },
+        "from": { "type": "array", "items": { "$ref": "#/$defs/id" }, "minItems": 1 },
+        "patterns": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "entrypoints": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+        "includeTypeOnly": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "noCycles": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "no-cycles" },
+        "modules": { "type": "array", "items": { "$ref": "#/$defs/id" } }
+      },
+      "additionalProperties": false
+    },
+    "flowComplete": {
+      "type": "object",
+      "required": ["kind", "flow", "requiredSteps"],
+      "properties": {
+        "kind": { "const": "flow-complete" },
+        "flow": { "$ref": "#/$defs/id" },
+        "requiredSteps": { "type": "array", "items": { "$ref": "#/$defs/id" }, "minItems": 1 },
+        "requiredEdges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "to"],
+            "properties": { "from": { "$ref": "#/$defs/id" }, "to": { "$ref": "#/$defs/id" } },
+            "additionalProperties": false
+          }
+        },
+        "requiredTerminals": { "type": "array", "items": { "$ref": "#/$defs/id" }, "minItems": 1 }
+      },
+      "additionalProperties": false
+    },
+    "tcbBudget": {
+      "type": "object",
+      "required": ["kind", "budgetFile"],
+      "properties": {
+        "kind": { "const": "tcb-budget" },
+        "budgetFile": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "constraint": {
+      "type": "object",
+      "required": ["id", "title", "description", "concern", "severity"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "concern": { "enum": ["modularity", "authority", "trust", "data", "lifecycle", "reliability", "delivery"] },
+        "severity": { "enum": ["critical", "high", "medium", "info"] },
+        "mechanism": {
+          "oneOf": [
+            { "$ref": "#/$defs/forbidDependency" },
+            { "$ref": "#/$defs/forbidExternal" },
+            { "$ref": "#/$defs/noCycles" },
+            { "$ref": "#/$defs/flowComplete" },
+            { "$ref": "#/$defs/tcbBudget" }
+          ]
+        },
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
+      },
+      "additionalProperties": false
+    }
+  }
+}

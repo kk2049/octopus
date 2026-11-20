@@ -1,0 +1,83 @@
+id: showcase
+# Schema 2 is the surface with typed, required parameters. This App declares
+# both of its actions as `runtime` bindings: they are implemented by handlers in
+# `actions.ts` and touch nothing but this App's own durable state. There is no
+# `resource` binding here and there cannot be one — a declared App binds no user
+# resources (see `src/plan.ts`), and its permission contract is empty.
+schema: 2
+state:
+  scope: account
+actions:
+  add_note:
+    binding: runtime
+    handler: add_note
+    title: 写一条
+    description: 记一条笔记。状态决定它落进收件箱还是归档箱。
+    params:
+      title:
+        type: string
+        max: 200
+        required: true
+        description: 一句话标题
+      body:
+        type: string
+        max: 4000
+        description: 正文，支持 Markdown
+      state:
+        type: string
+        max: 32
+        description: 草稿 / 待办 / 已归档
+  # ONE action for the whole deck vocabulary, not five.
+  #
+  # The edit vocabulary belongs to `deck-model/v1`: the View encodes a command
+  # with the contract's own encoder and this backend applies it. Declaring an
+  # `insert_action`, a `move_action`, a `remove_action` and a `set_action`
+  # would be four more strings an author has to get right, a reviewer has to
+  # check and this file has to declare — to express a vocabulary that is not
+  # this App's in the first place. The parameters below are exactly
+  # `DECK_WIRE_KEYS`.
+  deck_command:
+    binding: runtime
+    handler: deck_command
+    title: 编辑幻灯
+    description: 对这份 deck 应用一条 deck-model/v1 命令。
+    params:
+      op:
+        type: string
+        max: 32
+        required: true
+        description: 命令名，如 set_text / insert_slide / move_slide
+      slide:
+        type: string
+        max: 64
+        description: 被编辑的那一页的 id
+      field:
+        type: string
+        max: 40
+        description: 字段名，如 title / bullets / image.ref
+      index:
+        type: string
+        max: 4
+        description: 列表位置或幻灯位置（十进制）
+      value:
+        type: string
+        max: 512
+        description: 新的文本值
+      layout:
+        type: string
+        max: 32
+        description: 新建一页时的版式：title / bullets / two-column / image-ref
+
+# There is deliberately NO `agents:` block.
+#
+# Two reasons, and the second is the one that matters. (1) This build wires the
+# App agent plane to Session Plus's own manifest loader; a declared App's
+# `app.yaml` is not read by it today, so an `agents:` block here would be inert
+# data that reads like a working declaration — the "quietly turned something on
+# (or off)" failure every release document in this repository refuses. (2) An
+# agent turn spends the deployment's LLM budget and re-enters the tool loop with
+# nobody present. The platform's agent plane is off by default, and a demo App
+# must not be the thing that turns it on: whoever wants an agent here should
+# have to add it, name a model the deployment serves, and mean it.
+view:
+  page: pages/main.yaml

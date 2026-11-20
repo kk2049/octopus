@@ -1,0 +1,9 @@
+# The v4 View is the React composition in src/plan.ts; the backend release
+# layout still names this file, so it records the action surface for a reader.
+layout: daily-brief-docked
+sources: {}
+actions:
+  request: request_summary
+  publish: publish_summary
+  correct: correct_summary
+  acknowledge: acknowledge_summary

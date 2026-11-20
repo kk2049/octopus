@@ -1,0 +1,206 @@
+.chips {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  align-items: center;
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  padding: 2px 7px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  white-space: nowrap;
+  background: transparent;
+}
+
+.codexPanel {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  overflow: hidden;
+  white-space: nowrap;
+  background: transparent;
+}
+
+.codexBrand,
+.codexAccount {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 2px 7px;
+}
+
+.codexBrand {
+  padding-inline: 5px;
+  color: var(--muted);
+}
+
+.codexAccount {
+  position: relative;
+  border-left: 1px solid var(--line);
+}
+
+
+/* A no-layout-shift marker for a recent last-known-good value. */
+.stale::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.normal {
+  color: var(--muted);
+}
+
+.warning {
+  color: var(--q-warning);
+  border-color: var(--q-warning);
+}
+
+.critical {
+  color: var(--q-critical);
+  border-color: var(--q-critical);
+}
+
+/*
+ * The provider logomarks are the vendors' own SVG files, served as hashed
+ * assets and drawn with `<img>` — an isolated document, so neither `--fg` nor
+ * `currentColor` reaches inside them.
+ *
+ * Claude's mark carries the brand terracotta in the file and reads on both the
+ * light and the dark side of every theme, so it is left alone. OpenAI's is a
+ * flat near-black, which disappears on a dark background, so it is inverted to
+ * near-white there. Follow the resolved document scheme, including manual
+ * preferences, so the logo stays visible independently of the OS setting.
+ */
+.mark {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  display: block;
+  user-select: none;
+}
+
+:global(html[data-color-scheme="dark"]) .openai {
+  filter: invert(1);
+}
+
+.win {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+
+.ring {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  display: block;
+}
+
+.track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2.5;
+}
+
+.arc {
+  fill: none;
+  stroke: var(--q-normal);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.warning .arc {
+  stroke: var(--q-warning);
+}
+
+.critical .arc {
+  stroke: var(--q-critical);
+}
+
+.ringNum {
+  font-size: 7.5px;
+  font-weight: 650;
+  fill: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.ddl {
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+/*
+ * Mobile (ticket #178). Under 720px the strip no longer rides in a wide nav
+ * bar: `Shell.module.css` turns the navigation into a drawer and gives every
+ * non-tab child a full-width row, so a single nowrap line of four badges runs
+ * past the drawer's right edge instead of wrapping.
+ *
+ * Two columns, filled row by row, is the layout that fits: the four known
+ * cards become two rows of two, and a build with three or five cards still
+ * wraps sanely because the column count — not the card count — is what is
+ * fixed. `minmax(0, 1fr)` keeps a badge from widening its column past the
+ * available half. The breakpoint is deliberately the same 720px the shell
+ * uses; this rule only makes sense while the drawer layout is in effect.
+ */
+@media (max-width: 720px) {
+  .chips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    white-space: normal;
+  }
+
+  .codexPanel {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .codexBrand {
+    flex: none;
+  }
+
+  .codexAccount {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+
+  .chip {
+    min-width: 0;
+    justify-content: center;
+    overflow: hidden;
+  }
+}
+
+.hosts { display: inline-flex; flex-wrap: wrap; gap: 6px; min-width: 0; white-space: normal; }
+.host { display: flex; flex-direction: column; align-items: stretch; gap: 4px; min-width: min(100%, 340px); padding: 5px 8px; border: 1px solid var(--line); border-radius: 13px; font-size: var(--text-xs); }
+.accountRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; padding-top: 2px; }
+.accountName { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.accountStats { display: inline-flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 5px; min-width: 0; }
+.creditCount { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chips:has(.hosts) { flex-wrap: wrap; }
+@media (max-width: 720px) {
+  .hosts { grid-column: 1 / -1; }
+  .host { width: 100%; }
+}

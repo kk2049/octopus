@@ -1,0 +1,243 @@
+/*
+ * Structural styles for the workspace shell — placement only.
+ *
+ * The App owns the theme: it passes a class name per slot and styles it. What
+ * lives here is what the shell itself is responsible for, which is that panels
+ * fill their slot, a hidden panel stays mounted without taking space, a stacked
+ * document slot has a tab strip, and the primary/secondary split — when it
+ * exists — divides the main region as a flex row.
+ */
+
+.av-workspace {
+  /* Overlay slots use absolute positioning and must be bounded by THIS
+   * workspace, not by the iframe viewport above its header/chrome. */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* navigation | main region. `bottom` and `overlay` are siblings. */
+.av-columns {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+.av-slot {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * `display: flex` above would defeat the `hidden` attribute's UA default, so
+ * the shell's narrow-screen drill-in — which hides slots instead of
+ * unmounting them — needs this to actually take them out of the layout.
+ */
+.av-slot[hidden] {
+  display: none;
+}
+
+/*
+ * The tab strip's fixed row leaves the panels area to fill whatever is left of
+ * the slot. Without this the tablist and the panels would share the height at
+ * equal flex weights and every panel would end up half as tall as its slot.
+ */
+.av-slot-body {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.av-slot[data-av-slot="primary"],
+.av-slot[data-av-slot="secondary"] {
+  flex: 1;
+}
+
+.av-slot[data-av-slot="overlay"] {
+  position: absolute;
+  inset: auto;
+  z-index: 20;
+}
+
+.av-panel {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.av-panel[hidden] {
+  display: none;
+}
+
+.av-panel-unavailable {
+  border: 1px dashed var(--av-line);
+  border-radius: 10px;
+  padding: 9px 11px;
+  color: var(--av-muted);
+  font-size: 12px;
+  background: var(--av-surface);
+}
+
+.av-panel-detail {
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Dirty-close negotiation shared by fixed and docking presentations. */
+.av-close-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  background: rgb(0 0 0 / 28%);
+}
+
+.av-close-dialog {
+  width: min(420px, 100%);
+  padding: 16px;
+  border: 1px solid var(--av-line);
+  border-radius: 10px;
+  background: var(--av-surface);
+  color: var(--av-fg);
+  box-shadow: var(--av-shadow-sm);
+}
+
+.av-close-dialog p {
+  margin: 8px 0 14px;
+  color: var(--av-muted);
+}
+
+.av-close-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.av-close-discard {
+  border-color: var(--av-error);
+  color: var(--av-error);
+}
+
+.av-drill-back {
+  align-self: flex-start;
+  margin-bottom: 6px;
+  font: inherit;
+  padding: 4px 10px;
+  border: 1px solid var(--av-line);
+  border-radius: 8px;
+  background: var(--av-surface);
+  color: var(--av-fg);
+  cursor: pointer;
+}
+
+/* ── the main region: primary + optional secondary sharing a flex row ────── */
+
+.av-main-region {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+/* ── tab strip for stacked document panels ────────────────────────────────── */
+
+.av-tablist {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  padding: 4px 6px 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--av-line);
+}
+
+.av-tab {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 220px;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--av-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.av-tab:hover {
+  color: var(--av-fg);
+  background: var(--av-surface);
+}
+
+.av-tab.active {
+  color: var(--av-fg);
+  background: var(--av-surface);
+  border-color: var(--av-line);
+  position: relative;
+  z-index: 1;
+  margin-bottom: -1px;
+}
+
+.av-tab:focus-visible {
+  outline: 2px solid var(--av-accent, currentColor);
+  outline-offset: -1px;
+}
+
+.av-tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.av-tab-dirty {
+  flex: none;
+  color: var(--av-warn);
+  font-size: 9px;
+}
+
+.av-tab-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  color: var(--av-muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.av-tab-close:hover {
+  color: var(--av-fg);
+  background: var(--av-line, rgb(0 0 0 / 8%));
+}
+
+/* ── narrow: columns stack, main region does too ─────────────────────────── */
+
+.av-workspace[data-av-narrow] .av-columns {
+  flex-direction: column;
+}
+
+.av-workspace[data-av-narrow] .av-main-region {
+  flex-direction: column;
+}

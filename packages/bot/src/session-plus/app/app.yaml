@@ -1,0 +1,586 @@
+id: session-plus
+# Schema 2 is the surface that can declare `agents:` and typed parameters.
+# Schema 1 is frozen, not deprecated: the installed legacy / modular-v1 /
+# modular-v2 releases are the rollback targets, and they are read by code that
+# behaves exactly as it did before this file moved.
+schema: 2
+state:
+  scope: account
+actions:
+  read_codex_continuation:
+    binding: resource
+    human_only: true
+    title: 读取 Codex 自动续接消息
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+  save_codex_continuation:
+    binding: resource
+    human_only: true
+    title: 保存 Codex 自动续接消息
+    description: 设置重启恢复与容量重试使用的文字；保存不启动模型，空值恢复默认。
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+      prompt:
+        type: string
+        max: 4000
+      revision:
+        type: string
+        max: 36
+        required: true
+  open_shared_session:
+    binding: resource
+    human_only: true
+    title: 打开共享会话
+    params:
+      share_id:
+        type: string
+        max: 64
+        required: true
+  pin_session:
+    binding: runtime
+    handler: pin_session
+    title: 收藏会话
+    description: 把一条会话钉进收藏里；不带 pinned 时重复钉同一条会取消收藏。
+    params:
+      session:
+        type: string
+        max: 1024
+        required: true
+        description: 会话的不透明 id，来自列表或搜索结果
+      pinned:
+        type: boolean
+        description: true 收藏、false 取消收藏；留空表示切换
+  # Folders are App-owned navigation state like pins: no Gate operation, no
+  # provider mutation. Membership names opaque session resources only.
+  save_session_folder:
+    binding: runtime
+    handler: save_session_folder
+    title: 保存会话文件夹
+    description: 新建或重命名一个会话文件夹。
+    params:
+      folder:
+        type: string
+        max: 64
+        required: true
+        description: 文件夹的不透明 id；新建时由调用方生成
+      name:
+        type: string
+        max: 96
+        required: true
+        description: 最多 32 个字符的文件夹名称
+  delete_session_folder:
+    binding: runtime
+    handler: delete_session_folder
+    human_only: true
+    title: 删除会话文件夹
+    description: 删除一个文件夹；其中的会话回到未归档列表，会话本身不受影响。
+    params:
+      folder:
+        type: string
+        max: 64
+        required: true
+        description: 文件夹的不透明 id
+  file_sessions:
+    binding: runtime
+    handler: file_sessions
+    title: 归档会话到文件夹
+    description: 把一条或多条会话移进某个文件夹；folder 留空表示移出所有文件夹。每条会话最多属于一个文件夹。
+    params:
+      sessions:
+        type: string
+        max: 66000
+        required: true
+        description: 逗号分隔的会话不透明 id，最多 64 条
+      folder:
+        type: string
+        max: 64
+        description: 目标文件夹的不透明 id；空串表示移出文件夹
+  set_session_title:
+    binding: runtime
+    handler: set_session_title
+    human_only: true
+    title: 设置会话标题
+    description: 保存当前账户为一条会话设置的自定义标题；空标题恢复 provider 名称或消息摘要。
+    params:
+      session:
+        type: string
+        max: 1024
+        required: true
+        description: 会话的不透明 id，来自列表或搜索结果
+      title:
+        type: string
+        max: 96
+        description: 最多 48 个 Unicode 字符的自定义标题；空字符串表示清除
+  review_session:
+    binding: runtime
+    handler: review_session
+    human_only: true
+    title: 标记会话已验收
+    description: 记录用户已经打开并查看了某次完成的 Agent 运行结果。
+    params:
+      session:
+        type: string
+        max: 1024
+        required: true
+        description: 会话的不透明 id，来自当前会话投影
+      completed_at:
+        type: string
+        max: 64
+        required: true
+        description: 当前投影中最后一次 Agent 任务终止时间
+  # File annotations are pure App-owned state, so they use the same runtime
+  # binding as pin/title. The View mints an opaque per-file key from listing
+  # lineage; both the key and the list are packed into a single JSON payload
+  # so exactly one wire parameter carries the write. No Gate operation, no
+  # user resource read, no device write.
+  set_file_annotations:
+    binding: runtime
+    handler: set_file_annotations
+    human_only: true
+    title: 保存文件批注
+    description: 保存当前用户对某个工作区文件的批注列表；空数组清除该文件的全部批注。
+    params:
+      payload:
+        type: string
+        max: 100352
+        required: true
+        description: 批注载荷 JSON，形如 file_key + annotations 数组；最多 128 条批注
+  # 已有会话使用 opaque resource；新建草稿使用执行设备/已登记工作区。
+  # 可信侧绑定 owner 与上传身份，Runner 创建新目录；调用方不能选择路径或覆盖文件。
+  #
+  # 这是机器侧写入，因此 `upload_session_file` 进入 v4 permission contract；
+  # `human_only` 另外保证 App agent 不能借这个入口写设备。
+  attach_file:
+    binding: resource
+    human_only: true
+    title: 上传会话文件
+    description: 把用户选择的文件存进会话或新建草稿执行设备的新附件目录，返回消息可引用的绝对路径。
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: false
+        description: 当前会话的不透明资源 id；可信侧据此解析设备
+      device:
+        type: string
+        max: 200
+        description: 新建会话的执行设备；不能与 resource 同时指定
+      workspace_id:
+        type: string
+        max: 200
+        description: 新建跨机器会话的已登记执行工作区
+      name:
+        type: string
+        max: 200
+        required: true
+        description: 用户选择的文件名，仅作展示；设备创建路径
+      media_type:
+        type: string
+        max: 128
+        required: true
+        description: 浏览器报告的 MIME 类型，仅作展示
+      chunk_index:
+        type: string
+        max: 16
+        required: true
+        description: 从 0 开始的分块序号
+      chunk_count:
+        type: string
+        max: 16
+        required: true
+        description: 文件的总分块数
+      upload_id:
+        type: string
+        max: 24
+        description: 首块回执里的不透明上传 id
+      data:
+        type: string
+        max: 349528
+        required: true
+        description: 最多 256KiB 原始字节的 base64
+  close_session:
+    binding: resource
+    human_only: true
+    title: 关闭会话读取
+    description: 只停止当前页面对这条会话的实时读取，保留 Agent、历史和草稿。
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+        description: 已打开会话的不透明资源 id
+  refresh_sessions:
+    binding: resource
+    title: 刷新会话列表
+    description: 重新拉取最近活跃的会话。
+    params:
+      device:
+        type: string
+        max: 128
+        description: 浏览完整设备名册时使用已投影的设备名
+      cursor:
+        type: string
+        max: 1024
+        description: 显式浏览的前页游标；空串从第一页开始
+      source:
+        type: string
+        max: 16
+        description: 只看某一个来源（留空表示全部）
+      limit:
+        type: string
+        max: 4
+  open_session:
+    binding: resource
+    title: 打开会话
+    description: 读取一条会话的正文；也可读取某个被截断内容块的完整内容。
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+        description: 会话的不透明 id
+      limit:
+        type: string
+        max: 4
+      offset:
+        type: string
+        max: 16
+      block:
+        type: string
+        max: 16
+        description: 读取 offset 处消息中这个序号的内容块的完整内容
+      field:
+        type: string
+        max: 8
+        description: 内容块字段：text、input 或 output
+      char_offset:
+        type: string
+        max: 16
+        description: 从这个字符位置继续读取完整内容
+  search_sessions:
+    binding: resource
+    title: 搜索会话
+    description: 在会话正文里做全文搜索；每次搜索一页，从最新到最旧。
+    params:
+      query:
+        type: string
+        max: 512
+        required: true
+      cursor:
+        type: string
+        max: 1024
+        description: 上一页结果的 nextCursor，继续搜索更早的会话；空串从最新的会话开始
+      source:
+        type: string
+        max: 16
+      limit:
+        type: string
+        max: 3
+  refresh_workspaces:
+    binding: resource
+    title: 刷新工作区
+    description: 列出某台设备上已登记的工作区。
+    params:
+      device:
+        type: string
+        max: 64
+  open_terminal:
+    binding: resource
+    human_only: true
+    title: 打开远端工作区终端
+    description: 在本人设备的已登记工作区启动一个快速 shell 会话。
+    params:
+      device:
+        type: string
+        max: 64
+        required: true
+      workspace_id:
+        type: string
+        max: 64
+        required: true
+      cols:
+        type: string
+        max: 3
+      rows:
+        type: string
+        max: 2
+  read_terminal:
+    binding: resource
+    human_only: true
+    title: 刷新远端终端
+    description: 读取已打开终端的当前画面。
+    params:
+      device:
+        type: string
+        max: 64
+        required: true
+      terminal_id:
+        type: string
+        max: 64
+        required: true
+      cols:
+        type: string
+        max: 3
+      rows:
+        type: string
+        max: 2
+  send_terminal:
+    binding: resource
+    human_only: true
+    title: 输入远端终端命令
+    description: 向已打开终端粘贴一段输入并提交，不逐条弹出批准卡。
+    params:
+      device:
+        type: string
+        max: 64
+        required: true
+      terminal_id:
+        type: string
+        max: 64
+        required: true
+      input:
+        type: string
+        max: 16384
+        required: true
+      cols:
+        type: string
+        max: 3
+      rows:
+        type: string
+        max: 2
+  close_terminal:
+    binding: resource
+    human_only: true
+    title: 关闭远端终端
+    description: 结束设备侧的 shell 与快速通道。
+    params:
+      device:
+        type: string
+        max: 64
+        required: true
+      terminal_id:
+        type: string
+        max: 64
+        required: true
+  start_session:
+    binding: resource
+    title: 新建会话
+    # `human_only`: an agent may not start a coding CLI on somebody's laptop.
+    #
+    # Not because the capability Gate would let it through unnoticed — an agent
+    # turn inherits no auto-allow, so every one of these would be an approval
+    # card. It is that "which directory, on which machine, with what first
+    # instruction" is a decision whose INITIATOR should be the person, and a
+    # stream of approval cards proposing it is itself the pressure this flag
+    # removes. Enforced twice: absent from the agent's tool table, and refused
+    # at the door if a model names it anyway.
+    human_only: true
+    params:
+      device:
+        type: string
+        max: 64
+      # Agent-runtime machine for advanced placement; omitted by older Views
+      # means colocated execution on `device`.
+      runtime_device:
+        type: string
+        max: 64
+      codex_account:
+        type: string
+        max: 32
+      # Exactly one of these names where the Agent starts. `workspace_id` is a
+      # row the View picked out of the trusted projection; `directory` is a path
+      # the person typed, which only their own device can adjudicate.
+      workspace_id:
+        type: string
+        max: 64
+      directory:
+        type: string
+        max: 4096
+      source:
+        type: string
+        max: 16
+      model:
+        type: string
+        max: 120
+      effort:
+        type: string
+        max: 16
+      permission_profile:
+        type: string
+        max: 16
+        enum: [full_access, manual]
+      prompt:
+        type: string
+        # One declared-large parameter may use the wire's full 384 KiB budget.
+        # The Host still enforces its 512 KiB whole-proposal ceiling, and the
+        # Runner measures this prompt in UTF-8 bytes before provider dispatch.
+        max: 393216
+  append_session:
+    binding: resource
+    title: 追加一轮
+    description: 在一条已有会话里继续跑一轮；本人可信页面直接执行，Agent 发起仍需批准。
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+      prompt:
+        type: string
+        max: 393216
+        required: true
+      permission_profile:
+        type: string
+        max: 16
+        enum: [full_access, manual]
+      model:
+        type: string
+        max: 120
+      effort:
+        type: string
+        max: 16
+  resume_session:
+    binding: resource
+    title: 恢复会话
+    description: 恢复一条会话并继续跑一轮；本人可信页面直接执行，Agent 发起仍需批准。
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+      prompt:
+        type: string
+        max: 393216
+        required: true
+      permission_profile:
+        type: string
+        max: 16
+        enum: [full_access, manual]
+      model:
+        type: string
+        max: 120
+      effort:
+        type: string
+        max: 16
+  takeover_session:
+    binding: resource
+    title: 接管并继续
+    description: 中断 Runner 已精确识别的本机 CLI 进程，再恢复同一会话；本人可信页面直接执行。
+    human_only: true
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+      prompt:
+        type: string
+        max: 393216
+        required: true
+      permission_profile:
+        type: string
+        max: 16
+        enum: [full_access, manual]
+      model:
+        type: string
+        max: 120
+      effort:
+        type: string
+        max: 16
+  fallback_session:
+    binding: resource
+    title: 换备用账号续跑
+    description: 保留原 Codex 会话，将上下文分叉到 Runner 自动选择的健康备用账号并继续；不会自动重试。
+    human_only: true
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+      prompt:
+        type: string
+        max: 393216
+        required: true
+      permission_profile:
+        type: string
+        max: 16
+        enum: [full_access, manual]
+      model:
+        type: string
+        max: 120
+      effort:
+        type: string
+        max: 16
+  interrupt_session:
+    binding: resource
+    title: 停止当前托管轮次
+    description: 使用 Claude Agent SDK 或 Codex app-server 的原生 interrupt 停止当前 Octopus 托管轮次。
+    human_only: true
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+  release_session_control:
+    binding: resource
+    title: 释放 Codex 后台占用
+    description: 仅在一次 Codex 托管轮次已经结束、独立 app-server 自动退出失败时，释放当前会话的精确后台附件。
+    human_only: true
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+  respond_agent_interaction:
+    binding: resource
+    title: 回答 Agent 当前请求
+    description: 回答当前会话里由 Claude Code 或 Codex 发起的提问或单次权限请求。
+    # The provider prompt is the approval surface. An App agent must never
+    # answer it for the person whose browser is displaying the card.
+    human_only: true
+    params:
+      resource:
+        type: string
+        max: 1024
+        required: true
+      interaction_id:
+        type: string
+        max: 128
+        required: true
+      response_json:
+        type: string
+        max: 4096
+        required: true
+
+# The App's own agent.
+#
+# The prompt is INLINE and therefore part of `app/app.yaml`, which is a release
+# asset covered by `packageDigest`. Editing this text changes the release
+# identity and the App's hostname — that is correct, because the prompt is half
+# of what this agent will do, and it is part of what a person consents to. It is
+# NOT covered by `backendCodeDigest` (the Runtime child never reads it) and NOT
+# by `permissionContractDigest` (rewording is not a permission change; the
+# counterweight is that an agent turn never inherits auto-allow).
+agents:
+  keeper:
+    adapter: openai-loop
+    prompt: |
+      你是会话+ 的收藏助手。你替 {{user}} 打理他自己的会话收藏和文件夹。
+
+      你能做的事很少，请严格待在里面：
+      - 用 refresh_sessions / search_sessions / open_session 了解现状；
+      - 用 pin_session 收藏或取消收藏一条会话（pinned 填 true 或 false）；
+      - 用 save_session_folder 新建或重命名文件夹，用 file_sessions 把会话放进文件夹或移出；
+      - 想不清楚就用 ask_user 问一句，然后结束本轮。
+
+      规矩：
+      - 只处理用户明确要求的那几条会话，不要顺手收藏或归档别的；
+      - 新建文件夹时自己生成一个由字母、数字、下划线组成的 folder id，并在回答里说明名称；
+      - 需要批准的调用会明确说明，那时请结束本轮，不要重试；
+      - 回答用中文，短，先说做了什么，再说结论。
+view:
+  page: pages/main.yaml

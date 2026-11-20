@@ -1,0 +1,147 @@
+.popup {
+  position: fixed;
+  top: 58px;
+  right: 12px;
+  z-index: 900;
+  width: min(410px, calc(100vw - 24px));
+  max-height: min(620px, calc(100vh - 76px));
+  max-height: min(620px, calc(100dvh - 76px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)));
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--overlay-solid);
+  box-shadow: var(--shadow-overlay);
+}
+
+@supports ((-webkit-backdrop-filter: blur(0)) or (backdrop-filter: blur(0))) {
+  .popup {
+    background: var(--overlay-material);
+    -webkit-backdrop-filter: var(--overlay-filter);
+    backdrop-filter: var(--overlay-filter);
+  }
+}
+
+@media (max-width: 720px) {
+  .popup {
+    top: calc(8px + env(safe-area-inset-top, 0px));
+    right: max(8px, env(safe-area-inset-right, 0px));
+    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+    left: max(8px, env(safe-area-inset-left, 0px));
+    width: auto;
+    max-height: none;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.header > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.header h2,
+.header p {
+  margin: 0;
+}
+
+.header h2 {
+  font-size: 16px;
+}
+
+.header p {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.linkRow {
+  margin: 7px 0;
+  text-align: right;
+}
+
+.sectionTitle {
+  margin: 6px 0;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 10px;
+  margin: var(--space-2) 0;
+}
+
+.card h3 {
+  margin: 0 0 3px;
+  font-size: 13.5px;
+}
+
+.target,
+.meta {
+  color: var(--muted);
+  font-size: 11.5px;
+  word-break: break-all;
+}
+
+.detail {
+  margin-top: 6px;
+  font-size: var(--text-xs);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.activity {
+  margin-top: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 9px;
+}
+
+.activity summary {
+  cursor: pointer;
+  font-weight: 650;
+  font-size: 13px;
+}
+
+.activity summary span {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.activityCard {
+  padding: 8px 2px;
+  border-bottom: 1px solid var(--line);
+}
+
+.activityCard code {
+  font-size: 11.5px;
+}
+
+.activityHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.activityHead span {
+  color: var(--muted);
+}

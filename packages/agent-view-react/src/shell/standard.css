@@ -1,0 +1,111 @@
+/*
+ * The standard shell's chrome.
+ *
+ * This is the theme an App gets for free: a card per slot, a rail that does not
+ * collapse, a status strip that does not claim half the screen. Everything
+ * colour- or spacing-shaped comes from the `--av-*` tokens, so dark mode and
+ * reduced motion arrive without a second theme.
+ *
+ * An App that wants its own look passes `chrome` and `className`; those are
+ * merged over these per slot, so replacing the rail's width does not silently
+ * drop the card border.
+ *
+ * Ordinary global CSS on purpose: class names here are addressable from outside
+ * a frame, which is how the boundary suites measure things only a browser can
+ * settle.
+ */
+
+.av-std {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--av-s2);
+  color: var(--av-fg);
+  background: var(--av-canvas);
+}
+
+.av-std-cols {
+  flex: 1;
+  min-height: 0;
+}
+
+.av-std-nav,
+.av-std-main,
+.av-std-aside,
+.av-std-foot,
+.av-std-overlay {
+  border: 1px solid var(--av-line);
+  border-radius: var(--av-rm);
+  background: var(--av-surface);
+  overflow: hidden;
+  min-height: 0;
+}
+
+.av-std-nav {
+  width: 286px;
+  flex: none;
+}
+
+.av-std-main,
+.av-std-aside {
+  flex: 1;
+  min-width: 0;
+}
+
+/*
+ * The strip below the columns. `bottom` is a slot and not a panel decoration,
+ * so its height belongs to the shell rather than to whatever module lands in it.
+ */
+.av-std-foot {
+  flex: none;
+  max-height: 160px;
+  overflow: auto;
+}
+
+/* An empty declared surface is not a card. */
+.av-std-foot:not(:has(.av-panel:not([hidden]))) {
+  display: none;
+}
+
+.av-std-overlay {
+  box-shadow: 0 8px 32px rgb(0 0 0 / 18%);
+}
+
+.av-std-notice,
+.av-std-wait,
+.av-std-fatal {
+  flex: none;
+  border: 1px dashed var(--av-line);
+  border-radius: var(--av-rm);
+  padding: var(--av-s2) var(--av-s3);
+  color: var(--av-muted);
+  font-size: var(--av-sm);
+  background: var(--av-surface);
+}
+
+.av-std-fatal {
+  border-style: solid;
+  border-color: var(--av-error);
+  color: var(--av-fg);
+}
+
+.av-std-fatal div {
+  margin-top: 4px;
+  color: var(--av-muted);
+  font-size: var(--av-xs);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/*
+ * On a narrow screen the columns stack and the rail stops being a fixed width;
+ * the shell's own drill-in already decides which of them paint.
+ */
+.av-workspace[data-av-narrow] .av-std-nav {
+  width: auto;
+}
+
+.av-workspace[data-av-narrow] .av-splitter {
+  display: none;
+}

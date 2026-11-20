@@ -1,0 +1,13 @@
+[Unit]
+Description=Isolated candidate model Runner for Octopus refactor lab
+After=docker.service octopus-refactor-lab-model-tunnel.service
+Requires=docker.service
+[Service]
+Type=simple
+ExecStart=/usr/bin/docker exec -u ubuntu aws-env node /home/ubuntu/.octopus-labs/managed-agent/runner-process.mjs start /home/ubuntu/.octopus-labs/managed-agent/runners/model /home/ubuntu/.octopus-labs/managed-agent/runners/model/.octopus/runner/standalone.js
+ExecStop=/usr/bin/docker exec -u ubuntu aws-env node /home/ubuntu/.octopus-labs/managed-agent/runner-process.mjs stop /home/ubuntu/.octopus-labs/managed-agent/runners/model /home/ubuntu/.octopus-labs/managed-agent/runners/model/.octopus/runner/standalone.js
+Restart=always
+RestartSec=5
+TimeoutStopSec=75
+[Install]
+WantedBy=multi-user.target

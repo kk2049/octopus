@@ -1,0 +1,9 @@
+/* Resolved before the first React render, whether automatic or manual. */
+html:root[data-color-scheme="light"] { color-scheme: light; }
+html:root[data-color-scheme="dark"] { color-scheme: dark; }
+
+/* SDK surfaces otherwise declare light dark, which would follow the OS again.
+ * This is host-owned presentation; App state and appearance contracts stay put. */
+html:root[data-color-scheme] [data-app-surface] {
+  color-scheme: inherit !important;
+}

@@ -1,0 +1,4 @@
+.activity { flex: 0 0 auto; padding: 6px 14px; border-bottom: 1px solid var(--border); max-height: 30vh; overflow: auto; }
+.activity summary { cursor: pointer; }
+.activity article { padding: 8px 0; }
+.reply { white-space: pre-wrap; overflow-wrap: anywhere; }

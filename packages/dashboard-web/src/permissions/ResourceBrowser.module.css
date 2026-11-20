@@ -1,0 +1,43 @@
+.browser { min-width: 0; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; background: var(--card); }
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; flex-wrap: wrap; }
+.toolbar :global(.ant-input) { width: 260px; max-width: 100%; }
+.muted { color: var(--muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.breadcrumbs { display: flex; gap: 3px; flex-wrap: wrap; padding: 8px; background: var(--bg); border-block: 1px solid var(--line); }
+.breadcrumbs button { max-width: 100%; height: auto; white-space: normal; overflow-wrap: anywhere; text-align: left; }
+.columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); min-height: 440px; }
+.withPreview { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr); }
+.nextColumn { display: none; }
+.withPreview > .nextColumn { display: block; }
+.column { min-width: 0; border-right: 1px solid var(--line); }
+.columnHeading { min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px; font-size: 12px; overflow-wrap: anywhere; }
+.nodeList { list-style: none; margin: 0; padding: 4px 6px; max-height: 540px; overflow-y: auto; }
+.node { display: flex; align-items: center; gap: 8px; padding: 10px 8px; width: 100%; border: 0; border-radius: 7px; text-align: left; background: transparent; color: var(--fg); cursor: pointer; }
+.node:hover { background: var(--bg); }
+.node[aria-pressed="true"] { background: color-mix(in srgb, var(--accent) 13%, var(--card)); color: var(--accent); }
+.node:focus-visible, .permit:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.nodeText { flex: 1; min-width: 0; }
+.nodeText strong, .nodeText small { display: block; overflow-wrap: anywhere; }
+.nodeText strong { font-size: 12px; font-weight: 600; }
+.nodeText small { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.icon { color: var(--accent); }
+.inspector { min-width: 0; padding: 16px; max-height: 620px; overflow-y: auto; overflow-wrap: anywhere; }
+.inspector h3 { margin: 0 0 10px; }
+.inspector h4 { margin: 16px 0 8px; font-size: 12px; }
+.uri { display: block; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; color: var(--muted); margin-block: 8px; }
+.enter { margin-block: 8px; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; font-size: 11px; margin-top: 16px; }
+.detailCard { padding: 12px; border: 1px solid var(--line); border-radius: 8px; margin-block: 8px; font-size: 12px; }
+.detailCard p { line-height: 1.6; }
+.permit { display: grid; gap: 6px; width: 100%; color: var(--fg); background: var(--bg); border: 0; border-radius: 6px; text-align: left; padding: 10px; margin-top: 8px; cursor: pointer; overflow-wrap: anywhere; }
+.permit small { color: var(--muted); line-height: 1.6; }
+.inspectLink { color: var(--accent); font-size: 11px; }
+.empty { color: var(--muted); font-size: 12px; line-height: 1.8; padding: 16px; }
+.rules summary { cursor: pointer; font-size: 12px; }
+@media (max-width: 1000px) { .columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); } .withPreview > .nextColumn { display: none; } }
+@media (max-width: 600px) {
+  .columns { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .column { border-right: 0; border-bottom: 1px solid var(--line); }
+  .nodeList { max-height: 280px; }
+  .inspector { max-height: none; }
+  .toolbar :global(.ant-input) { width: 100%; }
+}

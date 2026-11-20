@@ -1,0 +1,43 @@
+{
+  "name": "@claude-bot/web-trust",
+  "version": "0.1.0",
+  "description": "Dependency-free browser trust primitives for origins, cookies, sessions, mutation gates, and sandboxed frames.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.example.com/lvht/octopus.git",
+    "directory": "packages/web-trust"
+  },
+  "homepage": "https://gitlab.example.com/lvht/octopus/-/tree/v4/packages/web-trust#readme",
+  "bugs": "https://gitlab.example.com/lvht/octopus/-/issues",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": { "types": "./src/index.ts", "default": "./src/index.ts" },
+    "./frame-protocol": { "types": "./src/frame-protocol.ts", "default": "./src/frame-protocol.ts" }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist",
+    "linkDirectory": false
+  },
+  "scripts": {
+    "build": "node ../../tools/build-cache/bin/octo-build.mjs -- 'tsup src/index.ts src/frame-protocol.ts --format esm --dts --clean && node scripts/prepare-package.mjs'",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0"
+  }
+}

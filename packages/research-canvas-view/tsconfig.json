@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "types": ["node", "vite/client"]
+  },
+  "include": ["src", "app", "vite.config.ts", "vitest.config.ts", "vitest.setup.ts"],
+  // `pack.test.ts` statically imports the generic packer from `packages/bot`'s
+  // source by relative path, which vitest's transform pipeline handles but this
+  // DOM-targeted tsconfig must not follow (it would drag the whole trusted
+  // tree's closure under browser compiler settings). The test still runs in
+  // `npx vitest run --project chess-view`.
+  "exclude": ["src/pack.test.ts"]
+}

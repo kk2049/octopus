@@ -1,0 +1,586 @@
+/*
+ * Design tokens and the primitive styles for isolated Agent Views.
+ *
+ * Ordinary global CSS for View-owned primitives. Class names are presentation,
+ * not browser-test API; cross-frame acceptance uses explicit `data-av-*`
+ * anchors. Apps add their own CSS on top.
+ *
+ * Geometry, density, type and state live behind `--av-*` tokens. Palette and
+ * per-theme overrides are injected at the `styles-index.css` build marker by
+ * `@claude-bot/agent-view-build` before this file is bundled.
+ *
+ * ── The themes (ticket #45; Apple added by ticket #427) ─────────────────────
+ *
+ * Generated `:root` IS the `classic` theme — the pre-theme rendering,
+ * reachable forever as the safe default. Generated attribute selectors
+ * override the tokens for the other profiles and mirror the outer shell's
+ * theme set. The provider
+ * mirrors the current appearance onto `data-av-theme`, with `classic` again
+ * being the ABSENCE of the attribute — so a missing appearance and an
+ * explicit `classic` paint the same, and a broken theme id folds to it.
+ *
+ * DeepSeek and Apple also override geometry and typography tokens; all values
+ * remain CSS-only and arrive before first paint, so module state and DOM
+ * identity do not move.
+ *
+ * The build tool reads only the Dashboard's build-time theme registry and emits
+ * inert CSS bytes. The View browser bundle imports no Dashboard module or CSS,
+ * preserving the opaque-origin runtime boundary.
+ */
+
+/* The View is a separate document, so it must contain horizontal overscroll at
+ * both viewport roots instead of relying on the embedding Dashboard page. */
+:root,
+body {
+  overscroll-behavior-x: none;
+}
+
+:root {
+  color-scheme: light dark;
+  /* Exact geometry values keep one-off component measurements out of module
+   * CSS. Themes normally override the semantic rhythm below; a design system
+   * that changes an exceptional measurement can override its `--av-g*` value. */
+  --av-hairline: 1px;
+  --av-g-n18: -18px;
+  --av-g-n6: -6px;
+  --av-g-n2: -2px;
+  --av-g1-5: 1.5px;
+  --av-g3: 3px;
+  --av-g5: 5px;
+  --av-g6: 6px;
+  --av-g7: 7px;
+  --av-g9: 9px;
+  --av-g10: 10px;
+  --av-g11: 11px;
+  --av-g13: 13px;
+  --av-g14: 14px;
+  --av-g15: 15px;
+  --av-g17: 17px;
+  --av-g18: 18px;
+  --av-g20: 20px;
+  --av-g21: 21px;
+  --av-g22: 22px;
+  --av-g27: 27px;
+  --av-g28: 28px;
+  --av-g30: 30px;
+  --av-g48: 48px;
+  --av-g52: 52px;
+  --av-g56: 56px;
+  --av-g60: 60px;
+  --av-g80: 80px;
+  --av-g88: 88px;
+  --av-g96: 96px;
+  --av-g104: 104px;
+  --av-g108: 108px;
+  --av-g112: 112px;
+  --av-g115: 115px;
+  --av-g116: 116px;
+  --av-g120: 120px;
+  --av-g132: 132px;
+  --av-g144: 144px;
+  --av-g148: 148px;
+  --av-g220: 220px;
+  --av-g240: 240px;
+  --av-g260: 260px;
+  --av-g280: 280px;
+  --av-g320: 320px;
+  --av-g340: 340px;
+  --av-g420: 420px;
+  --av-g440: 440px;
+  --av-g520: 520px;
+  --av-g920: 920px;
+  --av-s0: 2px;
+  --av-s1: 4px;
+  --av-s2: 8px;
+  --av-s3: 12px;
+  --av-s4: 16px;
+  --av-s5: 24px;
+  --av-s6: 32px;
+
+  --av-control-h: 30px;
+  --av-control-h-compact: 32px;
+  --av-control-h-md: 34px;
+  --av-control-h-lg: 36px;
+  --av-field-h: 38px;
+  --av-touch-target: 44px;
+  --av-primary-action-h: 46px;
+  --av-card-padding: 12px;
+  --av-list-row-h: 0px;
+
+  --av-rs: 6px;
+  --av-r-sm: 8px;
+  --av-rm: 10px;
+  --av-r-md: 12px;
+  --av-rl: 14px;
+  --av-r-xl: 18px;
+  --av-pill: 999px;
+
+  /* All profiles need a valid family, including Classic/Aurora/Ink/Feishu.
+   * An undefined family invalidates an entire font shorthand at computed time. */
+  --av-font: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --av-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --av-font-2xs: 10.5px;
+  --av-font-xs: 11px;
+  --av-font-sm: 11.5px;
+  --av-font-label: 12px;
+  --av-font-meta: 12.5px;
+  --av-font-caption: 13px;
+  --av-font-body: 14px;
+  --av-font-title: 15px;
+  --av-font-control: 16px;
+  --av-font-subheading: 17px;
+  --av-font-heading: 20px;
+  --av-xs: var(--av-font-sm);
+  --av-sm: var(--av-font-meta);
+  --av-md: var(--av-font-body);
+  --av-lg: 15.5px;
+  --av-line-footnote: 16px;
+  --av-line-body: 22px;
+  --av-line-title: 24px;
+  --av-line-display: 28px;
+
+  --av-weight-regular: 400;
+  --av-weight-medium: 500;
+  --av-weight-control: 600;
+  --av-weight-strong: 650;
+  --av-weight-bold: 700;
+  --av-weight-display: 720;
+  --av-control-weight: var(--av-weight-control);
+
+  --av-focus: 0 0 0 var(--av-g3) color-mix(in srgb, var(--av-accent) 25%, transparent);
+  --av-duration: 120ms;
+  --av-ease: ease-out;
+  --av-material-solid: var(--av-surface);
+  --av-material: var(--av-surface);
+  --av-material-strong: var(--av-surface);
+  --av-material-filter: none;
+  --av-shadow-md: var(--av-shadow-sm);
+  --av-shadow-overlay: var(--av-shadow-sm);
+  --av-dock-host-solid: var(--av-canvas);
+  --av-dock-host-material: var(--av-canvas);
+  --av-dock-chrome-solid: var(--av-raised);
+  --av-dock-chrome-material: var(--av-raised);
+  --av-mobile-chrome-solid: var(--av-surface);
+  --av-mobile-chrome-material: var(--av-surface);
+  --av-dock-material-filter: none;
+  --av-overlay-solid: var(--av-raised);
+  --av-overlay-material: var(--av-raised);
+  --av-overlay-filter: none;
+}
+
+@supports not (color: color-mix(in srgb, white 50%, black)) {
+  :root {
+    --av-focus: 0 0 0 var(--av-g3) #9eb2ea;
+  }
+}
+
+html[data-av-theme="deepseek"] body {
+  font-family: var(--av-font);
+  font-size: var(--av-font-body);
+  line-height: var(--av-g22);
+}
+
+html[data-av-theme="deepseek"] :is(button, input, textarea, select, .av-splitter) {
+  transition-duration: var(--av-duration);
+  transition-timing-function: var(--av-ease);
+}
+
+html[data-av-theme="apple"] body {
+  font-family: var(--av-font);
+  font-size: var(--av-font-body);
+  line-height: var(--av-line-body);
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html[data-av-theme="apple"] :is(button, input, textarea, select, .av-splitter) {
+  transition-duration: var(--av-duration);
+  transition-timing-function: var(--av-ease);
+}
+
+html[data-av-theme="apple"] ::selection {
+  background: color-mix(in srgb, var(--av-accent) 24%, transparent);
+}
+
+html[data-av-theme="apple"] :is(.av-status, .av-empty-icon) {
+  box-shadow: var(--av-shadow-sm);
+}
+
+html[data-av-theme="apple"] :is(.av-prose h1, .av-prose h2, .av-prose h3) {
+  letter-spacing: -0.025em;
+}
+
+html[data-av-theme="apple"] :is(time, code, pre, input, .av-meta) {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-contrast: more) {
+  html[data-av-theme="apple"][data-av-theme="apple"] {
+    --av-line: light-dark(#77777c, #8e8e93);
+    --av-focus: 0 0 0 var(--av-s1) color-mix(in srgb, var(--av-accent) 55%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --av-duration: 0ms;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html[data-av-theme="apple"] {
+    --av-dock-host-material: var(--av-material-solid);
+    --av-dock-chrome-material: var(--av-material-solid);
+    --av-mobile-chrome-material: var(--av-material-solid);
+    --av-dock-material-filter: none;
+    --av-overlay-material: var(--av-material-solid);
+    --av-overlay-filter: none;
+    --av-session-material: var(--av-material-solid);
+    --av-session-material-strong: var(--av-material-solid);
+    --av-session-material-filter: none;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+[tabindex] {
+  outline: none;
+}
+
+button:focus-visible, [tabindex]:focus-visible {
+  box-shadow: var(--av-focus);
+}
+
+.av-ant-root {
+  /*
+   * Ant's App context needs a real element while cssVar mode is enabled, but
+   * that implementation-detail wrapper must not become a new flex/grid item.
+   * Agent Views deliberately let each composition root own its layout; making
+   * this div a box would strand `#root > .cols { flex: 1 }` one level too deep
+   * and collapse the workspace to its intrinsic content height.
+   */
+  display: contents;
+}
+
+/* ── status chip ─────────────────────────────────────────────────────────── */
+
+.av-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--av-s1);
+  min-height: var(--av-s5);
+  padding: var(--av-s0) var(--av-s2);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-pill);
+  color: var(--av-muted);
+  background: var(--av-surface);
+  font-size: var(--av-xs);
+  font-weight: var(--av-weight-strong);
+}
+
+.av-status[data-tone="ok"] { color: var(--av-ok); }
+.av-status[data-tone="warn"] { color: var(--av-warn); }
+.av-status[data-tone="error"] { color: var(--av-error); }
+.av-status[data-tone="info"] { color: var(--av-info); }
+
+/* ── banner ──────────────────────────────────────────────────────────────── */
+
+.av-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--av-s2);
+  padding: var(--av-s2) var(--av-s3);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-rm);
+  background: var(--av-surface);
+  color: var(--av-muted);
+  font-size: var(--av-sm);
+}
+
+.av-banner strong { color: var(--av-fg); }
+.av-banner[data-tone="error"] { border-color: var(--av-error); color: var(--av-error); }
+.av-banner-note { margin-top: var(--av-s1); }
+
+/* ── alerts (AgentViewAlerts) ────────────────────────────────────────────── */
+
+.av-alert-notification {
+  position: fixed;
+  inset-block-start: var(--av-s3);
+  inset-inline-end: var(--av-s3);
+  z-index: 40;
+  box-sizing: border-box;
+  width: min(var(--av-g340), calc(100% - 2 * var(--av-s3)));
+  max-height: calc(100% - 2 * var(--av-s3));
+  overflow: auto;
+  display: grid;
+  gap: var(--av-s2);
+  padding: var(--av-s3);
+  border: var(--av-hairline) solid var(--av-line);
+  border-inline-start: var(--av-g3) solid var(--av-warn);
+  border-radius: var(--av-rm);
+  background: var(--av-surface);
+  color: var(--av-fg);
+  box-shadow: var(--av-shadow-sm);
+}
+
+.av-alert-notification[hidden] { display: none; }
+.av-alert-title { font-size: var(--av-sm); }
+
+.av-alerts {
+  display: grid;
+  gap: var(--av-s2);
+  min-height: 0;
+  max-height: min(35vh, var(--av-g320));
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.av-alert {
+  display: grid;
+  gap: var(--av-s1);
+}
+
+.av-alert + .av-alert {
+  padding-top: var(--av-s2);
+  border-top: var(--av-hairline) solid var(--av-line);
+}
+
+.av-alert-action {
+  color: var(--av-muted);
+  font-size: var(--av-xs);
+  overflow-wrap: anywhere;
+}
+
+/* Keep the Host's bounded reason, including paths and line breaks. */
+.av-alert-message {
+  color: var(--av-fg);
+  font-size: var(--av-sm);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.av-alert-notification[data-expanded="false"] .av-alert-message {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.av-alert-more {
+  color: var(--av-muted);
+  font-size: var(--av-xs);
+}
+
+.av-alert-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--av-s2);
+}
+
+/* ── empty state ─────────────────────────────────────────────────────────── */
+
+.av-empty {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  min-height: var(--av-g260);
+  padding: var(--av-s6) var(--av-s4);
+  text-align: center;
+}
+
+.av-empty-icon {
+  display: grid;
+  place-items: center;
+  width: var(--av-touch-target);
+  height: var(--av-touch-target);
+  margin-bottom: var(--av-s3);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-rl);
+  background: var(--av-raised);
+  font-size: var(--av-font-heading);
+}
+
+.av-empty h2 {
+  margin: 0 0 var(--av-s2);
+  color: var(--av-fg);
+  font-size: var(--av-lg);
+}
+
+.av-empty p {
+  max-width: 46ch;
+  margin: 0 0 var(--av-s4);
+  color: var(--av-muted);
+  font-size: var(--av-sm);
+}
+
+/* ── split handle ────────────────────────────────────────────────────────── */
+
+.av-splitter {
+  flex: none;
+  position: relative;
+  z-index: 4;
+  align-self: stretch;
+  touch-action: none;
+  background: transparent;
+  outline: none;
+}
+
+.av-splitter[data-av-axis="x"] { width: var(--av-g7); margin: 0 calc(-1 * var(--av-g3)); cursor: col-resize; }
+.av-splitter[data-av-axis="y"] { height: var(--av-g7); margin: calc(-1 * var(--av-g3)) 0; cursor: row-resize; }
+
+.av-splitter::after {
+  content: "";
+  position: absolute;
+  border-radius: var(--av-g3);
+  background: var(--av-line);
+  opacity: 0.55;
+}
+
+.av-splitter[data-av-axis="x"]::after { top: var(--av-g10); bottom: var(--av-g10); left: var(--av-g3); width: var(--av-hairline); }
+.av-splitter[data-av-axis="y"]::after { left: var(--av-g10); right: var(--av-g10); top: var(--av-g3); height: var(--av-hairline); }
+
+.av-splitter:hover::after,
+.av-splitter.dragging::after,
+.av-splitter:focus-visible::after {
+  background: var(--av-accent);
+  opacity: 1;
+}
+
+body.av-resizing-x { cursor: col-resize; user-select: none; }
+body.av-resizing-y { cursor: row-resize; user-select: none; }
+
+/* ── prose (react-markdown output) ───────────────────────────────────────── */
+
+.av-prose { word-break: break-word; }
+.av-prose .av-markdown-plain { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-family: var(--av-mono, ui-monospace, monospace); font-size: .92em; margin: 0; }
+.av-prose .av-markdown-budget { color: var(--av-muted, inherit); }
+.av-prose > :first-child { margin-top: 0; }
+.av-prose > :last-child { margin-bottom: 0; }
+.av-prose p { margin: 0 0 0.55em; }
+
+.av-prose pre {
+  margin: var(--av-g6) 0;
+  padding: var(--av-s2) var(--av-g10);
+  border: var(--av-hairline) solid var(--av-line);
+  border-radius: var(--av-r-sm);
+  background: var(--av-tool-bg);
+  overflow-x: auto;
+  font: var(--av-font-label)/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.av-prose code {
+  padding: 0 var(--av-s1);
+  border-radius: var(--av-s1);
+  background: var(--av-tool-bg);
+  font: var(--av-font-label)/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.av-prose pre code { padding: 0; background: none; }
+.av-prose h1, .av-prose h2, .av-prose h3, .av-prose h4 { margin: var(--av-g10) 0 var(--av-s1); font-size: 1.05em; }
+.av-prose h4, .av-prose h5, .av-prose h6 { font-size: 1em; }
+.av-prose ul, .av-prose ol { margin: 0.3em 0 0.55em; padding-left: 1.5em; }
+.av-prose li { margin: 0.12em 0; }
+
+.av-prose blockquote {
+  margin: 0.4em 0;
+  padding: 0.1em 0 0.1em 0.8em;
+  border-left: var(--av-g3) solid var(--av-line);
+  color: var(--av-muted);
+}
+
+.av-prose hr { margin: 0.9em 0; border: none; border-top: var(--av-hairline) solid var(--av-line); }
+.av-prose a { color: var(--av-accent); }
+.av-prose table { border-collapse: collapse; margin: var(--av-g6) 0; font-size: var(--av-sm); }
+.av-prose th, .av-prose td { padding: var(--av-g3) var(--av-s2); border: var(--av-hairline) solid var(--av-line); text-align: left; }
+.av-prose img { max-width: 100%; }
+
+/* ── activity affordances shared by every transcript-shaped App ──────────── */
+
+.av-spin {
+  display: inline-block;
+  width: var(--av-g11);
+  height: var(--av-g11);
+  flex: none;
+  border-radius: 50%;
+  border: var(--av-s0) solid var(--av-line);
+  border-top-color: var(--av-accent);
+  animation: av-spin 0.9s linear infinite;
+}
+
+@keyframes av-spin { to { transform: rotate(360deg); } }
+
+.av-dots i { font-style: normal; animation: av-blink 1.2s infinite; }
+.av-dots i:nth-child(2) { animation-delay: 0.2s; }
+.av-dots i:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes av-blink { 0%, 60%, 100% { opacity: 0.25; } 30% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .av-spin,
+  .av-dots i { animation: none; }
+}
+
+@media (max-width: 720px) {
+  :is(button, input:not([type="checkbox"]):not([type="radio"]), select, .av-button.ant-btn, .av-select.ant-select) {
+    min-height: var(--av-touch-target);
+  }
+
+  .av-prose table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    white-space: nowrap;
+  }
+}
+
+/* Keep the existing safety floor on native form controls and editable text.
+ * Reset inherited text adjustment / WebKit text zoom only
+ * on controls. The Host's bounded appearance value compensates page zoom;
+ * a View must not infer that scale from its own (possibly narrow) slot width.
+ * Keep a 16px floor even if a theme reduces the control token.
+ * Body text and buttons retain the reader's settings; pinch zoom stays enabled.
+ * !important wins over Ant and App styles concatenated after the SDK layer. */
+@media (max-width: 720px), (hover: none) and (pointer: coarse) {
+  input,
+  textarea,
+  select,
+  [contenteditable=""],
+  [contenteditable="true"],
+  [contenteditable="plaintext-only"] {
+    font-size: max(16px, var(--av-font-control), var(--mobile-control-font-size, 16px)) !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+    -webkit-text-zoom: reset !important;
+  }
+}
+
+.av-download-empty {
+  display: flex;
+  flex: 1;
+  min-height: var(--av-g220);
+}
+.av-download-empty > .av-empty { flex: 1; }
+.av-download-status {
+  display: grid;
+  gap: var(--av-s1);
+  margin: 0;
+  padding: var(--av-s2) var(--av-s3);
+  border-bottom: var(--av-hairline) solid var(--av-border);
+  color: var(--av-muted);
+  font-size: var(--av-xs);
+}
+.av-download-status progress {
+  width: 100%;
+  accent-color: var(--av-accent);
+}
+.av-download-status[data-status="refused"] { color: var(--av-danger); }

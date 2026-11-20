@@ -1,0 +1,36 @@
+# 工单板 — engine app #3, REDUCED on purpose. Probes the shared scope (one
+# log, many users) and conversation-as-control. What it does NOT probe, and
+# says so: no git worktrees, no gates, no headless-cli agent — production
+# devpipe remains authoritative; wiring a headless CLI adapter into the
+# plane is the recorded next experiment.
+app: tickets
+title: 工单板
+scope: shared
+
+actions:
+  open_ticket:
+    title: 开工单
+    predicate: any
+    params:
+      title: { type: string, required: true, description: 标题 }
+      body: { type: string, required: true, description: 想做什么/为什么 }
+  comment:
+    title: 评论
+    predicate: any
+    params:
+      id: { type: string, required: true, description: 工单 id（如 tk-1） }
+      text: { type: string, required: true, description: 内容 }
+  close_ticket:
+    title: 关单
+    predicate: any
+    confirm: true
+    params:
+      id: { type: string, required: true, description: 工单 id }
+
+agents:
+  triage:
+    adapter: openai-loop
+    prompt: prompts/triage.md
+
+pages:
+  main: pages/main.yaml
